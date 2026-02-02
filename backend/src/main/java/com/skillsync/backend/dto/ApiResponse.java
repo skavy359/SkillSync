@@ -1,4 +1,11 @@
 package com.skillsync.backend.dto;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-public class ApiResponse {
+@AllArgsConstructor
+@Getter
+public class ApiResponse<T> {
+    private boolean success;
+    private String message;
+    private T data;
 }
