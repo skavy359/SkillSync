@@ -1,4 +1,5 @@
 package com.skillsync.backend.dto;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

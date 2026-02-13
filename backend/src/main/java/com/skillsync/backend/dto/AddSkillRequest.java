@@ -9,7 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddSkillRequest {
-
     @NotBlank(message = "Skill name is required")
     private String name;
 

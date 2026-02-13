@@ -9,7 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Skill {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +21,7 @@ public class Skill {
     private SkillLevel level;
 
     @Column(nullable = false)
-    private int progress; // 0–100
+    private int progress;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

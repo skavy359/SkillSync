@@ -1,4 +1,5 @@
 package com.skillsync.backend.dto;
+
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.*;

@@ -1,15 +1,13 @@
 package com.skillsync.backend.security;
-import com.skillsync.backend.dto.LoginRequest;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 
 @Component
@@ -33,7 +31,6 @@ public class JwtUtil {
                 .compact();
     }
 
-
     public Claims extractClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -50,5 +47,4 @@ public class JwtUtil {
             return false;
         }
     }
-
 }

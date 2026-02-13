@@ -1,4 +1,5 @@
 package com.skillsync.backend.controller;
+
 import com.skillsync.backend.dto.AddSkillRequest;
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.SkillResponse;
@@ -15,7 +16,6 @@ import com.skillsync.backend.dto.UpdateSkillProgressRequest;
 public class SkillController {
 
     private final UserService userService;
-
     public SkillController(UserService userService) {
         this.userService = userService;
     }
@@ -80,5 +80,4 @@ public class SkillController {
                 )
         );
     }
-
 }

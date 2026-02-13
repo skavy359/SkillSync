@@ -1,4 +1,5 @@
 package com.skillsync.backend.service;
+
 import com.skillsync.backend.dto.*;
 import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.UserRepository;
@@ -14,8 +15,6 @@ import com.skillsync.backend.model.Skill;
 import com.skillsync.backend.model.SkillStatus;
 import com.skillsync.backend.repository.SkillRepository;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +36,6 @@ public class UserService {
         this.skillRepository = skillRepository;
     }
 
-
     public UserResponse registerUser(RegisterRequest request){
         if(userRepository.findByEmail(request.getEmail()).isPresent()){
             throw new EmailAlreadyExistsException("Email already registered");
@@ -52,7 +50,8 @@ public class UserService {
         User savedUser=userRepository.save(user);
         return new UserResponse(savedUser.getId(),
                 savedUser.getName(),
-                savedUser.getEmail());
+                savedUser.getEmail()
+        );
     }
 
     public LoginResponse authenticate(LoginRequest request){
@@ -65,7 +64,6 @@ public class UserService {
                 user.getEmail(),
                 user.getRole().name()
         );
-
 
         if(!passwordMatches){
             throw new InvalidCredentialsException("Invalid Email or Password");
@@ -80,10 +78,7 @@ public class UserService {
     }
 
     public UserProfileResponse getMyProfile() {
-
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         User user = userRepository.findByEmail(email)
@@ -98,10 +93,7 @@ public class UserService {
     }
 
     public UserProfileResponse updateMyProfile(UpdateProfileRequest request) {
-
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         User user = userRepository.findByEmail(email)
@@ -121,9 +113,7 @@ public class UserService {
 
     public SkillResponse addSkill(AddSkillRequest request) {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         User user = userRepository.findByEmail(email)
@@ -149,9 +139,7 @@ public class UserService {
 
     public List<SkillResponse> getMySkills() {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         User user = userRepository.findByEmail(email)
@@ -174,9 +162,7 @@ public class UserService {
             Long skillId,
             UpdateSkillProgressRequest request) {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         User user = userRepository.findByEmail(email)
@@ -207,9 +193,7 @@ public class UserService {
 
     public void deleteSkill(Long skillId) {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         User user = userRepository.findByEmail(email)
@@ -253,5 +237,4 @@ public class UserService {
                 ))
                 .toList();
     }
-
 }

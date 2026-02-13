@@ -1,8 +1,6 @@
 package com.skillsync.backend.controller;
 
-import com.skillsync.backend.dto.LoginRequest;
-import com.skillsync.backend.dto.LoginResponse;
-import com.skillsync.backend.dto.ApiResponse;
+import com.skillsync.backend.dto.*;
 import com.skillsync.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -31,6 +29,21 @@ public class AuthController {
                         true,
                         "Login successful",
                         response
+                ));
+    }
+
+    @PostMapping("/register"
+    )
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(
+            @jakarta.validation.Valid @RequestBody RegisterRequest request){
+        UserResponse userResponse = userService.registerUser(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(
+                        true,
+                        "User registered successfully!",
+                        userResponse
                 ));
     }
 }

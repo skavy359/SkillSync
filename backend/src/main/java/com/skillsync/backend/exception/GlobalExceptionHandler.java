@@ -1,4 +1,5 @@
 package com.skillsync.backend.exception;
+
 import com.skillsync.backend.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,11 +43,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<String>> handleGenericException(Exception ex){
+        ex.printStackTrace();
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiResponse<>(
                         false,
-                        "Something went wrong. Please try again later.",
+                        ex.getMessage(),
                         null
                 ));
     }

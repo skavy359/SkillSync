@@ -1,4 +1,5 @@
 package com.skillsync.backend.controller;
+
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.UserProfileResponse;
 import com.skillsync.backend.service.UserService;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class UserProfileController {
 
     private final UserService userService;
-
     public UserProfileController(UserService userService) {
         this.userService = userService;
     }
