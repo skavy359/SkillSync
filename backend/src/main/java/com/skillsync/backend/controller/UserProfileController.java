@@ -1,29 +1,36 @@
 package com.skillsync.backend.controller;
 
-import com.skillsync.backend.dto.ApiResponse;
-import com.skillsync.backend.dto.UserProfileResponse;
+import com.skillsync.backend.dto.*;
+import com.skillsync.backend.dto.audit.AuditLogResponse;
+import com.skillsync.backend.dto.goal.CreateGoalRequest;
+import com.skillsync.backend.dto.goal.GoalAnalyticsResponse;
+import com.skillsync.backend.dto.goal.GoalResponse;
+import com.skillsync.backend.dto.recommendation.RecommendationHistoryResponse;
+import com.skillsync.backend.dto.recommendation.SkillRecommendationResponse;
+import com.skillsync.backend.dto.recommendation.UserRecommendationResponse;
+import com.skillsync.backend.dto.stats.*;
+import com.skillsync.backend.model.Notification;
+import com.skillsync.backend.model.User;
+import com.skillsync.backend.service.NotificationService;
 import com.skillsync.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.skillsync.backend.dto.UpdateProfileRequest;
+import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/profile")
 public class UserProfileController {
 
     private final UserService userService;
-    public UserProfileController(UserService userService) {
+    private final NotificationService notificationService;
+    public UserProfileController(UserService userService, NotificationService notificationService) {
         this.userService = userService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<UserProfileResponse>> getMyProfile() {
-
         UserProfileResponse profile = userService.getMyProfile();
 
         return ResponseEntity.ok(
@@ -31,6 +38,78 @@ public class UserProfileController {
                         true,
                         "Profile fetched successfully",
                         profile
+                )
+        );
+    }
+
+    @GetMapping("/me/learning-stats")
+    public ResponseEntity<ApiResponse<UserLearningStatsResponse>>
+    getMyLearningStats() {
+
+        UserLearningStatsResponse stats = userService.getMyLearningStats();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Learning stats fetched",
+                        stats
+                )
+        );
+    }
+
+    @GetMapping("/me/streak")
+    public ResponseEntity<ApiResponse<UserStreakResponse>> getMyStreak() {
+
+        UserStreakResponse streak = userService.getMyStreak();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Streak fetched",
+                        streak
+                )
+        );
+    }
+
+    @GetMapping("/me/recommendations")
+    public ResponseEntity<ApiResponse<UserRecommendationResponse>>
+    getMyRecommendations() {
+
+        UserRecommendationResponse rec =
+                userService.getMyRecommendations();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Recommendations generated",
+                        rec
+                )
+        );
+    }
+
+    @GetMapping("/me/activity-heatmap")
+    public ResponseEntity<ApiResponse<List<DailyActivityResponse>>>
+    getMyActivityHeatmap() {
+
+        List<DailyActivityResponse> data =
+                userService.getMyActivityHeatmap();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Activity heatmap fetched",
+                        data
+                )
+        );
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<UserStatsResponse>> getMyStats() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "User stats fetched",
+                        userService.getMyStats()
                 )
         );
     }
@@ -47,6 +126,216 @@ public class UserProfileController {
                         true,
                         "Profile updated successfully",
                         updatedProfile
+                )
+        );
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<ApiResponse<CategoryResponse>>
+    createCategory(@RequestBody CreateCategoryRequest request) {
+
+        CategoryResponse result =
+                userService.createCategory(request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Category created",
+                        result
+                )
+        );
+    }
+
+    @GetMapping("/categories/{categoryId}/skills")
+    public ResponseEntity<ApiResponse<List<SkillResponse>>> getSkillsByCategory(
+            @PathVariable Long categoryId) {
+
+        List<SkillResponse> result =
+                userService.getSkillsByCategory(categoryId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Category skills fetched",
+                        result
+                )
+        );
+    }
+
+    @GetMapping("/categories/analytics")
+    public ResponseEntity<ApiResponse<List<CategoryAnalyticsResponse>>>
+    getCategoryAnalytics() {
+
+        List<CategoryAnalyticsResponse> data =
+                userService.getCategoryAnalytics();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Category analytics fetched",
+                        data
+                )
+        );
+    }
+
+    @GetMapping("/categories/focus")
+    public ResponseEntity<ApiResponse<DomainFocusResponse>>
+    getDomainFocus() {
+
+        DomainFocusResponse focus =
+                userService.getDomainFocus();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Domain focus detected",
+                        focus
+                )
+        );
+    }
+
+    @PostMapping("/goals")
+    public ResponseEntity<ApiResponse<GoalResponse>> createGoal(
+            @RequestBody CreateGoalRequest request) {
+
+        GoalResponse goal =
+                userService.createGoal(request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Goal created",
+                        goal
+                )
+        );
+    }
+
+    @GetMapping("/goals/analytics")
+    public ResponseEntity<ApiResponse<List<GoalAnalyticsResponse>>>
+    getGoalAnalytics() {
+
+        List<GoalAnalyticsResponse> data =
+                userService.getGoalAnalytics();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Goal analytics fetched",
+                        data
+                )
+        );
+    }
+
+    @GetMapping("/me/weekly-stats")
+    public ResponseEntity<ApiResponse<TimeWindowStatsResponse>>
+    getWeeklyStats() {
+
+        TimeWindowStatsResponse stats =
+                userService.getWeeklyStats();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Weekly stats fetched",
+                        stats
+                )
+        );
+    }
+
+    @GetMapping("/me/monthly-stats")
+    public ResponseEntity<ApiResponse<TimeWindowStatsResponse>>
+    getMonthlyStats() {
+
+        TimeWindowStatsResponse stats =
+                userService.getMonthlyStats();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Monthly stats fetched",
+                        stats
+                )
+        );
+    }
+
+    @GetMapping("/me/burnout-risk")
+    public ResponseEntity<ApiResponse<BurnoutRiskResponse>>
+    getBurnoutRisk() {
+
+        BurnoutRiskResponse risk =
+                userService.getBurnoutRisk();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Burnout risk calculated",
+                        risk
+                )
+        );
+    }
+
+    @GetMapping("/me/notifications")
+    public ResponseEntity<ApiResponse<List<Notification>>>
+    getMyNotifications() {
+
+        User user = userService.getCurrentUser();
+
+        List<Notification> notifications =
+                notificationService.getUserNotifications(user);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Notifications fetched",
+                        notifications
+                )
+        );
+    }
+
+    @GetMapping("/me/recommendation")
+    public ResponseEntity<ApiResponse<SkillRecommendationResponse>>
+    getRecommendation() {
+
+        SkillRecommendationResponse response =
+                userService.getNextSkillRecommendation();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Recommendation generated",
+                        response
+                )
+        );
+    }
+
+    @GetMapping("/me/recommendation-history")
+    public ResponseEntity<ApiResponse<List<RecommendationHistoryResponse>>>
+    getRecommendationHistory() {
+
+        List<RecommendationHistoryResponse> history =
+                userService.getRecommendationHistory();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Recommendation history fetched",
+                        history
+                )
+        );
+    }
+
+    @GetMapping("/me/audit")
+    public ResponseEntity<ApiResponse<List<AuditLogResponse>>>
+    getMyAuditLogs() {
+
+        List<AuditLogResponse> logs =
+                userService.getMyAuditLogs();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Audit logs fetched",
+                        logs
                 )
         );
     }

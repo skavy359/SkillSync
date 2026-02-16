@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
-
     public AuthController(UserService userService) {
         this.userService = userService;
     }
@@ -32,8 +31,7 @@ public class AuthController {
                 ));
     }
 
-    @PostMapping("/register"
-    )
+    @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(
             @jakarta.validation.Valid @RequestBody RegisterRequest request){
         UserResponse userResponse = userService.registerUser(request);

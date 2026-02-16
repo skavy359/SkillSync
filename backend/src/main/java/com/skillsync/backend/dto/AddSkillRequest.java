@@ -14,4 +14,6 @@ public class AddSkillRequest {
 
     @NotNull(message = "Skill level is required")
     private SkillLevel level;
+
+    private Long categoryId;
 }

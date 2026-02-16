@@ -47,4 +47,9 @@ public class JwtUtil {
             return false;
         }
     }
+
+    public String extractRole(String token) {
+        Claims claims = extractClaims(token);
+        return claims.get("role", String.class);
+    }
 }

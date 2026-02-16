@@ -1,11 +1,11 @@
 package com.skillsync.backend.controller;
 
+import com.skillsync.backend.dto.stats.AdminStatsResponse;
+import com.skillsync.backend.model.Role;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.skillsync.backend.dto.AdminUserResponse;
 import com.skillsync.backend.dto.ApiResponse;
 import java.util.List;
@@ -17,7 +17,6 @@ import com.skillsync.backend.dto.SkillResponse;
 public class AdminController {
 
     private final UserService userService;
-
     public AdminController(UserService userService) {
         this.userService = userService;
     }
@@ -30,16 +29,32 @@ public class AdminController {
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<AdminUserResponse>>> getAllUsers() {
-
-        List<AdminUserResponse> users =
-                userService.getAllUsersForAdmin();
+    public ResponseEntity<ApiResponse<Page<AdminUserResponse>>> getUsers(
+            @RequestParam(required = false) Role role,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<AdminUserResponse> result =
+                userService.getAllUsersForAdmin(role, search, page, size);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         true,
-                        "All users fetched successfully",
-                        users
+                        "Users fetched",
+                        result
+                )
+        );
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<AdminStatsResponse>> getAdminStats() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Admin stats fetched",
+                        userService.getAdminStats()
                 )
         );
     }
