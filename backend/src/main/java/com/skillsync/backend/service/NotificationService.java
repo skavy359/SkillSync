@@ -46,4 +46,11 @@ public class NotificationService {
         notification.setRead(true);
         notificationRepository.save(notification);
     }
+
+    public void markAllAsRead(User user) {
+        List<Notification> unread =
+                notificationRepository.findByUserAndReadFalse(user);
+        unread.forEach(n -> n.setRead(true));
+        notificationRepository.saveAll(unread);
+    }
 }

@@ -35,6 +35,16 @@ export const getMyNotifications = async () => {
     return data.data;
 };
 
+export const markNotificationRead = async (id) => {
+    const { data } = await api.patch(`/profile/me/notifications/${id}/read`);
+    return data;
+};
+
+export const markAllNotificationsRead = async () => {
+    const { data } = await api.patch('/profile/me/notifications/read-all');
+    return data;
+};
+
 export const getWeeklyStats = async () => {
     const { data } = await api.get('/profile/me/weekly-stats');
     return data.data;

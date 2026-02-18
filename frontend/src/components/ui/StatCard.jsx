@@ -3,22 +3,22 @@ import Card from './Card';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const StatCard = ({
-                      title,
-                      value,
-                      icon: Icon,
-                      trend,
-                      trendValue,
-                      color = 'indigo',
-                      subtitle
-                  }) => {
+    title,
+    value,
+    icon: Icon,
+    trend,
+    trendValue,
+    color = 'indigo',
+    subtitle
+}) => {
     const colorClasses = {
-        indigo: 'bg-indigo-50 text-indigo-600',
-        blue: 'bg-blue-50 text-blue-600',
-        green: 'bg-green-50 text-green-600',
-        purple: 'bg-purple-50 text-purple-600',
-        yellow: 'bg-yellow-50 text-yellow-600',
-        red: 'bg-red-50 text-red-600',
-        orange: 'bg-orange-50 text-orange-600',
+        indigo: 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400',
+        blue: 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400',
+        green: 'bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400',
+        purple: 'bg-purple-50 dark:bg-purple-500/15 text-purple-600 dark:text-purple-400',
+        yellow: 'bg-yellow-50 dark:bg-yellow-500/15 text-yellow-600 dark:text-yellow-400',
+        red: 'bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400',
+        orange: 'bg-orange-50 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400',
     };
 
     const trendColors = {
@@ -31,8 +31,8 @@ const StatCard = ({
         <Card className="p-6">
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-                    <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-[#9399b2] mb-1">{title}</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-2">{value}</p>
 
                     {(trend || subtitle) && (
                         <div className="flex items-center space-x-2">
@@ -44,7 +44,7 @@ const StatCard = ({
                                 </div>
                             )}
                             {subtitle && (
-                                <p className="text-sm text-gray-500">{subtitle}</p>
+                                <p className="text-sm text-gray-500 dark:text-[#7f849c]">{subtitle}</p>
                             )}
                         </div>
                     )}

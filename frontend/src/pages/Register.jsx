@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Lightbulb, Eye, EyeOff, ArrowRight, Github, Chrome, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lightbulb, Eye, EyeOff, ArrowRight, Check, X } from 'lucide-react';
+import api from "../services/api.js";
 
 const Register = ({ onNavigate, onLogin }) => {
     const [form, setForm] = useState({
@@ -13,41 +14,83 @@ const Register = ({ onNavigate, onLogin }) => {
     const [loading, setLoading] = useState(false);
     const [agreed, setAgreed] = useState(false);
     const [errors, setErrors] = useState({});
+    const [platformStats, setPlatformStats] = useState(null);
+    const [modalOpen, setModalOpen] = useState(null); // 'terms' | 'privacy' | null
 
-    // Password strength
+    // Fetch platform stats on mount
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const { data } = await api.get('/auth/platform-stats');
+                setPlatformStats(data.data);
+            } catch (err) {
+                console.error('Failed to fetch platform stats:', err);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    // Password strength — checks 5 criteria
     const getPasswordStrength = (password) => {
-        if (!password) return { score: 0, label: '', color: '' };
+        if (!password) return { score: 0, label: '', color: '', max: 5 };
         let score = 0;
         if (password.length >= 8) score++;
         if (/[A-Z]/.test(password)) score++;
+        if (/[a-z]/.test(password)) score++;
         if (/[0-9]/.test(password)) score++;
         if (/[^A-Za-z0-9]/.test(password)) score++;
-        const levels = [
-            { score: 0, label: '', color: '' },
-            { score: 1, label: 'Weak', color: 'bg-red-500' },
-            { score: 2, label: 'Fair', color: 'bg-yellow-500' },
-            { score: 3, label: 'Good', color: 'bg-blue-500' },
-            { score: 4, label: 'Strong', color: 'bg-green-500' },
+        const labels = [
+            { label: '', color: '' },
+            { label: 'Very Weak', color: 'bg-red-500' },
+            { label: 'Weak', color: 'bg-red-400' },
+            { label: 'Fair', color: 'bg-yellow-500' },
+            { label: 'Good', color: 'bg-blue-500' },
+            { label: 'Strong', color: 'bg-green-500' },
         ];
-        return levels[score];
+        return { ...labels[score], score, max: 5 };
     };
 
     const strength = getPasswordStrength(form.password);
 
     const validate = () => {
         const newErrors = {};
+
+        // Name: letters and spaces only
         if (!form.name.trim()) newErrors.name = 'Full name is required';
+        else if (!/^[A-Za-z\s]+$/.test(form.name.trim()))
+            newErrors.name = 'Name must contain only letters and spaces';
+        else if (form.name.trim().length < 2)
+            newErrors.name = 'Name must be at least 2 characters';
+
+        // Email
         if (!form.email) newErrors.email = 'Email is required';
         else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Enter a valid email';
-        if (!form.password) newErrors.password = 'Password is required';
-        else if (form.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+
+        // Password: min 8, uppercase, lowercase, number, symbol
+        if (!form.password) {
+            newErrors.password = 'Password is required';
+        } else {
+            const missing = [];
+            if (form.password.length < 8) missing.push('at least 8 characters');
+            if (!/[A-Z]/.test(form.password)) missing.push('an uppercase letter');
+            if (!/[a-z]/.test(form.password)) missing.push('a lowercase letter');
+            if (!/[0-9]/.test(form.password)) missing.push('a number');
+            if (!/[^A-Za-z0-9]/.test(form.password)) missing.push('a special character');
+            if (missing.length > 0)
+                newErrors.password = `Password must contain ${missing.join(', ')}`;
+        }
+
+        // Confirm password
         if (!form.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
         else if (form.password !== form.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+
+        // Terms
         if (!agreed) newErrors.agreed = 'You must accept the terms to continue';
+
         return newErrors;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validate();
         if (Object.keys(validationErrors).length > 0) {
@@ -56,10 +99,31 @@ const Register = ({ onNavigate, onLogin }) => {
         }
         setErrors({});
         setLoading(true);
-        setTimeout(() => {
+
+        try {
+            const { registerUser, loginUser } = await import('../services/authService.js');
+            const res = await registerUser(form.name, form.email, form.password);
+
+            if (res.success) {
+                // Auto-login after successful registration
+                const loginRes = await loginUser(form.email, form.password);
+                if (loginRes.success) {
+                    const { token, id, name, email, role } = loginRes.data;
+                    localStorage.setItem('token', token);
+                    onLogin && onLogin({ id, name, email, role });
+                } else {
+                    // Fallback: go to login page if auto-login fails
+                    onNavigate && onNavigate('login');
+                }
+            } else {
+                setErrors({ email: res.message || 'Registration failed' });
+            }
+        } catch (err) {
+            const message = err.response?.data?.message || 'Registration failed. Please try again.';
+            setErrors({ email: message });
+        } finally {
             setLoading(false);
-            onLogin && onLogin();
-        }, 1500);
+        }
     };
 
     const perks = [
@@ -70,335 +134,388 @@ const Register = ({ onNavigate, onLogin }) => {
     ];
 
     return (
-        <div className="min-h-screen flex bg-gray-50">
+        <>
+            <div className="min-h-screen flex bg-gray-50">
 
-            {/* ─── Left Branding Panel ───────────────────────────── */}
-            <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 flex-col justify-between p-12 overflow-hidden">
+                {/* ─── Left Branding Panel ───────────────────────────── */}
+                <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 flex-col justify-between p-12 overflow-hidden">
 
-                {/* Decorative blobs */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-32 -right-32 w-96 h-96 bg-white opacity-5 rounded-full" />
-                    <div className="absolute top-1/3 -left-16 w-56 h-56 bg-white opacity-5 rounded-full" />
-                    <div className="absolute -bottom-24 right-16 w-80 h-80 bg-purple-400 opacity-10 rounded-full" />
-                    <div
-                        className="absolute inset-0 opacity-10"
-                        style={{
-                            backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)`,
-                            backgroundSize: '32px 32px',
-                        }}
-                    />
-                </div>
-
-                {/* Logo */}
-                <div className="relative flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                        <Lightbulb className="w-6 h-6 text-white" />
+                    {/* Decorative blobs */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute -top-32 -right-32 w-96 h-96 bg-white opacity-5 rounded-full" />
+                        <div className="absolute top-1/3 -left-16 w-56 h-56 bg-white opacity-5 rounded-full" />
+                        <div className="absolute -bottom-24 right-16 w-80 h-80 bg-purple-400 opacity-10 rounded-full" />
+                        <div
+                            className="absolute inset-0 opacity-10"
+                            style={{
+                                backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)`,
+                                backgroundSize: '32px 32px',
+                            }}
+                        />
                     </div>
-                    <span className="text-2xl font-bold text-white tracking-tight">SkillSync</span>
-                </div>
 
-                {/* Hero Content */}
-                <div className="relative space-y-8">
-                    <div>
-                        <div className="inline-flex items-center space-x-2 bg-white bg-opacity-15 rounded-full px-4 py-1.5 mb-4">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                            <span className="text-white text-sm font-medium">Free forever plan available</span>
+                    {/* Logo */}
+                    <div className="relative flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                            <Lightbulb className="w-6 h-6 text-white" />
                         </div>
-                        <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-                            Start your learning<br />
-                            <span className="text-indigo-200">journey today.</span>
-                        </h1>
-                        <p className="text-indigo-200 text-lg leading-relaxed max-w-sm">
-                            Everything you need to become a more consistent, focused, and effective learner — in one place.
-                        </p>
+                        <span className="text-2xl font-bold text-white tracking-tight">SkillSync</span>
                     </div>
 
-                    {/* Perks List */}
-                    <div className="space-y-3">
-                        {perks.map((perk, i) => (
-                            <div key={i} className="flex items-center space-x-3">
-                                <div className="w-6 h-6 bg-green-400 bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <Check className="w-3.5 h-3.5 text-green-300" />
-                                </div>
-                                <span className="text-indigo-100 text-sm">{perk}</span>
+                    {/* Hero Content */}
+                    <div className="relative space-y-8">
+                        <div>
+                            <div className="inline-flex items-center space-x-2 bg-white bg-opacity-15 rounded-full px-4 py-1.5 mb-4">
+                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                                <span className="text-white text-sm font-medium">Free forever plan available</span>
                             </div>
-                        ))}
-                    </div>
+                            <h1 className="text-4xl font-bold text-white leading-tight mb-4">
+                                Start your learning<br />
+                                <span className="text-indigo-200">journey today.</span>
+                            </h1>
+                            <p className="text-indigo-200 text-lg leading-relaxed max-w-sm">
+                                Everything you need to become a more consistent, focused, and effective learner — in one place.
+                            </p>
+                        </div>
 
-                    {/* Social Proof */}
-                    <div className="bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-2xl p-5">
-                        <div className="flex items-center space-x-3 mb-3">
-                            {['AK', 'JL', 'MR', 'SP'].map((avatar, i) => (
-                                <div
-                                    key={i}
-                                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold -ml-2 first:ml-0 border-2 border-indigo-700"
-                                    style={{
-                                        background: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981'][i],
-                                    }}
-                                >
-                                    {avatar}
+                        {/* Perks List */}
+                        <div className="space-y-3">
+                            {perks.map((perk, i) => (
+                                <div key={i} className="flex items-center space-x-3">
+                                    <div className="w-6 h-6 bg-green-400 bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <Check className="w-3.5 h-3.5 text-green-300" />
+                                    </div>
+                                    <span className="text-indigo-100 text-sm">{perk}</span>
                                 </div>
                             ))}
-                            <span className="text-indigo-200 text-sm ml-2">+12,000 learners</span>
-                        </div>
-                        <p className="text-white text-xs leading-relaxed opacity-90">
-                            Join a community of developers, designers, and creators leveling up every day.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="relative text-indigo-400 text-sm">
-                    © 2025 SkillSync. Built for learners, by learners.
-                </div>
-            </div>
-
-            {/* ─── Right Form Panel ──────────────────────────────── */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-                <div className="w-full max-w-md">
-
-                    {/* Mobile logo */}
-                    <div className="flex lg:hidden items-center space-x-3 mb-10">
-                        <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                            <Lightbulb className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="text-xl font-bold text-gray-900">SkillSync</span>
-                    </div>
-
-                    {/* Heading */}
-                    <div className="mb-8">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h2>
-                        <p className="text-gray-500">Free to start. No credit card required.</p>
-                    </div>
-
-                    {/* OAuth Buttons */}
-                    <div className="space-y-3 mb-6">
-                        <button className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all">
-                            <Chrome className="w-5 h-5 text-red-500" />
-                            <span>Sign up with Google</span>
-                        </button>
-                        <button className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all">
-                            <Github className="w-5 h-5 text-gray-800" />
-                            <span>Sign up with GitHub</span>
-                        </button>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="flex items-center space-x-4 mb-6">
-                        <div className="flex-1 h-px bg-gray-200" />
-                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">or</span>
-                        <div className="flex-1 h-px bg-gray-200" />
-                    </div>
-
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
-
-                        {/* Full Name */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Full name
-                            </label>
-                            <input
-                                type="text"
-                                value={form.name}
-                                onChange={(e) => {
-                                    setForm({ ...form, name: e.target.value });
-                                    if (errors.name) setErrors({ ...errors, name: '' });
-                                }}
-                                placeholder="John Doe"
-                                className={`w-full px-4 py-3 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                                    errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                                }`}
-                            />
-                            {errors.name && (
-                                <p className="mt-1.5 text-xs text-red-600">{errors.name}</p>
-                            )}
                         </div>
 
-                        {/* Email */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Email address
-                            </label>
-                            <input
-                                type="email"
-                                value={form.email}
-                                onChange={(e) => {
-                                    setForm({ ...form, email: e.target.value });
-                                    if (errors.email) setErrors({ ...errors, email: '' });
-                                }}
-                                placeholder="john@example.com"
-                                className={`w-full px-4 py-3 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                                    errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                                }`}
-                            />
-                            {errors.email && (
-                                <p className="mt-1.5 text-xs text-red-600">{errors.email}</p>
-                            )}
-                        </div>
-
-                        {/* Password */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={form.password}
-                                    onChange={(e) => {
-                                        setForm({ ...form, password: e.target.value });
-                                        if (errors.password) setErrors({ ...errors, password: '' });
-                                    }}
-                                    placeholder="Min. 8 characters"
-                                    className={`w-full px-4 py-3 pr-12 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                                        errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                                    }`}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
-                                >
-                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
-                            </div>
-                            {errors.password && (
-                                <p className="mt-1.5 text-xs text-red-600">{errors.password}</p>
-                            )}
-
-                            {/* Password Strength Meter */}
-                            {form.password && (
-                                <div className="mt-2">
-                                    <div className="flex space-x-1 mb-1">
-                                        {[1, 2, 3, 4].map((i) => (
-                                            <div
-                                                key={i}
-                                                className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                                                    strength.score >= i ? strength.color : 'bg-gray-200'
-                                                }`}
-                                            />
-                                        ))}
+                        {/* Social Proof */}
+                        <div className="bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-2xl p-5">
+                            <div className="flex items-center space-x-3 mb-3">
+                                {['AK', 'JL', 'MR', 'SP'].map((avatar, i) => (
+                                    <div
+                                        key={i}
+                                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold -ml-2 first:ml-0 border-2 border-indigo-700"
+                                        style={{
+                                            background: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981'][i],
+                                        }}
+                                    >
+                                        {avatar}
                                     </div>
-                                    {strength.label && (
-                                        <p className={`text-xs font-medium ${
-                                            strength.score === 1 ? 'text-red-600' :
-                                                strength.score === 2 ? 'text-yellow-600' :
-                                                    strength.score === 3 ? 'text-blue-600' :
-                                                        'text-green-600'
-                                        }`}>
-                                            {strength.label} password
-                                        </p>
-                                    )}
-                                </div>
-                            )}
+                                ))}
+                                <span className="text-indigo-200 text-sm ml-2">
+                                    +{platformStats ? platformStats.totalUsers.toLocaleString() : '...'} learners
+                                </span>
+                            </div>
+                            <p className="text-white text-xs leading-relaxed opacity-90">
+                                Join a community of developers, designers, and creators leveling up every day.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="relative text-indigo-400 text-sm">
+                        © 2025 SkillSync. Built for learners, by learners.
+                    </div>
+                </div>
+
+                {/* ─── Right Form Panel ──────────────────────────────── */}
+                <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+                    <div className="w-full max-w-md">
+
+                        {/* Mobile logo */}
+                        <div className="flex lg:hidden items-center space-x-3 mb-10">
+                            <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                                <Lightbulb className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-xl font-bold text-gray-900">SkillSync</span>
                         </div>
 
-                        {/* Confirm Password */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Confirm password
-                            </label>
-                            <div className="relative">
+                        {/* Heading */}
+                        <div className="mb-8">
+                            <h2 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h2>
+                            <p className="text-gray-500">Free to start. No credit card required.</p>
+                        </div>
+
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="space-y-4">
+
+                            {/* Full Name */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Full name
+                                </label>
                                 <input
-                                    type={showConfirm ? 'text' : 'password'}
-                                    value={form.confirmPassword}
+                                    type="text"
+                                    value={form.name}
                                     onChange={(e) => {
-                                        setForm({ ...form, confirmPassword: e.target.value });
-                                        if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: '' });
+                                        setForm({ ...form, name: e.target.value });
+                                        if (errors.name) setErrors({ ...errors, name: '' });
                                     }}
-                                    placeholder="Repeat your password"
-                                    className={`w-full px-4 py-3 pr-12 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                                        errors.confirmPassword ? 'border-red-300 bg-red-50' :
-                                            form.confirmPassword && form.confirmPassword === form.password ? 'border-green-300' :
-                                                'border-gray-200'
-                                    }`}
+                                    placeholder="John Doe"
+                                    className={`w-full px-4 py-3 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                                        }`}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowConfirm(!showConfirm)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
-                                >
-                                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
-                                {/* Checkmark when matching */}
-                                {form.confirmPassword && form.confirmPassword === form.password && (
-                                    <div className="absolute right-10 top-1/2 -translate-y-1/2">
-                                        <Check className="w-4 h-4 text-green-500" />
+                                {errors.name && (
+                                    <p className="mt-1.5 text-xs text-red-600">{errors.name}</p>
+                                )}
+                            </div>
+
+                            {/* Email */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Email address
+                                </label>
+                                <input
+                                    type="email"
+                                    value={form.email}
+                                    onChange={(e) => {
+                                        setForm({ ...form, email: e.target.value });
+                                        if (errors.email) setErrors({ ...errors, email: '' });
+                                    }}
+                                    placeholder="john@example.com"
+                                    className={`w-full px-4 py-3 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                                        }`}
+                                />
+                                {errors.email && (
+                                    <p className="mt-1.5 text-xs text-red-600">{errors.email}</p>
+                                )}
+                            </div>
+
+                            {/* Password */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Password
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={form.password}
+                                        onChange={(e) => {
+                                            setForm({ ...form, password: e.target.value });
+                                            if (errors.password) setErrors({ ...errors, password: '' });
+                                        }}
+                                        placeholder="Min. 8 characters"
+                                        className={`w-full px-4 py-3 pr-12 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                                            }`}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                                {errors.password && (
+                                    <p className="mt-1.5 text-xs text-red-600">{errors.password}</p>
+                                )}
+
+                                {/* Password Strength Meter */}
+                                {form.password && (
+                                    <div className="mt-2">
+                                        <div className="flex space-x-1 mb-1">
+                                            {[1, 2, 3, 4, 5].map((i) => (
+                                                <div
+                                                    key={i}
+                                                    className={`h-1 flex-1 rounded-full transition-all duration-300 ${strength.score >= i ? strength.color : 'bg-gray-200'
+                                                        }`}
+                                                />
+                                            ))}
+                                        </div>
+                                        {strength.label && (
+                                            <p className={`text-xs font-medium ${strength.score <= 2 ? 'text-red-600' :
+                                                strength.score === 3 ? 'text-yellow-600' :
+                                                    strength.score === 4 ? 'text-blue-600' :
+                                                        'text-green-600'
+                                                }`}>
+                                                {strength.label} password
+                                            </p>
+                                        )}
                                     </div>
                                 )}
                             </div>
-                            {errors.confirmPassword && (
-                                <p className="mt-1.5 text-xs text-red-600">{errors.confirmPassword}</p>
-                            )}
-                        </div>
 
-                        {/* Terms */}
-                        <div className="pt-1">
-                            <div className="flex items-start space-x-3">
-                                <input
-                                    id="terms"
-                                    type="checkbox"
-                                    checked={agreed}
-                                    onChange={(e) => {
-                                        setAgreed(e.target.checked);
-                                        if (errors.agreed) setErrors({ ...errors, agreed: '' });
-                                    }}
-                                    className="w-4 h-4 mt-0.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer flex-shrink-0"
-                                />
-                                <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer select-none leading-relaxed">
-                                    I agree to the{' '}
-                                    <button type="button" className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
-                                        Terms of Service
-                                    </button>{' '}
-                                    and{' '}
-                                    <button type="button" className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
-                                        Privacy Policy
-                                    </button>
+                            {/* Confirm Password */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Confirm password
                                 </label>
+                                <div className="relative">
+                                    <input
+                                        type={showConfirm ? 'text' : 'password'}
+                                        value={form.confirmPassword}
+                                        onChange={(e) => {
+                                            setForm({ ...form, confirmPassword: e.target.value });
+                                            if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: '' });
+                                        }}
+                                        placeholder="Repeat your password"
+                                        className={`w-full px-4 py-3 pr-12 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.confirmPassword ? 'border-red-300 bg-red-50' :
+                                            form.confirmPassword && form.confirmPassword === form.password ? 'border-green-300' :
+                                                'border-gray-200'
+                                            }`}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirm(!showConfirm)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
+                                    >
+                                        {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                    {/* Checkmark when matching */}
+                                    {form.confirmPassword && form.confirmPassword === form.password && (
+                                        <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                                            <Check className="w-4 h-4 text-green-500" />
+                                        </div>
+                                    )}
+                                </div>
+                                {errors.confirmPassword && (
+                                    <p className="mt-1.5 text-xs text-red-600">{errors.confirmPassword}</p>
+                                )}
                             </div>
-                            {errors.agreed && (
-                                <p className="mt-1.5 ml-7 text-xs text-red-600">{errors.agreed}</p>
-                            )}
-                        </div>
 
-                        {/* Submit */}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-indigo-400 text-white text-sm font-semibold rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 mt-1"
-                        >
-                            {loading ? (
-                                <>
-                                    <svg className="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                    </svg>
-                                    <span>Creating account...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <span>Create free account</span>
-                                    <ArrowRight className="w-4 h-4" />
-                                </>
-                            )}
-                        </button>
-                    </form>
+                            {/* Terms */}
+                            <div className="pt-1">
+                                <div className="flex items-start space-x-3">
+                                    <input
+                                        id="terms"
+                                        type="checkbox"
+                                        checked={agreed}
+                                        onChange={(e) => {
+                                            setAgreed(e.target.checked);
+                                            if (errors.agreed) setErrors({ ...errors, agreed: '' });
+                                        }}
+                                        className="w-4 h-4 mt-0.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer flex-shrink-0"
+                                    />
+                                    <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer select-none leading-relaxed">
+                                        I agree to the{' '}
+                                        <button type="button" onClick={(e) => { e.preventDefault(); setModalOpen('terms'); }} className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
+                                            Terms of Service
+                                        </button>{' '}
+                                        and{' '}
+                                        <button type="button" onClick={(e) => { e.preventDefault(); setModalOpen('privacy'); }} className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
+                                            Privacy Policy
+                                        </button>
+                                    </label>
+                                </div>
+                                {errors.agreed && (
+                                    <p className="mt-1.5 ml-7 text-xs text-red-600">{errors.agreed}</p>
+                                )}
+                            </div>
 
-                    {/* Footer link */}
-                    <p className="mt-8 text-center text-sm text-gray-500">
-                        Already have an account?{' '}
-                        <button
-                            onClick={() => onNavigate && onNavigate('login')}
-                            className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
-                        >
-                            Sign in instead
-                        </button>
-                    </p>
+                            {/* Submit */}
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-indigo-400 text-white text-sm font-semibold rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 mt-1"
+                            >
+                                {loading ? (
+                                    <>
+                                        <svg className="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                        </svg>
+                                        <span>Creating account...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Create free account</span>
+                                        <ArrowRight className="w-4 h-4" />
+                                    </>
+                                )}
+                            </button>
+                        </form>
 
+                        {/* Footer link */}
+                        <p className="mt-8 text-center text-sm text-gray-500">
+                            Already have an account?{' '}
+                            <button
+                                onClick={() => onNavigate && onNavigate('login')}
+                                className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+                            >
+                                Sign in instead
+                            </button>
+                        </p>
+
+                    </div>
                 </div>
+
             </div>
 
-        </div>
+            {/* Modal Overlay */}
+            {
+                modalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        {/* Backdrop */}
+                        <div
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                            onClick={() => setModalOpen(null)}
+                        />
+                        {/* Modal */}
+                        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900">
+                                    {modalOpen === 'terms' ? 'Terms of Service' : 'Privacy Policy'}
+                                </h3>
+                                <button
+                                    onClick={() => setModalOpen(null)}
+                                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            {/* Content */}
+                            <div className="px-6 py-5 overflow-y-auto text-sm text-gray-600 leading-relaxed space-y-4">
+                                {modalOpen === 'terms' ? (
+                                    <>
+                                        <p className="font-semibold text-gray-800">Last updated: February 2026</p>
+                                        <p>Welcome to SkillSync. By creating an account and using our platform, you agree to the following terms:</p>
+                                        <h4 className="font-semibold text-gray-800 mt-3">1. Account Responsibility</h4>
+                                        <p>You are responsible for maintaining the security of your account credentials. You agree to provide accurate information during registration and to keep it up to date.</p>
+                                        <h4 className="font-semibold text-gray-800">2. Acceptable Use</h4>
+                                        <p>You agree to use SkillSync solely for personal learning and skill tracking purposes. You may not use the platform to distribute harmful content, violate any laws, or interfere with other users' experience.</p>
+                                        <h4 className="font-semibold text-gray-800">3. Intellectual Property</h4>
+                                        <p>All content, features, and functionality of SkillSync are owned by SkillSync and protected by copyright and trademark laws. Your learning data belongs to you.</p>
+                                        <h4 className="font-semibold text-gray-800">4. Service Availability</h4>
+                                        <p>We strive for 99.9% uptime but do not guarantee uninterrupted service. We may perform maintenance or updates that temporarily affect availability.</p>
+                                        <h4 className="font-semibold text-gray-800">5. Termination</h4>
+                                        <p>We reserve the right to suspend or terminate accounts that violate these terms. You may delete your account at any time from your profile settings.</p>
+                                        <h4 className="font-semibold text-gray-800">6. Limitation of Liability</h4>
+                                        <p>SkillSync is provided "as is" without warranties of any kind. We shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform.</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p className="font-semibold text-gray-800">Last updated: February 2026</p>
+                                        <p>At SkillSync, your privacy is important to us. This policy explains how we collect, use, and protect your personal information.</p>
+                                        <h4 className="font-semibold text-gray-800 mt-3">1. Information We Collect</h4>
+                                        <p>We collect your name, email address, and password when you create an account. We also store your learning sessions, skills, and usage analytics to provide our services.</p>
+                                        <h4 className="font-semibold text-gray-800">2. How We Use Your Data</h4>
+                                        <p>Your data is used to personalize your learning experience, generate analytics and insights, detect burnout patterns, and improve the platform.</p>
+                                        <h4 className="font-semibold text-gray-800">3. Data Storage & Security</h4>
+                                        <p>All data is stored securely with industry-standard encryption. Passwords are hashed using bcrypt and are never stored in plain text. We use JWT tokens for authentication.</p>
+                                        <h4 className="font-semibold text-gray-800">4. Data Sharing</h4>
+                                        <p>We do not sell, trade, or share your personal data with third parties. Your learning data is yours and will never be used for advertising purposes.</p>
+                                        <h4 className="font-semibold text-gray-800">5. Your Rights</h4>
+                                        <p>You have the right to access, update, or delete your personal information at any time. You may export your data or request complete account deletion.</p>
+                                        <h4 className="font-semibold text-gray-800">6. Cookies</h4>
+                                        <p>We use local storage to maintain your authentication session. We do not use third-party tracking cookies or analytics services.</p>
+                                    </>
+                                )}
+                            </div>
+                            {/* Footer */}
+                            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+                                <button
+                                    onClick={() => setModalOpen(null)}
+                                    className="w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all"
+                                >
+                                    I understand
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+        </>
     );
 };
 

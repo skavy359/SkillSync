@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
-// ── User App ─────────────────────────────────────────────────────────────────
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
@@ -10,46 +8,60 @@ import Categories from './pages/Categories';
 import Goals from './pages/Goals';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
-
-// ── Auth ─────────────────────────────────────────────────────────────────────
+import Settings from './pages/Settings';
+import Notifications from './pages/Notifications';
 import Login from './pages/Login';
 import Register from './pages/Register';
-
-// ── Admin ─────────────────────────────────────────────────────────────────────
 import AdminLayout from './pages/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
-
-// ─────────────────────────────────────────────────────────────────────────────
+import { getMyProfile } from './services/profileService';
 
 function App() {
-    // Auth state
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [authPage, setAuthPage] = useState('login');
     const [currentUser, setCurrentUser] = useState(null);
-
-    // User app routing
     const [currentPage, setCurrentPage] = useState('dashboard');
     const [selectedSkillId, setSelectedSkillId] = useState(null);
-
-    // Admin routing
     const [adminPage, setAdminPage] = useState('admin');
 
-    // ── Check for existing session on mount ─────────────────────────────
+    // Apply saved theme on app mount
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            // Token exists - try to restore session
-            // You can either:
-            // A) Decode JWT to get user info
-            // B) Call /api/profile to get current user
-            // For now, we'll just mark as authenticated
-            setIsAuthenticated(true);
-            // TODO: Fetch user profile here
+        const saved = localStorage.getItem('theme') || 'system';
+        const applyTheme = (isDark) => {
+            if (isDark) document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+        };
+        if (saved === 'dark') applyTheme(true);
+        else if (saved === 'light') applyTheme(false);
+        else {
+            const mq = window.matchMedia('(prefers-color-scheme: dark)');
+            applyTheme(mq.matches);
         }
     }, []);
 
-    // ── Handlers ───────────────────────────────────────────────────────────
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            setIsAuthenticated(true);
+            // Fetch user profile so Topbar has name/email
+            getMyProfile()
+                .then((profile) => {
+                    setCurrentUser({
+                        id: profile.id,
+                        name: profile.name,
+                        email: profile.email,
+                        role: profile.role,
+                    });
+                })
+                .catch(() => {
+                    // Token invalid — force logout
+                    localStorage.removeItem('token');
+                    setIsAuthenticated(false);
+                });
+        }
+    }, []);
+
     const handleLogin = (userData) => {
         setIsAuthenticated(true);
         setCurrentUser(userData);
@@ -120,18 +132,22 @@ function App() {
                 return <Goals />;
             case 'analytics':
                 return <Analytics />;
+            case 'notifications':
+                return <Notifications />;
             case 'profile':
                 return <Profile />;
+            case 'settings':
+                return <Settings />;
             default:
                 return <Dashboard onNavigate={setCurrentPage} onSelectSkill={setSelectedSkillId} />;
         }
     };
 
     return (
-        <div className="flex h-screen bg-gray-50">
+        <div className="flex h-screen bg-gray-50 dark:bg-[#11111b]">
             <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
             <div className="flex-1 flex flex-col overflow-hidden">
-                <Topbar onLogout={handleLogout} />
+                <Topbar onLogout={handleLogout} currentUser={currentUser} onNavigate={setCurrentPage} onSelectSkill={setSelectedSkillId} />
                 <main className="flex-1 overflow-y-auto">
                     <div className="max-w-7xl mx-auto px-6 py-8">
                         {renderUserPage()}

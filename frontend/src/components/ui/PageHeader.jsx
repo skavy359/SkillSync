@@ -1,8 +1,8 @@
 import React from 'react';
 import Button from './Button';
 
-const PageHeader = ({ 
-  title, 
+const PageHeader = ({
+  title,
   description,
   action,
   actionLabel,
@@ -10,7 +10,7 @@ const PageHeader = ({
   onAction,
   breadcrumbs,
   children,
-  className = '' 
+  className = ''
 }) => {
   return (
     <div className={`mb-6 ${className}`}>
@@ -20,10 +20,10 @@ const PageHeader = ({
           {breadcrumbs.map((crumb, index) => (
             <React.Fragment key={index}>
               {index > 0 && <span>/</span>}
-              <button 
+              <button
                 className={`
-                  ${index === breadcrumbs.length - 1 
-                    ? 'text-gray-900 font-medium' 
+                  ${index === breadcrumbs.length - 1
+                    ? 'text-gray-900 font-medium'
                     : 'hover:text-gray-700'
                   }
                 `}
@@ -35,22 +35,22 @@ const PageHeader = ({
           ))}
         </div>
       )}
-      
+
       {/* Header Content */}
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-2">{title}</h1>
           {description && (
-            <p className="text-gray-600 max-w-2xl">{description}</p>
+            <p className="text-gray-600 dark:text-[#9399b2] max-w-2xl">{description}</p>
           )}
         </div>
-        
+
         {/* Action Button or Custom Children */}
         {children ? (
           <div className="ml-4">{children}</div>
         ) : action !== false && (
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             icon={actionIcon}
             onClick={onAction}
           >

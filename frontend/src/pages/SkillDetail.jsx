@@ -20,7 +20,7 @@ import {
     Target
 } from 'lucide-react';
 import { useEffect } from "react";
-import {addSession } from "../services/skillService";
+import { getMySkills, addSession, getSessions } from "../services/skillService";
 
 const SkillDetail = ({ skillId, onNavigate }) => {
     const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
@@ -36,8 +36,14 @@ const SkillDetail = ({ skillId, onNavigate }) => {
     useEffect(() => {
         if (!skillId) return;
 
-        getSkillById(skillId).then(setSkill);
-        fetchSessions(skillId).then(setSessions);
+        getMySkills({ size: 100 }).then(data => {
+            const skills = data?.content || [];
+            const found = skills.find(s => String(s.id) === String(skillId));
+            if (found) setSkill(found);
+        }).catch(() => { });
+        getSessions(skillId).then(data => {
+            setSessions(Array.isArray(data) ? data : []);
+        }).catch(() => setSessions([]));
     }, [skillId]);
 
     const handleAddSession = async (e) => {
@@ -62,7 +68,7 @@ const SkillDetail = ({ skillId, onNavigate }) => {
             console.error("Add session failed", err);
         }
     };
-k
+
 
     const levelColors = {
         Beginner: 'success',
@@ -72,7 +78,7 @@ k
     };
 
     if (!skill) {
-        return <div className="p-8 text-gray-500">Loading skill...</div>;
+        return <div className="p-8 text-gray-500 dark:text-[#7f849c]">Loading skill...</div>;
     }
 
     return (
@@ -91,13 +97,13 @@ k
                 <div className="flex items-start justify-between mb-6">
                     <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-3">
-                            <h1 className="text-3xl font-bold text-gray-900">{skill.name}</h1>
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-[#cdd6f4]">{skill.name}</h1>
                             <Badge variant={levelColors[skill.level]} size="lg">
                                 {skill.level}
                             </Badge>
                         </div>
-                        <p className="text-gray-600 mb-4">{skill.description}</p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
+                        <p className="text-gray-600 dark:text-[#9399b2] mb-4">{skill.description}</p>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-[#9399b2]">
                             <div className="flex items-center">
                                 <Clock className="w-4 h-4 mr-1.5" />
                                 <span>{sessions.reduce((a, s) => a + s.durationMinutes, 0)} minutes logged</span>
@@ -124,15 +130,15 @@ k
                 </div>
 
                 {/* Progress Section */}
-                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-6">
+                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-500/15 dark:to-blue-500/10 rounded-2xl p-6">
                     <div className="flex items-start justify-between mb-4">
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Overall Progress</h3>
-                            <p className="text-sm text-gray-600">You're making great progress!</p>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-1">Overall Progress</h3>
+                            <p className="text-sm text-gray-600 dark:text-[#9399b2]">You're making great progress!</p>
                         </div>
                         <div className="text-right">
-                            <div className="text-3xl font-bold text-indigo-600">{skill.progress}%</div>
-                            <div className="text-sm text-gray-600">Complete</div>
+                            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{skill.progress}%</div>
+                            <div className="text-sm text-gray-600 dark:text-[#9399b2]">Complete</div>
                         </div>
                     </div>
                     <ProgressBar progress={skill.progress} size="lg" />
@@ -143,38 +149,38 @@ k
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-indigo-600" />
+                        <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/15 rounded-xl flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">
-                        {Math.round(sessions.reduce((a,s)=>a+s.durationMinutes,0)/60)}h
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">
+                        {Math.round(sessions.reduce((a, s) => a + s.durationMinutes, 0) / 60)}h
                     </h3>
-                    <p className="text-sm text-gray-600">Total Time</p>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Total Time</p>
                 </Card>
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                            <TrendingUp className="w-6 h-6 text-green-600" />
+                        <div className="w-12 h-12 bg-green-100 dark:bg-green-500/15 rounded-xl flex items-center justify-center">
+                            <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{sessions.length}</h3>
-                    <p className="text-sm text-gray-600">Sessions</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{sessions.length}</h3>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Sessions</p>
                 </Card>
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                            <Target className="w-6 h-6 text-purple-600" />
+                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/15 rounded-xl flex items-center justify-center">
+                            <Target className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">
                         {sessions.length
-                            ? Math.round((sessions.reduce((a,s)=>a+s.durationMinutes,0)/sessions.length)/60*10)/10
+                            ? Math.round((sessions.reduce((a, s) => a + s.durationMinutes, 0) / sessions.length) / 60 * 10) / 10
                             : 0}h
                     </h3>
-                    <p className="text-sm text-gray-600">Avg per Session</p>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Avg per Session</p>
                 </Card>
             </div>
 
@@ -198,19 +204,19 @@ k
                             {sessions.map((session) => (
                                 <div
                                     key={session.id}
-                                    className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                                    className="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-[#181825] rounded-xl hover:bg-gray-100 dark:hover:bg-[#272739] transition-colors"
                                 >
-                                    <div className="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <Clock className="w-5 h-5 text-gray-600" />
+                                    <div className="w-12 h-12 bg-white dark:bg-[#1e1e2e] border border-gray-200 dark:border-[#313244] rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <Clock className="w-5 h-5 text-gray-600 dark:text-[#9399b2]" />
                                     </div>
 
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center space-x-3">
-                        <span className="text-sm font-semibold text-gray-900">
-                          {session.durationMinutes} minutes
-                        </span>
-                                                <div className="flex items-center text-sm text-gray-500">
+                                                <span className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4]">
+                                                    {session.durationMinutes} minutes
+                                                </span>
+                                                <div className="flex items-center text-sm text-gray-500 dark:text-[#7f849c]">
                                                     <Calendar className="w-4 h-4 mr-1.5" />
                                                     {session.sessionDate}
                                                 </div>
@@ -224,7 +230,7 @@ k
                                                 </button>
                                             </div>
                                         </div>
-                                        <p className="text-sm text-gray-700">{session.notes}</p>
+                                        <p className="text-sm text-gray-700 dark:text-[#a6adc8]">{session.notes}</p>
                                     </div>
                                 </div>
                             ))}

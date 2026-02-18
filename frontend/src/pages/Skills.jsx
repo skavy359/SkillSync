@@ -9,11 +9,11 @@ import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 import FormRow from '../components/ui/FormRow';
 import { Plus, Search, Lightbulb } from 'lucide-react';
-import { useEffect} from "react"
-import { addSkill } from "../services/skillService"
+import { useEffect } from "react"
+import { addSkill, getMySkills } from "../services/skillService"
 
 const Skills = ({ onNavigate, onSelectSkill }) => {
-    const[initialSkills,setInitialSkills]=useState([]);
+    const [initialSkills, setInitialSkills] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
@@ -25,7 +25,7 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
     });
 
     useEffect(() => {
-        fetchSkills().then(setInitialSkills)
+        getMySkills().then(data => setInitialSkills(data?.content || []))
     }, [])
 
     const filteredSkills = initialSkills.filter(skill => {
@@ -102,15 +102,15 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                             className={`
                 px-4 py-2.5 rounded-xl text-sm font-medium transition-all
                 ${filterStatus === status
-                                ? 'bg-indigo-600 text-white shadow-sm'
-                                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-                            }
+                                    ? 'bg-indigo-600 text-white shadow-sm'
+                                    : 'bg-white dark:bg-[#1e1e2e] text-gray-700 dark:text-[#a6adc8] border border-gray-200 dark:border-[#313244] hover:bg-gray-50 dark:hover:bg-[#272739]'
+                                }
               `}
                         >
                             {status.charAt(0).toUpperCase() + status.slice(1)}
                             <span className={`ml-2 ${filterStatus === status ? 'text-indigo-200' : 'text-gray-500'}`}>
-                ({count})
-              </span>
+                                ({count})
+                            </span>
                         </button>
                     ))}
                 </div>

@@ -292,6 +292,37 @@ public class UserProfileController {
         );
     }
 
+    @PatchMapping("/me/notifications/{id}/read")
+    public ResponseEntity<ApiResponse<String>>
+    markNotificationAsRead(@PathVariable Long id) {
+
+        notificationService.markAsRead(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Notification marked as read",
+                        null
+                )
+        );
+    }
+
+    @PatchMapping("/me/notifications/read-all")
+    public ResponseEntity<ApiResponse<String>>
+    markAllNotificationsAsRead() {
+
+        User user = userService.getCurrentUser();
+        notificationService.markAllAsRead(user);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "All notifications marked as read",
+                        null
+                )
+        );
+    }
+
     @GetMapping("/me/recommendation")
     public ResponseEntity<ApiResponse<SkillRecommendationResponse>>
     getRecommendation() {
@@ -325,11 +356,9 @@ public class UserProfileController {
     }
 
     @GetMapping("/me/audit")
-    public ResponseEntity<ApiResponse<List<AuditLogResponse>>>
-    getMyAuditLogs() {
+    public ResponseEntity<ApiResponse<List<AuditLogResponse>>> getMyAuditLogs() {
 
-        List<AuditLogResponse> logs =
-                userService.getMyAuditLogs();
+        List<AuditLogResponse> logs = userService.getMyAuditLogs();
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -340,12 +369,20 @@ public class UserProfileController {
         );
     }
 
+
+
+
+
     @GetMapping("/categories")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
         List<CategoryResponse> categories = userService.getAllCategories();
 
         return ResponseEntity.ok(
-                new ApiResponse<>(true, "Categories fetched", categories)
+                new ApiResponse<>(
+                        true,
+                        "Categories fetched",
+                        categories
+                )
         );
     }
 
@@ -354,7 +391,11 @@ public class UserProfileController {
         List<GoalResponse> goals = userService.getMyGoals();
 
         return ResponseEntity.ok(
-                new ApiResponse<>(true, "Goals fetched", goals)
+                new ApiResponse<>(
+                        true,
+                        "Goals fetched",
+                        goals
+                )
         );
     }
 }

@@ -51,7 +51,14 @@ public class UserService {
             UserRepository userRepository,
             BCryptPasswordEncoder passwordEncoder,
             JwtUtil jwtUtil,
-            SkillRepository skillRepository, LearningSessionRepository learningSessionRepository, SkillCategoryRepository skillCategoryRepository, LearningGoalRepository learningGoalRepository, NotificationService notificationService, RecommendationHistoryRepository recommendationHistoryRepository, AuditService auditService, AuditLogRepository auditLogRepository
+            SkillRepository skillRepository,
+            LearningSessionRepository learningSessionRepository,
+            SkillCategoryRepository skillCategoryRepository,
+            LearningGoalRepository learningGoalRepository,
+            NotificationService notificationService,
+            RecommendationHistoryRepository recommendationHistoryRepository,
+            AuditService auditService,
+            AuditLogRepository auditLogRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -108,12 +115,23 @@ public class UserService {
             throw new InvalidCredentialsException("Invalid Email or Password");
         }
 
-        String token = jwtUtil.generateToken(
+        String token;
+    if (request.isRememberMe()) {
+        // 5 days in milliseconds
+        long rememberMeExpiration = 5L * 24 * 60 * 60 * 1000;
+        token = jwtUtil.generateToken(
+                user.getId(),
+                user.getEmail(),
+                user.getRole().name(),
+                rememberMeExpiration
+        );
+    } else {
+        token = jwtUtil.generateToken(
                 user.getId(),
                 user.getEmail(),
                 user.getRole().name()
         );
-
+    }
         auditService.log(
                 user,
                 "LOGIN",
@@ -126,7 +144,7 @@ public class UserService {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole() // ADD THIS
+                user.getRole()
         );
     }
 
@@ -186,7 +204,6 @@ public class UserService {
         skill.setStatus(SkillStatus.ACTIVE);
         skill.setUser(user);
         skill.setCategory(category);
-
 
         Skill savedSkill = skillRepository.save(skill);
 
@@ -390,20 +407,33 @@ public class UserService {
     public AdminStatsResponse getAdminStats() {
 
         long totalUsers = userRepository.countBy();
-        long adminCount = userRepository.countByRole(Role.ADMIN);
-        long userCount = userRepository.countByRole(Role.USER);
-
         long totalSkills = skillRepository.count();
-        long completed = skillRepository.countByStatus(SkillStatus.COMPLETED);
-        long active = skillRepository.countByStatus(SkillStatus.ACTIVE);
+
+        // Count total sessions from all users
+        long totalSessions = learningSessionRepository.count();
+
+        // Calculate active users (users who have at least one active skill)
+        long activeUsers = userRepository.findAll().stream()
+                .filter(user -> skillRepository.countByUserAndStatus(user, SkillStatus.ACTIVE) > 0)
+                .count();
 
         return new AdminStatsResponse(
                 totalUsers,
                 totalSkills,
-                active,
-                completed,
-                adminCount,
-                userCount
+                totalSessions,
+                activeUsers
+        );
+    }
+
+    public PlatformStatsResponse getPlatformStats() {
+        long totalUsers = userRepository.countBy();
+        long totalSessions = learningSessionRepository.count();
+        long totalSkills = skillRepository.count();
+
+        return new PlatformStatsResponse(
+                totalUsers,
+                totalSessions,
+                totalSkills
         );
     }
 
@@ -721,7 +751,7 @@ public class UserService {
 
         SkillCategory saved = skillCategoryRepository.save(category);
 
-        return new CategoryResponse(saved.getId(), saved.getName());
+        return mapToCategoryResponse(saved);
     }
 
     public List<SkillResponse> getSkillsByCategory(Long categoryId) {
@@ -842,12 +872,7 @@ public class UserService {
                 goal.getId()
         );
 
-        return new GoalResponse(
-                saved.getId(),
-                skill.getId(),
-                skill.getName(),
-                saved.getTargetDate()
-        );
+        return mapToGoalResponse(saved);
     }
 
     public List<GoalAnalyticsResponse> getGoalAnalytics() {
@@ -1195,25 +1220,6 @@ public class UserService {
                 .toList();
     }
 
-    public List<AuditLogResponse> getMyAuditLogs() {
-
-        String email = getCurrentUserEmail();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(null));
-
-        return auditLogRepository
-                .findByUserOrderByCreatedAtDesc(user)
-                .stream()
-                .map(a -> new AuditLogResponse(
-                        a.getAction(),
-                        a.getEntityType(),
-                        a.getEntityId(),
-                        a.getCreatedAt().toString()
-                ))
-                .toList();
-    }
-
     private SkillResponse mapSkillToResponse(Skill skill) {
         return new SkillResponse(
                 skill.getId(),
@@ -1242,13 +1248,7 @@ public class UserService {
 
         Skill updated = skillRepository.save(skill);
 
-        return new SkillResponse(
-                updated.getId(),
-                updated.getName(),
-                updated.getLevel().name(),
-                updated.getProgress(),
-                updated.getStatus().name()
-        );
+        return mapToSkillResponse(updated);
     }
 
     public AdminUserResponse adminCreateUser(CreateUserRequest req) {
@@ -1256,7 +1256,7 @@ public class UserService {
         User user = new User();
         user.setName(req.getName());
         user.setEmail(req.getEmail());
-        user.setPassword(req.getPassword()); // later encode
+        user.setPassword(req.getPassword());
         user.setRole(req.getRole());
 
         userRepository.save(user);
@@ -1314,36 +1314,6 @@ public class UserService {
         skillCategoryRepository.deleteById(categoryId);
     }
 
-    private CategoryResponse mapToCategoryResponse(SkillCategory c) {
-        CategoryResponse r = new CategoryResponse();
-        r.setId(c.getId());
-        r.setName(c.getName());
-        return r;
-    }
-
-    private SkillResponse mapToSkillResponse(Skill skill) {
-        SkillResponse res = new SkillResponse();
-
-        res.setId(skill.getId());
-        res.setName(skill.getName());
-        res.setLevel(String.valueOf(skill.getLevel()));
-        res.setProgress(skill.getProgress());
-        res.setStatus(String.valueOf(skill.getStatus()));
-
-        return res;
-    }
-
-    private AdminUserResponse mapToAdminUserResponse(User user) {
-        AdminUserResponse res = new AdminUserResponse();
-
-        res.setId(user.getId());
-        res.setName(user.getName());
-        res.setEmail(user.getEmail());
-        res.setRole(String.valueOf(user.getRole()));
-
-        return res;
-    }
-
     public void updateUserRole(Long userId, Role role) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -1370,16 +1340,62 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public List<AuditLogResponse> getMyAuditLogs() {
+        User user = getCurrentUser();
+        List<AuditLog> logs = auditLogRepository.findByUserOrderByCreatedAtDesc(user);
+
+        return logs.stream()
+                .map(this::mapToAuditLogResponse)
+                .collect(Collectors.toList());
+    }
+
     // ─── Mapper Methods ──────────────────────────────────────────────────
 
     private GoalResponse mapToGoalResponse(LearningGoal goal) {
         return new GoalResponse(
                 goal.getId(),
-                goal.getUser(),
-                goal.getSkill(),
+                goal.getSkill().getId(),
+                goal.getSkill().getName(),
                 goal.getTargetDate()
         );
     }
 
+    private CategoryResponse mapToCategoryResponse(SkillCategory c) {
+        return new CategoryResponse(
+                c.getId(),
+                c.getName()
+        );
+    }
 
+    private AuditLogResponse mapToAuditLogResponse(AuditLog log) {
+        return new AuditLogResponse(
+                log.getId(),
+                log.getUser().getId(),
+                log.getUser().getName(),
+                log.getUser().getEmail(),
+                log.getAction(),
+                log.getEntityType(),
+                log.getEntityId(),
+                log.getCreatedAt().toString()
+        );
+    }
+
+    private SkillResponse mapToSkillResponse(Skill skill) {
+        return new SkillResponse(
+                skill.getId(),
+                skill.getName(),
+                skill.getLevel().name(),
+                skill.getProgress(),
+                skill.getStatus().name()
+        );
+    }
+
+    private AdminUserResponse mapToAdminUserResponse(User user) {
+        return new AdminUserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole().name()
+        );
+    }
 }

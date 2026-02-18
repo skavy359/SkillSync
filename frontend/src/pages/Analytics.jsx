@@ -17,15 +17,10 @@ import {
     Award
 } from 'lucide-react';
 import { useEffect, useState } from "react";
-// import {
-//     fetchStreak,
-//     fetchBurnout,
-//     fetchVelocity,
-//     fetchETA,
-//     fetchTopSkills,
-//     fetchCategoryAnalytics,
-//     fetchLearningStats
-// } from "../services/analyticsService";
+import { getMyStreak, getBurnoutRisk, getMyLearningStats } from "../services/profileService";
+import { getCategoryAnalytics } from "../services/categoryService";
+import { getGoalAnalytics } from "../services/goalService";
+import { getMySkills } from "../services/skillService";
 
 
 const Analytics = () => {
@@ -38,13 +33,21 @@ const Analytics = () => {
     const [stats, setStats] = useState(null);
 
     useEffect(() => {
-        fetchStreak().then(setStreak);
-        fetchBurnout().then(setBurnout);
-        fetchVelocity().then(setVelocity);
-        fetchETA().then(setEta);
-        fetchTopSkills().then(setTopSkills);
-        fetchCategoryAnalytics().then(setCategoryStats);
-        fetchLearningStats().then(setStats);
+        getMyStreak().then(setStreak).catch(() => setStreak({ currentStreak: 0, longestStreak: 0 }));
+        getBurnoutRisk().then(setBurnout).catch(() => setBurnout({ riskLevel: 'LOW', weeklyMinutes: 0 }));
+        getGoalAnalytics().then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                const first = data[0];
+                setVelocity({ velocityPerHour: first.currentVelocity || 0 });
+                setEta({ estimatedHours: first.requiredVelocity ? (first.remainingPercent / first.requiredVelocity) : null });
+            } else {
+                setVelocity({ velocityPerHour: 0 });
+                setEta({ estimatedHours: null });
+            }
+        }).catch(() => { setVelocity({ velocityPerHour: 0 }); setEta({ estimatedHours: null }); });
+        getMySkills({ size: 5 }).then(data => setTopSkills((data?.content || []).map(s => ({ name: s.name, totalMinutes: s.totalMinutes || 0 })))).catch(() => setTopSkills([]));
+        getCategoryAnalytics().then(setCategoryStats).catch(() => setCategoryStats([]));
+        getMyLearningStats().then(setStats).catch(() => setStats({ totalMinutes: 0, weeklyMinutes: 0, avgSessionMinutes: 0, totalSessions: 0 }));
     }, []);
 
 
@@ -64,7 +67,7 @@ const Analytics = () => {
     }));
 
     if (!streak || !burnout || !stats || !velocity) {
-        return <div className="p-8 text-gray-500">Loading analytics...</div>;
+        return <div className="p-8 text-gray-500 dark:text-[#7f849c]">Loading analytics...</div>;
     }
 
     return (
@@ -116,7 +119,7 @@ const Analytics = () => {
                 <Card className="p-6">
                     <div className="flex items-start justify-between mb-6">
                         <div>
-                            <p className="text-sm text-gray-600">Overall Health Status</p>
+                            <p className="text-sm text-gray-600 dark:text-[#9399b2]">Overall Health Status</p>
                         </div>
                         <Badge
                             variant={
@@ -135,40 +138,40 @@ const Analytics = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-gray-600">Consistency</span>
+                                <span className="text-sm font-medium text-gray-600 dark:text-[#9399b2]">Consistency</span>
                                 <span className="text-sm font-bold text-green-600">Excellent</span>
                             </div>
                             <ProgressBar progress={85} color="green" size="md" />
-                            <p className="text-xs text-gray-500 mt-2">Regular daily practice detected</p>
+                            <p className="text-xs text-gray-500 dark:text-[#7f849c] mt-2">Regular daily practice detected</p>
                         </div>
 
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-gray-600">Intensity</span>
+                                <span className="text-sm font-medium text-gray-600 dark:text-[#9399b2]">Intensity</span>
                                 <span className="text-sm font-bold text-indigo-600">Balanced</span>
                             </div>
                             <ProgressBar progress={65} color="indigo" size="md" />
-                            <p className="text-xs text-gray-500 mt-2">Good balance between rest and practice</p>
+                            <p className="text-xs text-gray-500 dark:text-[#7f849c] mt-2">Good balance between rest and practice</p>
                         </div>
 
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-gray-600">Recovery</span>
+                                <span className="text-sm font-medium text-gray-600 dark:text-[#9399b2]">Recovery</span>
                                 <span className="text-sm font-bold text-blue-600">Good</span>
                             </div>
                             <ProgressBar progress={75} color="blue" size="md" />
-                            <p className="text-xs text-gray-500 mt-2">Taking adequate breaks</p>
+                            <p className="text-xs text-gray-500 dark:text-[#7f849c] mt-2">Taking adequate breaks</p>
                         </div>
                     </div>
 
-                    <div className="mt-6 p-4 bg-green-50 rounded-xl">
+                    <div className="mt-6 p-4 bg-green-50 dark:bg-green-500/10 rounded-xl">
                         <div className="flex items-start space-x-3">
-                            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Award className="w-5 h-5 text-green-600" />
+                            <div className="w-8 h-8 bg-green-100 dark:bg-green-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Award className="w-5 h-5 text-green-600 dark:text-green-400" />
                             </div>
                             <div>
-                                <h4 className="text-sm font-semibold text-green-900 mb-1">Great Job!</h4>
-                                <p className="text-sm text-green-700">
+                                <h4 className="text-sm font-semibold text-green-900 dark:text-green-300 mb-1">Great Job!</h4>
+                                <p className="text-sm text-green-700 dark:text-green-400">
                                     Your learning habits are sustainable and healthy. Keep maintaining this excellent balance between practice and rest.
                                 </p>
                             </div>
@@ -198,12 +201,12 @@ const Analytics = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Card className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-                                <Clock className="w-6 h-6 text-indigo-600" />
+                            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/15 rounded-xl flex items-center justify-center">
+                                <Clock className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                             </div>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">{Math.round(stats.totalMinutes / 60)}h</h3>
-                        <p className="text-sm text-gray-600 mb-3">Total Learning Time</p>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{Math.round(stats.totalMinutes / 60)}h</h3>
+                        <p className="text-sm text-gray-600 dark:text-[#9399b2] mb-3">Total Learning Time</p>
                         <div className="flex items-center text-xs text-green-600 font-medium">
                             <TrendingUp className="w-3 h-3 mr-1" />
                             <span>+15% from last month</span>
@@ -212,27 +215,27 @@ const Analytics = () => {
 
                     <Card className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <TrendingUp className="w-6 h-6 text-blue-600" />
+                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/15 rounded-xl flex items-center justify-center">
+                                <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                             </div>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.avgSessionMinutes}m</h3>
-                        <p className="text-sm text-gray-600 mb-3">Avg Session Length</p>
-                        <div className="flex items-center text-xs text-gray-600 font-medium">
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{stats.avgSessionMinutes}m</h3>
+                        <p className="text-sm text-gray-600 dark:text-[#9399b2] mb-3">Avg Session Length</p>
+                        <div className="flex items-center text-xs text-gray-600 dark:text-[#9399b2] font-medium">
                             <span>Optimal range: 45-90m</span>
                         </div>
                     </Card>
 
                     <Card className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                                <Calendar className="w-6 h-6 text-purple-600" />
+                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/15 rounded-xl flex items-center justify-center">
+                                <Calendar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                             </div>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">
                             {stats.totalSessions}
                         </h3>
-                        <p className="text-sm text-gray-600 mb-3">Total Sessions</p>
+                        <p className="text-sm text-gray-600 dark:text-[#9399b2] mb-3">Total Sessions</p>
                         <div className="flex items-center text-xs text-green-600 font-medium">
                             <TrendingUp className="w-3 h-3 mr-1" />
                             <span>Great consistency!</span>
@@ -245,37 +248,37 @@ const Analytics = () => {
             <Section title="Insights & Recommendations">
                 <Card className="p-6">
                     <div className="space-y-4">
-                        <div className="flex items-start space-x-4 p-4 bg-indigo-50 rounded-xl">
-                            <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <TrendingUp className="w-5 h-5 text-indigo-600" />
+                        <div className="flex items-start space-x-4 p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                            <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-sm font-semibold text-indigo-900 mb-1">Strong Momentum</h4>
-                                <p className="text-sm text-indigo-700">
+                                <h4 className="text-sm font-semibold text-indigo-900 dark:text-indigo-300 mb-1">Strong Momentum</h4>
+                                <p className="text-sm text-indigo-700 dark:text-indigo-400">
                                     You're on a 12-day streak! This consistent practice is building great habits.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-start space-x-4 p-4 bg-blue-50 rounded-xl">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Target className="w-5 h-5 text-blue-600" />
+                        <div className="flex items-start space-x-4 p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl">
+                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-sm font-semibold text-blue-900 mb-1">Goal Progress</h4>
-                                <p className="text-sm text-blue-700">
+                                <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">Goal Progress</h4>
+                                <p className="text-sm text-blue-700 dark:text-blue-400">
                                     You're 52% towards your "Master React Ecosystem" goal. Keep it up!
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-start space-x-4 p-4 bg-yellow-50 rounded-xl">
-                            <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Calendar className="w-5 h-5 text-yellow-600" />
+                        <div className="flex items-start space-x-4 p-4 bg-yellow-50 dark:bg-yellow-500/10 rounded-xl">
+                            <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Calendar className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-sm font-semibold text-yellow-900 mb-1">Peak Learning Times</h4>
-                                <p className="text-sm text-yellow-700">
+                                <h4 className="text-sm font-semibold text-yellow-900 dark:text-yellow-300 mb-1">Peak Learning Times</h4>
+                                <p className="text-sm text-yellow-700 dark:text-yellow-400">
                                     Your most productive learning happens on weekends. Consider scheduling key topics then.
                                 </p>
                             </div>

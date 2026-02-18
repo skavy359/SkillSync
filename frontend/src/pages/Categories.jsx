@@ -11,11 +11,12 @@ import {
     ArrowRight
 } from 'lucide-react';
 import { useEffect, useState } from "react";
-// import { fetchCategories, fetchCategoryAnalytics } from "../services/categoryService";
+import { getAllCategories, getCategoryAnalytics } from "../services/categoryService";
 
 const Categories = () => {
     const [categories, setCategories] = useState([]);
     const [analytics, setAnalytics] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const categoriesWithStats = categories.map(cat => {
         const stat = analytics.find(a => a.categoryId === cat.id);
@@ -28,10 +29,16 @@ const Categories = () => {
     });
 
     useEffect(() => {
-        fetchCategories().then(setCategories);
-        fetchCategoryAnalytics().then(setAnalytics);
+        Promise.all([
+            getAllCategories().catch(() => []),
+            getCategoryAnalytics().catch(() => [])
+        ]).then(([cats, stats]) => {
+            setCategories(Array.isArray(cats) ? cats : []);
+            setAnalytics(Array.isArray(stats) ? stats : []);
+        }).finally(() => setLoading(false));
     }, []);
 
+    const colorMap = ['indigo', 'blue', 'purple', 'yellow', 'green'];
 
     const colorClasses = {
         indigo: {
@@ -64,8 +71,8 @@ const Categories = () => {
     const totalSkills = categoriesWithStats.reduce((sum, cat) => sum + cat.skillCount, 0);
     const totalHours = categoriesWithStats.reduce((sum, cat) => sum + cat.totalMinutes, 0) / 60;
 
-    if (!categories.length) {
-        return <div className="p-8 text-gray-500">Loading categories...</div>;
+    if (loading) {
+        return <div className="p-8 text-gray-500 dark:text-[#7f849c]">Loading categories...</div>;
     }
 
     return (
@@ -82,40 +89,40 @@ const Categories = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-                            <FolderKanban className="w-6 h-6 text-indigo-600" />
+                        <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/15 rounded-xl flex items-center justify-center">
+                            <FolderKanban className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{categoriesWithStats.length}</h3>
-                    <p className="text-sm text-gray-600">Total Categories</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{categoriesWithStats.length}</h3>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Total Categories</p>
                 </Card>
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                            <Lightbulb className="w-6 h-6 text-blue-600" />
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/15 rounded-xl flex items-center justify-center">
+                            <Lightbulb className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{totalSkills}</h3>
-                    <p className="text-sm text-gray-600">Skills Across Categories</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{totalSkills}</h3>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Skills Across Categories</p>
                 </Card>
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-green-600" />
+                        <div className="w-12 h-12 bg-green-100 dark:bg-green-500/15 rounded-xl flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-green-600 dark:text-green-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{Math.round(totalHours)}h</h3>
-                    <p className="text-sm text-gray-600">Total Learning Time</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{Math.round(totalHours)}h</h3>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Total Learning Time</p>
                 </Card>
             </div>
 
             {/* Categories Grid */}
             {categoriesWithStats.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {categoriesWithStats.map((category) => {
-                        const colors = colorClasses[category.color];
+                    {categoriesWithStats.map((category, index) => {
+                        const colors = colorClasses[category.color] || colorClasses[colorMap[index % colorMap.length]];
                         const hours = Math.round(category.totalMinutes / 60);
 
                         return (
@@ -131,42 +138,42 @@ const Categories = () => {
                                         </div>
 
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-1">
                                                 {category.name}
                                             </h3>
-                                            <p className="text-sm text-gray-600 mb-3">
+                                            <p className="text-sm text-gray-600 dark:text-[#9399b2] mb-3">
                                                 {category.description}
                                             </p>
 
                                             <div className="flex items-center space-x-4">
-                                                <div className="flex items-center text-sm text-gray-700">
-                                                    <Lightbulb className="w-4 h-4 mr-1.5 text-gray-400" />
+                                                <div className="flex items-center text-sm text-gray-700 dark:text-[#a6adc8]">
+                                                    <Lightbulb className="w-4 h-4 mr-1.5 text-gray-400 dark:text-[#6c7086]" />
                                                     <span className="font-medium">{category.skillCount}</span>
-                                                    <span className="ml-1 text-gray-500">skills</span>
+                                                    <span className="ml-1 text-gray-500 dark:text-[#7f849c]">skills</span>
                                                 </div>
-                                                <div className="flex items-center text-sm text-gray-700">
-                                                    <Clock className="w-4 h-4 mr-1.5 text-gray-400" />
+                                                <div className="flex items-center text-sm text-gray-700 dark:text-[#a6adc8]">
+                                                    <Clock className="w-4 h-4 mr-1.5 text-gray-400 dark:text-[#6c7086]" />
                                                     <span className="font-medium">{hours}</span>
-                                                    <span className="ml-1 text-gray-500">hours</span>
+                                                    <span className="ml-1 text-gray-500 dark:text-[#7f849c]">hours</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                        <ArrowRight className="w-5 h-5 text-gray-400" />
+                                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-[#272739] rounded-lg transition-colors">
+                                        <ArrowRight className="w-5 h-5 text-gray-400 dark:text-[#6c7086]" />
                                     </button>
                                 </div>
 
                                 {/* Progress Bar */}
-                                <div className="mt-4 pt-4 border-t border-gray-100">
+                                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#272739]">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-medium text-gray-600">Activity</span>
+                                        <span className="text-xs font-medium text-gray-600 dark:text-[#9399b2]">Activity</span>
                                         <Badge variant={colors.badge} size="sm">
                                             {category.skillCount > 3 ? 'High' : category.skillCount > 1 ? 'Medium' : 'Low'}
                                         </Badge>
                                     </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2">
+                                    <div className="w-full bg-gray-100 dark:bg-[#313244] rounded-full h-2">
                                         <div
                                             className={`h-2 rounded-full ${colors.bg.replace('100', '500')}`}
                                             style={{ width: `${Math.min((category.skillCount / 5) * 100, 100)}%` }}

@@ -21,12 +21,16 @@ public class JwtUtil {
     }
 
     public String generateToken(Long userId, String email, String role) {
+        return generateToken(userId, email, role, expiration);
+    }
+
+    public String generateToken(Long userId, String email, String role, long customExpiration) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("userId", userId)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + customExpiration))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }

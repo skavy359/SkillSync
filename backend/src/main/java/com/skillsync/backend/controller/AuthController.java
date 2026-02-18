@@ -44,4 +44,12 @@ public class AuthController {
                         userResponse
                 ));
     }
+
+    @GetMapping("/platform-stats")
+    public ResponseEntity<ApiResponse<PlatformStatsResponse>> getPlatformStats() {
+        PlatformStatsResponse stats = userService.getPlatformStats();
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Platform stats fetched", stats)
+        );
+    }
 }

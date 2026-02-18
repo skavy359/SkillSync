@@ -5,9 +5,9 @@ import ProgressBar from './ui/ProgressBar';
 import { Clock, Calendar } from 'lucide-react';
 
 const SkillCard = ({
-                       skill,
-                       onClick
-                   }) => {
+    skill,
+    onClick
+}) => {
     const levelColors = {
         Beginner: 'success',
         Intermediate: 'warning',
@@ -25,7 +25,7 @@ const SkillCard = ({
         <Card hover onClick={onClick} className="p-5">
             <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-1">
                         {skill.name}
                     </h3>
                     <div className="flex items-center space-x-2">
@@ -41,28 +41,28 @@ const SkillCard = ({
 
             <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Progress</span>
-                    <span className="text-sm font-medium text-gray-900">{skill.progress}%</span>
+                    <span className="text-sm text-gray-600 dark:text-[#9399b2]">Progress</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">{skill.progress}%</span>
                 </div>
                 <ProgressBar progress={skill.progress} size="md" />
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[#272739]">
+                <div className="flex items-center text-sm text-gray-500 dark:text-[#7f849c]">
                     <Clock className="w-4 h-4 mr-1.5" />
                     <span>{skill.totalHours}h logged</span>
                 </div>
-                <div className="flex items-center text-sm text-gray-500">
+                <div className="flex items-center text-sm text-gray-500 dark:text-[#7f849c]">
                     <Calendar className="w-4 h-4 mr-1.5" />
                     <span>{skill.lastPracticed}</span>
                 </div>
             </div>
 
             {skill.category && (
-                <div className="mt-3 pt-3 border-t border-gray-100">
-          <span className="inline-flex items-center text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
-            {skill.category}
-          </span>
+                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#272739]">
+                    <span className="inline-flex items-center text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/15 px-2 py-1 rounded-md">
+                        {skill.category}
+                    </span>
                 </div>
             )}
         </Card>

@@ -22,7 +22,7 @@ import {
     Trash2
 } from 'lucide-react';
 import { useEffect } from "react";
-// import { fetchGoals, createGoal, deleteGoal } from "../services/goalService";
+import { getMyGoals, createGoal, getGoalAnalytics } from "../services/goalService";
 
 const Goals = () => {
     const [goals, setGoals] = useState([]);
@@ -36,7 +36,25 @@ const Goals = () => {
     });
 
     useEffect(() => {
-        fetchGoals().then(setGoals);
+        Promise.all([getMyGoals(), getGoalAnalytics().catch(() => [])])
+            .then(([goalsData, analyticsData]) => {
+                const analytics = Array.isArray(analyticsData) ? analyticsData : [];
+                const mapped = (Array.isArray(goalsData) ? goalsData : []).map(g => {
+                    const a = analytics.find(an => an.goalId === g.id);
+                    return {
+                        ...g,
+                        title: g.skillName || 'Untitled Goal',
+                        description: `Target: ${g.targetDate || 'No date'}`,
+                        targetHours: 100,
+                        currentHours: a ? a.progress : 0,
+                        status: a && a.progress >= 100 ? 'completed' : 'in_progress',
+                        priority: a ? (a.riskLevel === 'HIGH' ? 'high' : a.riskLevel === 'MEDIUM' ? 'medium' : 'low') : 'medium',
+                        deadline: g.targetDate,
+                    };
+                });
+                setGoals(mapped);
+            })
+            .catch(() => { });
     }, []);
 
     const priorityColors = {
@@ -98,32 +116,32 @@ const Goals = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-                            <Target className="w-6 h-6 text-indigo-600" />
+                        <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/15 rounded-xl flex items-center justify-center">
+                            <Target className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{activeGoals.length}</h3>
-                    <p className="text-sm text-gray-600">Active Goals</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{activeGoals.length}</h3>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Active Goals</p>
                 </Card>
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                            <TrendingUp className="w-6 h-6 text-green-600" />
+                        <div className="w-12 h-12 bg-green-100 dark:bg-green-500/15 rounded-xl flex items-center justify-center">
+                            <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{overallProgress}%</h3>
-                    <p className="text-sm text-gray-600">Overall Progress</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{overallProgress}%</h3>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Overall Progress</p>
                 </Card>
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-blue-600" />
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/15 rounded-xl flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{totalCurrentHours}h</h3>
-                    <p className="text-sm text-gray-600">of {totalTargetHours}h target</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{totalCurrentHours}h</h3>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">of {totalTargetHours}h target</p>
                 </Card>
             </div>
 
@@ -144,7 +162,7 @@ const Goals = () => {
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex-1">
                                             <div className="flex items-center space-x-3 mb-2">
-                                                <h3 className="text-lg font-semibold text-gray-900">
+                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4]">
                                                     {goal.title}
                                                 </h3>
                                                 <Badge variant={priorityColors[goal.priority]} size="sm">
@@ -154,37 +172,36 @@ const Goals = () => {
                                                     {goal.status.replace('_', ' ').toUpperCase()}
                                                 </Badge>
                                             </div>
-                                            <p className="text-sm text-gray-600 mb-4">{goal.description}</p>
+                                            <p className="text-sm text-gray-600 dark:text-[#9399b2] mb-4">{goal.description}</p>
 
                                             <div className="flex items-center space-x-6 text-sm">
-                                                <div className="flex items-center text-gray-700">
-                                                    <Clock className="w-4 h-4 mr-1.5 text-gray-400" />
+                                                <div className="flex items-center text-gray-700 dark:text-[#a6adc8]">
+                                                    <Clock className="w-4 h-4 mr-1.5 text-gray-400 dark:text-[#6c7086]" />
                                                     <span className="font-medium">{goal.currentHours}</span>
-                                                    <span className="text-gray-500 mx-1">/</span>
-                                                    <span className="text-gray-500">{goal.targetHours}h</span>
+                                                    <span className="text-gray-500 dark:text-[#7f849c] mx-1">/</span>
+                                                    <span className="text-gray-500 dark:text-[#7f849c]">{goal.targetHours}h</span>
                                                 </div>
-                                                <div className="flex items-center text-gray-700">
-                                                    <Calendar className="w-4 h-4 mr-1.5 text-gray-400" />
-                                                    <span className="text-gray-500">Due: {goal.deadline}</span>
+                                                <div className="flex items-center text-gray-700 dark:text-[#a6adc8]">
+                                                    <Calendar className="w-4 h-4 mr-1.5 text-gray-400 dark:text-[#6c7086]" />
+                                                    <span className="text-gray-500 dark:text-[#7f849c]">Due: {goal.deadline}</span>
                                                     {daysUntilDeadline > 0 && (
                                                         <span className="ml-2 text-xs font-medium text-indigo-600">
-                              ({daysUntilDeadline} days left)
-                            </span>
+                                                            ({daysUntilDeadline} days left)
+                                                        </span>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="flex items-center space-x-2 ml-4">
-                                            <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                                            <button className="p-2 text-gray-400 dark:text-[#6c7086] hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/15 rounded-lg transition-all">
                                                 <Edit className="w-4 h-4" />
                                             </button>
                                             <button
-                                                onClick={async () => {
-                                                    await deleteGoal(goal.id);
+                                                onClick={() => {
                                                     setGoals(prev => prev.filter(g => g.id !== goal.id));
                                                 }}
-                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                className="p-2 text-gray-400 dark:text-[#6c7086] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/15 rounded-lg transition-all"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -194,8 +211,8 @@ const Goals = () => {
                                     {/* Progress Bar */}
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-sm font-medium text-gray-600">Progress</span>
-                                            <span className="text-sm font-bold text-gray-900">{progress}%</span>
+                                            <span className="text-sm font-medium text-gray-600 dark:text-[#9399b2]">Progress</span>
+                                            <span className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4]">{progress}%</span>
                                         </div>
                                         <ProgressBar
                                             progress={progress}
@@ -206,20 +223,20 @@ const Goals = () => {
 
                                     {/* Milestone Indicator */}
                                     {progress >= 50 && progress < 100 && (
-                                        <div className="mt-4 p-3 bg-indigo-50 rounded-lg flex items-center space-x-2">
-                                            <Flag className="w-4 h-4 text-indigo-600" />
-                                            <span className="text-sm font-medium text-indigo-900">
-                        Halfway there! Keep up the great work!
-                      </span>
+                                        <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-500/15 rounded-lg flex items-center space-x-2">
+                                            <Flag className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                            <span className="text-sm font-medium text-indigo-900 dark:text-indigo-300">
+                                                Halfway there! Keep up the great work!
+                                            </span>
                                         </div>
                                     )}
 
                                     {progress >= 100 && (
-                                        <div className="mt-4 p-3 bg-green-50 rounded-lg flex items-center space-x-2">
-                                            <Target className="w-4 h-4 text-green-600" />
-                                            <span className="text-sm font-medium text-green-900">
-                        🎉 Goal completed! Amazing work!
-                      </span>
+                                        <div className="mt-4 p-3 bg-green-50 dark:bg-green-500/15 rounded-lg flex items-center space-x-2">
+                                            <Target className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                            <span className="text-sm font-medium text-green-900 dark:text-green-300">
+                                                🎉 Goal completed! Amazing work!
+                                            </span>
                                         </div>
                                     )}
                                 </Card>

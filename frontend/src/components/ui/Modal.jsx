@@ -3,13 +3,13 @@ import { X } from 'lucide-react';
 import Button from './Button';
 
 const Modal = ({
-                   isOpen,
-                   onClose,
-                   title,
-                   children,
-                   footer,
-                   size = 'md'
-               }) => {
+    isOpen,
+    onClose,
+    title,
+    children,
+    footer,
+    size = 'md'
+}) => {
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -43,18 +43,18 @@ const Modal = ({
             <div className="flex min-h-full items-center justify-center p-4">
                 <div
                     className={`
-            relative bg-white rounded-2xl shadow-xl
+            relative bg-white dark:bg-[#1e1e2e] rounded-2xl shadow-xl
             w-full ${sizes[size]}
             transform transition-all
           `}
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-[#313244]">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-[#cdd6f4]">{title}</h2>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg"
+                            className="text-gray-400 hover:text-gray-600 dark:hover:text-[#cdd6f4] transition-colors p-1 hover:bg-gray-100 dark:hover:bg-[#313244] rounded-lg"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -67,7 +67,7 @@ const Modal = ({
 
                     {/* Footer */}
                     {footer && (
-                        <div className="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+                        <div className="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-[#313244] bg-gray-50 dark:bg-[#181825] rounded-b-2xl">
                             {footer}
                         </div>
                     )}

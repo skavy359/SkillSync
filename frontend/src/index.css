@@ -1,1 +1,62 @@
 @import "tailwindcss";
+
+/* Tell Tailwind v4 that dark: should use the .dark class on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Smooth theme transitions ─────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+}
+
+/* ── Dark mode root ───────────────────────────────────────────────────── */
+html.dark {
+    color-scheme: dark;
+}
+
+html.dark body {
+    background-color: #11111b;
+    color: #cdd6f4;
+}
+
+/* ── Form elements ────────────────────────────────────────────────────── */
+html.dark input,
+html.dark textarea,
+html.dark select {
+    background-color: #181825;
+    border-color: #313244;
+    color: #cdd6f4;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #6c7086;
+}
+
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+    border-color: #6366f1;
+    outline-color: #6366f1;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────── */
+html.dark ::-webkit-scrollbar {
+    width: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+    background: #181825;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background: #45475a;
+    border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #585b70;
+}

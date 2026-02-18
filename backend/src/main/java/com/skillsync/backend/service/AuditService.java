@@ -9,23 +9,13 @@ import org.springframework.stereotype.Service;
 public class AuditService {
 
     private final AuditLogRepository auditLogRepository;
+
     public AuditService(AuditLogRepository auditLogRepository) {
         this.auditLogRepository = auditLogRepository;
     }
 
-    public void log(
-            User user,
-            String action,
-            String entityType,
-            Long entityId
-    ) {
-        auditLogRepository.save(
-                new AuditLog(
-                        user,
-                        action,
-                        entityType,
-                        entityId
-                )
-        );
+    public void log(User user, String action, String entityType, Long entityId) {
+        AuditLog log = new AuditLog(user, action, entityType, entityId);
+        auditLogRepository.save(log);
     }
 }

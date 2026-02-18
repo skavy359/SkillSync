@@ -1,12 +1,82 @@
-import React, { useState } from 'react';
-import { Lightbulb, Eye, EyeOff, ArrowRight, Github, Chrome } from 'lucide-react';
-import {loginUser} from "../services/authService.js";
+import React, { useState, useEffect } from 'react';
+import { Lightbulb, Eye, EyeOff, ArrowRight, Quote } from 'lucide-react';
+import { loginUser } from "../services/authService.js";
+import api from "../services/api.js";
+
+const testimonials = [
+    {
+        text: "SkillSync completely changed how I approach learning. I went from inconsistent to clocking 20+ hours a week without feeling burned out.",
+        name: "Sarah M.",
+        role: "Full-Stack Developer",
+        initials: "SM",
+        gradient: "from-yellow-400 to-orange-500"
+    },
+    {
+        text: "The streak tracking feature is incredibly motivating. I've maintained a 45-day learning streak and my coding skills have skyrocketed.",
+        name: "Arjun K.",
+        role: "Data Scientist",
+        initials: "AK",
+        gradient: "from-cyan-400 to-blue-500"
+    },
+    {
+        text: "I love how SkillSync breaks down my learning into manageable sessions. The burnout risk feature saved me from overworking multiple times.",
+        name: "Emily R.",
+        role: "UX Designer",
+        initials: "ER",
+        gradient: "from-pink-400 to-rose-500"
+    },
+    {
+        text: "As a self-taught developer, SkillSync gave me the structure I was missing. The analytics helped me understand my learning patterns.",
+        name: "James L.",
+        role: "Frontend Engineer",
+        initials: "JL",
+        gradient: "from-green-400 to-emerald-500"
+    },
+    {
+        text: "The recommendations engine is spot-on. It always knows exactly which skill I should focus on next to maximize my growth.",
+        name: "Priya S.",
+        role: "ML Engineer",
+        initials: "PS",
+        gradient: "from-violet-400 to-purple-500"
+    },
+    {
+        text: "SkillSync's category analytics helped our team track learning across different domains. It's become essential for our growth plans.",
+        name: "Michael T.",
+        role: "Engineering Manager",
+        initials: "MT",
+        gradient: "from-amber-400 to-red-500"
+    }
+];
 
 const Login = ({ onNavigate, onLogin }) => {
     const [form, setForm] = useState({ email: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [platformStats, setPlatformStats] = useState(null);
+    const [activeTestimonial, setActiveTestimonial] = useState(0);
+    const [rememberMe, setRememberMe] = useState(false);
+
+    // Fetch platform stats on mount
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const { data } = await api.get('/auth/platform-stats');
+                setPlatformStats(data.data);
+            } catch (err) {
+                console.error('Failed to fetch platform stats:', err);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    // Auto-rotate testimonials every 4 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, []);
 
     const validate = () => {
         const newErrors = {};
@@ -30,21 +100,20 @@ const Login = ({ onNavigate, onLogin }) => {
         setLoading(true);
 
         try {
-            const res = await loginUser(form.email, form.password);
+            const res = await loginUser(form.email, form.password, rememberMe);
 
             if (res.success) {
-                const { token, id, name, email } = res.data;
+                const { token, id, name, email, role } = res.data;
 
                 // Store token
                 localStorage.setItem('token', token);
 
-                // Decode role from JWT or fetch from /profile
-                // For now, pass user data to App
+                // Pass user data (including role from backend) to App
                 onLogin && onLogin({
                     id,
                     name,
                     email,
-                    role: 'USER' // You need to either include role in LoginResponse or fetch it
+                    role
                 });
             } else {
                 setErrors({ password: 'Invalid credentials' });
@@ -57,11 +126,22 @@ const Login = ({ onNavigate, onLogin }) => {
         }
     };
 
-    const stats = [
-        { value: '12K+', label: 'Active Learners' },
-        { value: '340K+', label: 'Sessions Logged' },
-        { value: '98%', label: 'Streak Success' },
-    ];
+    const formatStat = (num) => {
+        if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K+`;
+        return `${num}+`;
+    };
+
+    const stats = platformStats
+        ? [
+            { value: formatStat(platformStats.totalUsers), label: 'Active Learners' },
+            { value: formatStat(platformStats.totalSessions), label: 'Sessions Logged' },
+            { value: formatStat(platformStats.totalSkills), label: 'Skills Tracked' },
+        ]
+        : [
+            { value: '—', label: 'Active Learners' },
+            { value: '—', label: 'Sessions Logged' },
+            { value: '—', label: 'Skills Tracked' },
+        ];
 
     return (
         <div className="min-h-screen flex bg-gray-50">
@@ -113,18 +193,36 @@ const Login = ({ onNavigate, onLogin }) => {
                         ))}
                     </div>
 
-                    {/* Testimonial Card */}
-                    <div className="bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-2xl p-6">
-                        <p className="text-white text-sm leading-relaxed mb-4">
-                            "SkillSync completely changed how I approach learning. I went from inconsistent to clocking 20+ hours a week without feeling burned out."
-                        </p>
-                        <div className="flex items-center space-x-3">
-                            <div className="w-9 h-9 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                SM
-                            </div>
-                            <div>
-                                <div className="text-white text-sm font-semibold">Sarah M.</div>
-                                <div className="text-indigo-300 text-xs">Full-Stack Developer</div>
+                    {/* Auto-rotating Testimonials */}
+                    <div className="relative">
+                        <div className="bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-2xl p-6 min-h-[160px] transition-all duration-500">
+                            <Quote className="w-5 h-5 text-indigo-300 opacity-50 mb-2" />
+                            <p className="text-white text-sm leading-relaxed mb-4 transition-opacity duration-500" key={activeTestimonial}>
+                                "{testimonials[activeTestimonial].text}"
+                            </p>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <div className={`w-9 h-9 bg-gradient-to-br ${testimonials[activeTestimonial].gradient} rounded-full flex items-center justify-center text-white text-sm font-bold`}>
+                                        {testimonials[activeTestimonial].initials}
+                                    </div>
+                                    <div>
+                                        <div className="text-white text-sm font-semibold">{testimonials[activeTestimonial].name}</div>
+                                        <div className="text-indigo-300 text-xs">{testimonials[activeTestimonial].role}</div>
+                                    </div>
+                                </div>
+                                {/* Dot indicators */}
+                                <div className="flex items-center space-x-1.5">
+                                    {testimonials.map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setActiveTestimonial(i)}
+                                            className={`rounded-full transition-all duration-300 ${i === activeTestimonial
+                                                ? 'w-6 h-2 bg-white'
+                                                : 'w-2 h-2 bg-white bg-opacity-30 hover:bg-opacity-50'
+                                                }`}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -153,25 +251,6 @@ const Login = ({ onNavigate, onLogin }) => {
                         <p className="text-gray-500">Sign in to continue your learning journey</p>
                     </div>
 
-                    {/* OAuth Buttons */}
-                    <div className="space-y-3 mb-6">
-                        <button className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all">
-                            <Chrome className="w-5 h-5 text-red-500" />
-                            <span>Continue with Google</span>
-                        </button>
-                        <button className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all">
-                            <Github className="w-5 h-5 text-gray-800" />
-                            <span>Continue with GitHub</span>
-                        </button>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="flex items-center space-x-4 mb-6">
-                        <div className="flex-1 h-px bg-gray-200" />
-                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">or</span>
-                        <div className="flex-1 h-px bg-gray-200" />
-                    </div>
-
                     {/* Email & Password Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Email */}
@@ -187,9 +266,8 @@ const Login = ({ onNavigate, onLogin }) => {
                                     if (errors.email) setErrors({ ...errors, email: '' });
                                 }}
                                 placeholder="john@example.com"
-                                className={`w-full px-4 py-3 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                                    errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                                }`}
+                                className={`w-full px-4 py-3 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                                    }`}
                             />
                             {errors.email && (
                                 <p className="mt-1.5 text-xs text-red-600">{errors.email}</p>
@@ -198,17 +276,9 @@ const Login = ({ onNavigate, onLogin }) => {
 
                         {/* Password */}
                         <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Password
-                                </label>
-                                <button
-                                    type="button"
-                                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
-                                >
-                                    Forgot password?
-                                </button>
-                            </div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Password
+                            </label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -218,9 +288,8 @@ const Login = ({ onNavigate, onLogin }) => {
                                         if (errors.password) setErrors({ ...errors, password: '' });
                                     }}
                                     placeholder="Enter your password"
-                                    className={`w-full px-4 py-3 pr-12 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                                        errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                                    }`}
+                                    className={`w-full px-4 py-3 pr-12 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                                        }`}
                                 />
                                 <button
                                     type="button"
@@ -240,10 +309,12 @@ const Login = ({ onNavigate, onLogin }) => {
                             <input
                                 id="remember"
                                 type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
                                 className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
                             />
                             <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer select-none">
-                                Keep me signed in for 30 days
+                                Keep me signed in for 5 days
                             </label>
                         </div>
 

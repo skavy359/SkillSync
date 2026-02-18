@@ -2,14 +2,16 @@ package com.skillsync.backend.dto.stats;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
 public class AdminStatsResponse {
-    private long totalUsers;
-    private long totalSkills;
-    private long activeSkills;
-    private long completedSkills;
-    private long adminCount;
-    private long userCount;
+    private Long totalUsers;
+    private Long totalSkills;
+    private Long totalSessions;
+    private Long activeUsers;
 }

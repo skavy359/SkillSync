@@ -33,9 +33,12 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Token expired / invalid — clear and redirect to login
-            localStorage.removeItem('token');
-            window.location.href = '/login';
+            const requestUrl = error.config?.url || '';
+            // Don't redirect on auth endpoints — let the login page handle its own errors
+            if (!requestUrl.includes('/auth/')) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }

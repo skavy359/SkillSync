@@ -1,12 +1,12 @@
 import React from 'react';
 
 const ProgressBar = ({
-                         progress = 0,
-                         size = 'md',
-                         color = 'indigo',
-                         showLabel = false,
-                         className = ''
-                     }) => {
+    progress = 0,
+    size = 'md',
+    color = 'indigo',
+    showLabel = false,
+    className = ''
+}) => {
     // Ensure progress is between 0 and 100
     const normalizedProgress = Math.min(Math.max(progress, 0), 100);
 
@@ -27,14 +27,14 @@ const ProgressBar = ({
 
     return (
         <div className={className}>
-            <div className={`w-full bg-gray-100 rounded-full overflow-hidden ${sizes[size]}`}>
+            <div className={`w-full bg-gray-100 dark:bg-[#313244] rounded-full overflow-hidden ${sizes[size]}`}>
                 <div
                     className={`${colors[color]} ${sizes[size]} rounded-full transition-all duration-300 ease-out`}
                     style={{ width: `${normalizedProgress}%` }}
                 />
             </div>
             {showLabel && (
-                <div className="mt-1 text-xs text-gray-600 text-right">
+                <div className="mt-1 text-xs text-gray-600 dark:text-[#9399b2] text-right">
                     {normalizedProgress}%
                 </div>
             )}
