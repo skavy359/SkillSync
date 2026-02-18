@@ -1,9 +1,11 @@
-import React from 'react';
-import { Search, Bell, Settings } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Bell, Settings, LogOut, User, ChevronDown } from 'lucide-react';
 
-const Topbar = () => {
+const Topbar = ({ onLogout }) => {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
     return (
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 relative z-20">
             {/* Search Bar */}
             <div className="flex-1 max-w-xl">
                 <div className="relative">
@@ -18,7 +20,7 @@ const Topbar = () => {
 
             {/* Right Section */}
             <div className="flex items-center space-x-3 ml-6">
-                {/* Settings Button */}
+                {/* Settings */}
                 <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all">
                     <Settings className="w-5 h-5" />
                 </button>
@@ -26,22 +28,73 @@ const Topbar = () => {
                 {/* Notifications */}
                 <button className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all">
                     <Bell className="w-5 h-5" />
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-500 rounded-full ring-2 ring-white"></span>
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-500 rounded-full ring-2 ring-white" />
                 </button>
 
                 {/* Divider */}
-                <div className="w-px h-8 bg-gray-200"></div>
+                <div className="w-px h-8 bg-gray-200" />
 
-                {/* User Profile */}
-                <button className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg pl-2 pr-3 py-1.5 transition-all">
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                        JD
-                    </div>
-                    <div className="text-left hidden sm:block">
-                        <p className="text-sm font-medium text-gray-900">John Doe</p>
-                        <p className="text-xs text-gray-500">john@example.com</p>
-                    </div>
-                </button>
+                {/* User Profile Dropdown */}
+                <div className="relative">
+                    <button
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                        className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg pl-2 pr-3 py-1.5 transition-all"
+                    >
+                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            JD
+                        </div>
+                        <div className="text-left hidden sm:block">
+                            <p className="text-sm font-medium text-gray-900">John Doe</p>
+                            <p className="text-xs text-gray-500">john@example.com</p>
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {dropdownOpen && (
+                        <>
+                            {/* Backdrop */}
+                            <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => setDropdownOpen(false)}
+                            />
+
+                            <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden">
+                                {/* User Info */}
+                                <div className="px-4 py-3 border-b border-gray-100">
+                                    <p className="text-sm font-semibold text-gray-900">John Doe</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">john@example.com</p>
+                                </div>
+
+                                {/* Menu Items */}
+                                <div className="p-1.5">
+                                    <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <User className="w-4 h-4 text-gray-400" />
+                                        <span>View Profile</span>
+                                    </button>
+                                    <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <Settings className="w-4 h-4 text-gray-400" />
+                                        <span>Settings</span>
+                                    </button>
+                                </div>
+
+                                {/* Logout */}
+                                <div className="p-1.5 border-t border-gray-100">
+                                    <button
+                                        onClick={() => {
+                                            setDropdownOpen(false);
+                                            onLogout && onLogout();
+                                        }}
+                                        className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        <span>Sign out</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         </header>
     );

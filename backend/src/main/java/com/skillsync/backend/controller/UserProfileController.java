@@ -339,4 +339,22 @@ public class UserProfileController {
                 )
         );
     }
+
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
+        List<CategoryResponse> categories = userService.getAllCategories();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Categories fetched", categories)
+        );
+    }
+
+    @GetMapping("/goals")
+    public ResponseEntity<ApiResponse<List<GoalResponse>>> getMyGoals() {
+        List<GoalResponse> goals = userService.getMyGoals();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Goals fetched", goals)
+        );
+    }
 }

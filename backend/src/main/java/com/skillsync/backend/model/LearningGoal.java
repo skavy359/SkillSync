@@ -2,6 +2,7 @@ package com.skillsync.backend.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDate;
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
 public class LearningGoal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +23,8 @@ public class LearningGoal {
     private Skill skill;
 
     private LocalDate targetDate;
+
+    public LearningGoal() {
+
+    }
 }

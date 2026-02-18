@@ -17,11 +17,29 @@ import {
     Award,
     TrendingUp
 } from 'lucide-react';
-import { userProfile, skills } from '../data/dummyData';
+import { useEffect, useState } from "react";
+// import {
+//     fetchProfile,
+//     fetchProfileStats,
+//     fetchStreak
+// } from "../services/profileService";
+
 
 const Profile = () => {
-    const completedSkills = skills.filter(s => s.status === 'completed').length;
-    const totalSessions = skills.reduce((sum, skill) => sum + skill.sessions.length, 0);
+
+    const [profile, setProfile] = useState(null);
+    const [stats, setStats] = useState(null);
+    const [streak, setStreak] = useState(null);
+
+    useEffect(() => {
+        fetchProfile().then(setProfile);
+        fetchProfileStats().then(setStats);
+        fetchStreak().then(setStreak);
+    }, []);
+
+    if (!profile || !stats || !streak) {
+        return <div className="p-8 text-gray-500">Loading profile...</div>;
+    }
 
     return (
         <div className="space-y-6">
@@ -37,27 +55,27 @@ const Profile = () => {
                     <div className="flex items-start space-x-6">
                         {/* Avatar */}
                         <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold flex-shrink-0 shadow-lg">
-                            {userProfile.avatar}
+                            {profile.name?.charAt(0)}
                         </div>
 
                         {/* Info */}
                         <div className="flex-1">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">{userProfile.name}</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">{profile.name}</h2>
                             <div className="space-y-2 mb-4">
                                 <div className="flex items-center text-gray-600">
                                     <Mail className="w-4 h-4 mr-2" />
-                                    <span className="text-sm">{userProfile.email}</span>
+                                    <span className="text-sm">{profile.email}</span>
                                 </div>
                                 <div className="flex items-center text-gray-600">
                                     <Briefcase className="w-4 h-4 mr-2" />
-                                    <span className="text-sm">{userProfile.role}</span>
+                                    <span className="text-sm">{profile.role || "Learner"}</span>
                                 </div>
                                 <div className="flex items-center text-gray-600">
                                     <Calendar className="w-4 h-4 mr-2" />
                                     <span className="text-sm">
-                    Member since {new Date(userProfile.joinedDate).toLocaleDateString('en-US', {
-                                        month: 'long',
-                                        year: 'numeric'
+                   Member since {new Date(profile.createdAt).toLocaleDateString("en-US", {
+                                        month: "long",
+                                        year: "numeric"
                                     })}
                   </span>
                                 </div>
@@ -91,11 +109,11 @@ const Profile = () => {
                             </div>
                         </div>
                         <h3 className="text-3xl font-bold text-gray-900 mb-1">
-                            {userProfile.stats.totalSkills}
+                            {stats.totalSkills}
                         </h3>
                         <p className="text-sm text-gray-600">Total Skills</p>
                         <div className="mt-2 text-xs text-gray-500">
-                            {completedSkills} completed
+                            {stats.completedSkills} completed
                         </div>
                     </Card>
 
@@ -106,7 +124,7 @@ const Profile = () => {
                             </div>
                         </div>
                         <h3 className="text-3xl font-bold text-gray-900 mb-1">
-                            {totalSessions}
+                            {stats.totalSessions}
                         </h3>
                         <p className="text-sm text-gray-600">Total Sessions</p>
                         <div className="mt-2 text-xs text-green-600 font-medium flex items-center">
@@ -122,7 +140,7 @@ const Profile = () => {
                             </div>
                         </div>
                         <h3 className="text-3xl font-bold text-gray-900 mb-1">
-                            {userProfile.stats.totalHours}h
+                            {Math.round(stats.totalMinutes / 60)}h
                         </h3>
                         <p className="text-sm text-gray-600">Total Hours</p>
                         <div className="mt-2 text-xs text-gray-500">
@@ -137,11 +155,11 @@ const Profile = () => {
                             </div>
                         </div>
                         <h3 className="text-3xl font-bold text-gray-900 mb-1">
-                            {userProfile.stats.currentStreak}
+                            {streak.currentStreak}
                         </h3>
                         <p className="text-sm text-gray-600">Day Streak</p>
                         <div className="mt-2 text-xs text-gray-500">
-                            Longest: {userProfile.stats.longestStreak} days
+                            Longest: {streak.longestStreak} days
                         </div>
                     </Card>
                 </div>

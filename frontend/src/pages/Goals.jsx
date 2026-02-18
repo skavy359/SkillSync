@@ -21,9 +21,11 @@ import {
     Edit,
     Trash2
 } from 'lucide-react';
-import { goals } from '../data/dummyData';
+import { useEffect } from "react";
+// import { fetchGoals, createGoal, deleteGoal } from "../services/goalService";
 
 const Goals = () => {
+    const [goals, setGoals] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [goalForm, setGoalForm] = useState({
         title: '',
@@ -32,6 +34,10 @@ const Goals = () => {
         deadline: '',
         priority: 'medium'
     });
+
+    useEffect(() => {
+        fetchGoals().then(setGoals);
+    }, []);
 
     const priorityColors = {
         high: 'danger',
@@ -45,12 +51,33 @@ const Goals = () => {
         paused: 'default'
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('New goal:', goalForm);
-        setIsModalOpen(false);
-        setGoalForm({ title: '', description: '', targetHours: '', deadline: '', priority: 'medium' });
+
+        try {
+            const newGoal = await createGoal({
+                title: goalForm.title,
+                description: goalForm.description,
+                targetHours: Number(goalForm.targetHours),
+                deadline: goalForm.deadline,
+                priority: goalForm.priority.toUpperCase()
+            });
+
+            setGoals(prev => [newGoal, ...prev]);
+
+            setIsModalOpen(false);
+            setGoalForm({
+                title: '',
+                description: '',
+                targetHours: '',
+                deadline: '',
+                priority: 'medium'
+            });
+        } catch (err) {
+            console.error("Goal creation failed", err);
+        }
     };
+
 
     const activeGoals = goals.filter(g => g.status === 'in_progress');
     const totalTargetHours = goals.reduce((sum, g) => sum + g.targetHours, 0);
@@ -105,7 +132,9 @@ const Goals = () => {
                 <Section>
                     <div className="space-y-4">
                         {goals.map((goal) => {
-                            const progress = Math.round((goal.currentHours / goal.targetHours) * 100);
+                            const progress = goal.targetHours
+                                ? Math.round((goal.currentHours / goal.targetHours) * 100)
+                                : 0;
                             const daysUntilDeadline = Math.ceil(
                                 (new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24)
                             );
@@ -150,7 +179,13 @@ const Goals = () => {
                                             <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
                                                 <Edit className="w-4 h-4" />
                                             </button>
-                                            <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                                            <button
+                                                onClick={async () => {
+                                                    await deleteGoal(goal.id);
+                                                    setGoals(prev => prev.filter(g => g.id !== goal.id));
+                                                }}
+                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                            >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>

@@ -10,9 +10,29 @@ import {
     Plus,
     ArrowRight
 } from 'lucide-react';
-import { categories } from '../data/dummyData';
+import { useEffect, useState } from "react";
+// import { fetchCategories, fetchCategoryAnalytics } from "../services/categoryService";
 
 const Categories = () => {
+    const [categories, setCategories] = useState([]);
+    const [analytics, setAnalytics] = useState([]);
+
+    const categoriesWithStats = categories.map(cat => {
+        const stat = analytics.find(a => a.categoryId === cat.id);
+
+        return {
+            ...cat,
+            skillCount: stat?.skillCount || 0,
+            totalMinutes: stat?.totalMinutes || 0
+        };
+    });
+
+    useEffect(() => {
+        fetchCategories().then(setCategories);
+        fetchCategoryAnalytics().then(setAnalytics);
+    }, []);
+
+
     const colorClasses = {
         indigo: {
             bg: 'bg-indigo-100',
@@ -41,8 +61,12 @@ const Categories = () => {
         }
     };
 
-    const totalSkills = categories.reduce((sum, cat) => sum + cat.skillCount, 0);
-    const totalHours = categories.reduce((sum, cat) => sum + cat.totalMinutes, 0) / 60;
+    const totalSkills = categoriesWithStats.reduce((sum, cat) => sum + cat.skillCount, 0);
+    const totalHours = categoriesWithStats.reduce((sum, cat) => sum + cat.totalMinutes, 0) / 60;
+
+    if (!categories.length) {
+        return <div className="p-8 text-gray-500">Loading categories...</div>;
+    }
 
     return (
         <div className="space-y-6">
@@ -62,7 +86,7 @@ const Categories = () => {
                             <FolderKanban className="w-6 h-6 text-indigo-600" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{categories.length}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{categoriesWithStats.length}</h3>
                     <p className="text-sm text-gray-600">Total Categories</p>
                 </Card>
 
@@ -88,9 +112,9 @@ const Categories = () => {
             </div>
 
             {/* Categories Grid */}
-            {categories.length > 0 ? (
+            {categoriesWithStats.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {categories.map((category) => {
+                    {categoriesWithStats.map((category) => {
                         const colors = colorClasses[category.color];
                         const hours = Math.round(category.totalMinutes / 60);
 

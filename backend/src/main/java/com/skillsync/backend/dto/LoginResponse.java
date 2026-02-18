@@ -1,5 +1,6 @@
 package com.skillsync.backend.dto;
 
+import com.skillsync.backend.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,4 +11,5 @@ public class LoginResponse {
     private Long id;
     private String name;
     private String email;
+    private Role role; // ADD THIS
 }

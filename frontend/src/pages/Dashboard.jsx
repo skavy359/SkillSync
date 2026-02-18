@@ -17,32 +17,40 @@ import {
     ArrowRight,
     Calendar
 } from 'lucide-react';
-import { dashboardStats, skills } from '../data/dummyData';
+import { useEffect, useState } from "react";
+import {
+    fetchDashboardStats,
+    fetchBurnout,
+    fetchRecentSkills,
+} from "../services/dashboardService";
+
 
 const Dashboard = ({ onNavigate, onSelectSkill }) => {
-    const recentSkills = skills.filter(s => s.status === 'active').slice(0, 3);
-    const recentSessions = skills
-        .flatMap(skill =>
-            skill.sessions.map(session => ({ ...session, skillName: skill.name, skillId: skill.id }))
-        )
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 5);
 
-    const weeklyActivityData = [
-        { label: 'Mon', value: 2.5 },
-        { label: 'Tue', value: 3.2 },
-        { label: 'Wed', value: 1.8 },
-        { label: 'Thu', value: 2.9 },
-        { label: 'Fri', value: 3.5 },
-        { label: 'Sat', value: 4.2 },
-        { label: 'Sun', value: 2.8 },
-    ];
+    const [stats, setStats] = useState(null);
+    const [burnout, setBurnout] = useState(null);
+    const [weeklyActivity, setWeeklyActivity] = useState([]);
+    const [recentSkills, setRecentSkills] = useState([]);
+    const [recentSessions, setRecentSessions] = useState([]);
+
+    useEffect(() => {
+        fetchDashboardStats().then(setStats);
+        fetchBurnout().then(setBurnout);
+        // fetchWeeklyActivity().then(setWeeklyActivity);
+        fetchRecentSkills().then(setRecentSkills);
+        // fetchRecentSessions().then(setRecentSessions);
+    }, []);
+
 
     const burnoutColor = {
         low: 'success',
         medium: 'warning',
         high: 'danger'
     };
+
+    if (!stats || !burnout) {
+        return <div className="p-8 text-gray-500">Loading dashboard...</div>;
+    }
 
     return (
         <div className="space-y-6">
@@ -56,7 +64,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     title="Total Skills"
-                    value={dashboardStats.totalSkills}
+                    value={stats.totalSkills}
                     icon={Lightbulb}
                     color="indigo"
                     trend="up"
@@ -64,14 +72,14 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 />
                 <StatCard
                     title="Active Skills"
-                    value={dashboardStats.activeSkills}
+                    value={stats.activeSkills}
                     icon={Zap}
                     color="blue"
                     subtitle="Currently learning"
                 />
                 <StatCard
                     title="Current Streak"
-                    value={`${dashboardStats.currentStreak} days`}
+                    value={`${stats.currentStreak} days`}
                     icon={Flame}
                     color="orange"
                     trend="up"
@@ -79,10 +87,10 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 />
                 <StatCard
                     title="Weekly Minutes"
-                    value={dashboardStats.weeklyMinutes}
+                    value={stats.weeklyMinutes}
                     icon={Clock}
                     color="green"
-                    subtitle={`${dashboardStats.weeklyProgress}/${dashboardStats.weeklyGoal}h goal`}
+                    subtitle={`${stats.weeklyMinutes} min this week`}
                 />
             </div>
 
@@ -95,8 +103,8 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                     <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
                             <h3 className="text-lg font-semibold text-gray-900">You're doing great!</h3>
-                            <Badge variant={burnoutColor[dashboardStats.burnoutRisk]} size="sm">
-                                {dashboardStats.burnoutRisk.toUpperCase()} RISK
+                            <Badge variant={burnoutColor[burnout.riskLevel.toLowerCase()]} size="sm">
+                                {burnout.riskLevel} RISK
                             </Badge>
                         </div>
                         <p className="text-gray-600 mb-3">
@@ -105,7 +113,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                         <div className="flex items-center space-x-4 text-sm">
                             <div className="flex items-center text-gray-700">
                                 <span className="font-medium">Velocity:</span>
-                                <span className="ml-2">{dashboardStats.velocity}</span>
+                                <span className="ml-2">{stats.velocityPerHour?.toFixed(2) || 0} %/h</span>
                             </div>
                             <div className="flex items-center text-gray-700">
                                 <span className="font-medium">Consistency:</span>
@@ -120,7 +128,10 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             <LineChartCard
                 title="Weekly Activity"
                 description="Your practice hours this week"
-                data={weeklyActivityData}
+                data={weeklyActivity.map(d => ({
+                    label: d.sessionDate,
+                    value: d.minutes / 60
+                }))}
                 color="indigo"
                 height={200}
             />
@@ -141,32 +152,32 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                         </Button>
                     }
                 >
-                    <Card className="p-4">
-                        <div className="space-y-4">
-                            {recentSkills.map((skill) => (
-                                <div
-                                    key={skill.id}
-                                    onClick={() => {
-                                        onSelectSkill(skill.id);
-                                        onNavigate('skill-detail');
-                                    }}
-                                    className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
-                                >
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900 mb-1">{skill.name}</h3>
-                                            <div className="flex items-center space-x-2">
-                                                <Badge variant="primary" size="sm">{skill.level}</Badge>
-                                                <span className="text-xs text-gray-500">{skill.category}</span>
-                                            </div>
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-900">{skill.progress}%</span>
-                                    </div>
-                                    <ProgressBar progress={skill.progress} size="sm" />
-                                </div>
-                            ))}
-                        </div>
-                    </Card>
+                    {/*<Card className="p-4">*/}
+                    {/*    <div className="space-y-4">*/}
+                    {/*        {recentSkills.map((skill) => (*/}
+                    {/*            <div*/}
+                    {/*                key={skill.id}*/}
+                    {/*                onClick={() => {*/}
+                    {/*                    onSelectSkill(skill.id);*/}
+                    {/*                    onNavigate('skill-detail');*/}
+                    {/*                }}*/}
+                    {/*                className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"*/}
+                    {/*            >*/}
+                    {/*                <div className="flex items-start justify-between mb-3">*/}
+                    {/*                    <div>*/}
+                    {/*                        <h3 className="font-semibold text-gray-900 mb-1">{skill.name}</h3>*/}
+                    {/*                        <div className="flex items-center space-x-2">*/}
+                    {/*                            <Badge variant="primary" size="sm">{skill.level}</Badge>*/}
+                    {/*                            <span className="text-xs text-gray-500">{skill.level}</span>*/}
+                    {/*                        </div>*/}
+                    {/*                    </div>*/}
+                    {/*                    <span className="text-sm font-medium text-gray-900">{skill.progress}%</span>*/}
+                    {/*                </div>*/}
+                    {/*                <ProgressBar progress={skill.progress} size="sm" />*/}
+                    {/*            </div>*/}
+                    {/*        ))}*/}
+                    {/*    </div>*/}
+                    {/*</Card>*/}
                 </Section>
 
                 {/* Recent Sessions */}
@@ -192,12 +203,12 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between mb-1">
                                             <h4 className="text-sm font-semibold text-gray-900">{session.skillName}</h4>
-                                            <span className="text-sm font-medium text-gray-900">{session.duration}m</span>
+                                            <span className="text-sm font-medium text-gray-900">{session.durationMinutes}m</span>
                                         </div>
                                         <p className="text-xs text-gray-600 mb-1">{session.notes}</p>
                                         <div className="flex items-center text-xs text-gray-500">
                                             <Calendar className="w-3 h-3 mr-1" />
-                                            {session.date}
+                                            {session.sessionDate}
                                         </div>
                                     </div>
                                 </div>

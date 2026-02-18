@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -39,7 +40,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final SkillRepository skillRepository;
     private final LearningSessionRepository learningSessionRepository;
-    private final SkillCategoryRepository  skillCategoryRepository;
+    private final SkillCategoryRepository skillCategoryRepository;
     private final LearningGoalRepository learningGoalRepository;
     private final NotificationService notificationService;
     private final RecommendationHistoryRepository recommendationHistoryRepository;
@@ -124,7 +125,8 @@ public class UserService {
                 token,
                 user.getId(),
                 user.getName(),
-                user.getEmail()
+                user.getEmail(),
+                user.getRole() // ADD THIS
         );
     }
 
@@ -1248,4 +1250,136 @@ public class UserService {
                 updated.getStatus().name()
         );
     }
+
+    public AdminUserResponse adminCreateUser(CreateUserRequest req) {
+
+        User user = new User();
+        user.setName(req.getName());
+        user.setEmail(req.getEmail());
+        user.setPassword(req.getPassword()); // later encode
+        user.setRole(req.getRole());
+
+        userRepository.save(user);
+
+        return mapToAdminUserResponse(user);
+    }
+
+    public void adminDeleteUser(Long userId) {
+        userRepository.deleteById(userId);
+    }
+
+    public SkillResponse adminAddSkill(Long userId, AddSkillRequest req) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        SkillCategory category = skillCategoryRepository.findById(req.getCategoryId())
+                .orElse(null);
+
+        Skill skill = new Skill();
+        skill.setName(req.getName());
+        skill.setLevel(SkillLevel.valueOf(String.valueOf(req.getLevel())));
+        skill.setProgress(0);
+        skill.setStatus(SkillStatus.ACTIVE);
+        skill.setUser(user);
+        skill.setCategory(category);
+
+        skillRepository.save(skill);
+
+        return mapToSkillResponse(skill);
+    }
+
+    public void adminDeleteSkill(Long skillId) {
+        skillRepository.deleteById(skillId);
+    }
+
+    public List<CategoryResponse> adminGetCategories() {
+        return skillCategoryRepository.findAll()
+                .stream()
+                .map(this::mapToCategoryResponse)
+                .toList();
+    }
+
+    public CategoryResponse adminCreateCategory(CreateCategoryRequest req) {
+
+        SkillCategory cat = new SkillCategory();
+        cat.setName(req.getName());
+
+        skillCategoryRepository.save(cat);
+
+        return mapToCategoryResponse(cat);
+    }
+
+    public void adminDeleteCategory(Long categoryId) {
+        skillCategoryRepository.deleteById(categoryId);
+    }
+
+    private CategoryResponse mapToCategoryResponse(SkillCategory c) {
+        CategoryResponse r = new CategoryResponse();
+        r.setId(c.getId());
+        r.setName(c.getName());
+        return r;
+    }
+
+    private SkillResponse mapToSkillResponse(Skill skill) {
+        SkillResponse res = new SkillResponse();
+
+        res.setId(skill.getId());
+        res.setName(skill.getName());
+        res.setLevel(String.valueOf(skill.getLevel()));
+        res.setProgress(skill.getProgress());
+        res.setStatus(String.valueOf(skill.getStatus()));
+
+        return res;
+    }
+
+    private AdminUserResponse mapToAdminUserResponse(User user) {
+        AdminUserResponse res = new AdminUserResponse();
+
+        res.setId(user.getId());
+        res.setName(user.getName());
+        res.setEmail(user.getEmail());
+        res.setRole(String.valueOf(user.getRole()));
+
+        return res;
+    }
+
+    public void updateUserRole(Long userId, Role role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        user.setRole(role);
+        userRepository.save(user);
+    }
+
+    public List<CategoryResponse> getAllCategories() {
+        User user = getCurrentUser();
+        List<SkillCategory> categories = skillCategoryRepository.findByUser(user);
+
+        return categories.stream()
+                .map(this::mapToCategoryResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<GoalResponse> getMyGoals() {
+        User user = getCurrentUser();
+        List<LearningGoal> goals = learningGoalRepository.findByUser(user);
+
+        return goals.stream()
+                .map(this::mapToGoalResponse)
+                .collect(Collectors.toList());
+    }
+
+    // ─── Mapper Methods ──────────────────────────────────────────────────
+
+    private GoalResponse mapToGoalResponse(LearningGoal goal) {
+        return new GoalResponse(
+                goal.getId(),
+                goal.getUser(),
+                goal.getSkill(),
+                goal.getTargetDate()
+        );
+    }
+
+
 }

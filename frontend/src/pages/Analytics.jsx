@@ -16,33 +16,56 @@ import {
     Clock,
     Award
 } from 'lucide-react';
-import { dashboardStats, skills, categories } from '../data/dummyData';
+import { useEffect, useState } from "react";
+// import {
+//     fetchStreak,
+//     fetchBurnout,
+//     fetchVelocity,
+//     fetchETA,
+//     fetchTopSkills,
+//     fetchCategoryAnalytics,
+//     fetchLearningStats
+// } from "../services/analyticsService";
+
 
 const Analytics = () => {
-    // Calculate analytics
-    const totalHours = skills.reduce((sum, skill) => sum + skill.totalHours, 0);
-    const avgSessionLength = Math.round(
-        skills.reduce((sum, skill) => {
-            const skillAvg = skill.totalHours * 60 / skill.sessions.length;
-            return sum + skillAvg;
-        }, 0) / skills.length
-    );
+    const [streak, setStreak] = useState(null);
+    const [burnout, setBurnout] = useState(null);
+    const [velocity, setVelocity] = useState(null);
+    const [eta, setEta] = useState(null);
+    const [topSkills, setTopSkills] = useState([]);
+    const [categoryStats, setCategoryStats] = useState([]);
+    const [stats, setStats] = useState(null);
 
-    const velocity = 'Steady';
-    const estimatedCompletion = '3 months';
+    useEffect(() => {
+        fetchStreak().then(setStreak);
+        fetchBurnout().then(setBurnout);
+        fetchVelocity().then(setVelocity);
+        fetchETA().then(setEta);
+        fetchTopSkills().then(setTopSkills);
+        fetchCategoryAnalytics().then(setCategoryStats);
+        fetchLearningStats().then(setStats);
+    }, []);
+
+
+    // Calculate analytics
 
     // Bar chart data
-    const barChartData = skills.slice(0, 5).map(skill => ({
+    const barChartData = topSkills.map(skill => ({
         label: skill.name,
-        value: skill.totalHours,
-        unit: 'h'
+        value: skill.totalMinutes / 60,
+        unit: "h"
     }));
 
     // Donut chart data
-    const donutChartData = categories.map(category => ({
-        label: category.name,
-        value: Math.round(category.totalMinutes / 60)
+    const donutChartData = categoryStats.map(cat => ({
+        label: cat.categoryName,
+        value: cat.totalMinutes / 60
     }));
+
+    if (!streak || !burnout || !stats || !velocity) {
+        return <div className="p-8 text-gray-500">Loading analytics...</div>;
+    }
 
     return (
         <div className="space-y-6">
@@ -56,7 +79,7 @@ const Analytics = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     title="Current Streak"
-                    value={`${dashboardStats.currentStreak} days`}
+                    value={`${streak.currentStreak} days`}
                     icon={Flame}
                     color="orange"
                     trend="up"
@@ -64,24 +87,24 @@ const Analytics = () => {
                 />
                 <StatCard
                     title="Learning Velocity"
-                    value={velocity}
+                    value={`${velocity?.velocityPerHour?.toFixed(2) || 0} %/h`}
                     icon={TrendingUp}
                     color="green"
-                    subtitle="13h this week"
+                    subtitle={`${stats.weeklyMinutes} min this week`}
                 />
                 <StatCard
                     title="Est. Completion"
-                    value={estimatedCompletion}
+                    value={eta?.estimatedHours ? `${Math.round(eta.estimatedHours)}h` : "—"}
                     icon={Target}
                     color="indigo"
                     subtitle="At current pace"
                 />
                 <StatCard
                     title="Burnout Risk"
-                    value={dashboardStats.burnoutRisk}
+                    value={burnout.riskLevel}
+                    subtitle={`${burnout.weeklyMinutes} min/week`}
                     icon={AlertTriangle}
                     color="green"
-                    subtitle="Healthy pace"
                 />
             </div>
 
@@ -95,7 +118,18 @@ const Analytics = () => {
                         <div>
                             <p className="text-sm text-gray-600">Overall Health Status</p>
                         </div>
-                        <Badge variant="success" size="lg">LOW RISK</Badge>
+                        <Badge
+                            variant={
+                                burnout.riskLevel === "HIGH"
+                                    ? "danger"
+                                    : burnout.riskLevel === "MEDIUM"
+                                        ? "warning"
+                                        : "success"
+                            }
+                            size="lg"
+                        >
+                            {burnout.riskLevel} RISK
+                        </Badge>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -168,7 +202,7 @@ const Analytics = () => {
                                 <Clock className="w-6 h-6 text-indigo-600" />
                             </div>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">{totalHours}h</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-1">{Math.round(stats.totalMinutes / 60)}h</h3>
                         <p className="text-sm text-gray-600 mb-3">Total Learning Time</p>
                         <div className="flex items-center text-xs text-green-600 font-medium">
                             <TrendingUp className="w-3 h-3 mr-1" />
@@ -182,7 +216,7 @@ const Analytics = () => {
                                 <TrendingUp className="w-6 h-6 text-blue-600" />
                             </div>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">{avgSessionLength}m</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.avgSessionMinutes}m</h3>
                         <p className="text-sm text-gray-600 mb-3">Avg Session Length</p>
                         <div className="flex items-center text-xs text-gray-600 font-medium">
                             <span>Optimal range: 45-90m</span>
@@ -196,7 +230,7 @@ const Analytics = () => {
                             </div>
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-1">
-                            {skills.reduce((sum, skill) => sum + skill.sessions.length, 0)}
+                            {stats.totalSessions}
                         </h3>
                         <p className="text-sm text-gray-600 mb-3">Total Sessions</p>
                         <div className="flex items-center text-xs text-green-600 font-medium">

@@ -13,4 +13,6 @@ public interface LearningGoalRepository
     List<LearningGoal> findAllByUser(User user);
     Optional<LearningGoal> findByIdAndUser(Long id, User user);
     Optional<LearningGoal> findByUserAndSkill(User user, Skill skill);
+
+    List<LearningGoal> findByUser(User user);
 }

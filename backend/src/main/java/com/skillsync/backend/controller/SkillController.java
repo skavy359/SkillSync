@@ -217,6 +217,12 @@ public class SkillController {
 
         SkillResponse response = userService.assignCategoryToSkill(skillId, categoryId);
 
-        return ApiResponse.success("Category assigned to skill", response);
+        return new ApiResponse<>(
+                true,
+                "Category assigned to skill",
+                response
+        );
     }
 }
+
+// Make a function to see all the categories too

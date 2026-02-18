@@ -11,4 +11,6 @@ public interface SkillCategoryRepository
 
     List<SkillCategory> findAllByUser(User user);
     Optional<SkillCategory> findByIdAndUser(Long id, User user);
+
+    List<SkillCategory> findByUser(User user);
 }

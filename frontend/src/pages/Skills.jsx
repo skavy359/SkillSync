@@ -9,9 +9,11 @@ import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 import FormRow from '../components/ui/FormRow';
 import { Plus, Search, Lightbulb } from 'lucide-react';
-import { skills as initialSkills, categories } from '../data/dummyData';
+import { useEffect} from "react"
+import { addSkill } from "../services/skillService"
 
 const Skills = ({ onNavigate, onSelectSkill }) => {
+    const[initialSkills,setInitialSkills]=useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
@@ -22,10 +24,16 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
         description: ''
     });
 
+    useEffect(() => {
+        fetchSkills().then(setInitialSkills)
+    }, [])
+
     const filteredSkills = initialSkills.filter(skill => {
-        const matchesSearch = skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            skill.category.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || skill.status === filterStatus;
+        const matchesSearch =
+            skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (skill.category?.toLowerCase() || "").includes(searchTerm.toLowerCase());
+
+        const matchesStatus = filterStatus === 'all' || skill.status.toLowerCase() === filterStatus;
         return matchesSearch && matchesStatus;
     });
 
@@ -34,18 +42,34 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
         onNavigate('skill-detail');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('New skill:', formData);
-        setIsModalOpen(false);
-        setFormData({ name: '', level: 'Beginner', category: '', description: '' });
+
+        try {
+            const newSkill = await addSkill({
+                name: formData.name,
+                level: formData.level.toUpperCase(),
+            });
+
+            setInitialSkills(prev => [...prev, newSkill]);
+
+            setIsModalOpen(false);
+            setFormData({
+                name: '',
+                level: 'Beginner',
+                category: '',
+                description: ''
+            });
+        } catch (err) {
+            console.error("Add skill failed", err);
+        }
     };
 
     const statusCounts = {
         all: initialSkills.length,
-        active: initialSkills.filter(s => s.status === 'active').length,
-        completed: initialSkills.filter(s => s.status === 'completed').length,
-        paused: initialSkills.filter(s => s.status === 'paused').length,
+        active: initialSkills.filter(s => s.status.toLowerCase() === 'active').length,
+        completed: initialSkills.filter(s => s.status.toLowerCase() === 'completed').length,
+        paused: initialSkills.filter(s => s.status.toLowerCase() === 'paused').length,
     };
 
     return (
@@ -151,7 +175,7 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                             label="Category"
                             value={formData.category}
                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                            options={categories.map(cat => cat.name)}
+                            options={[]}
                             placeholder="Select a category"
                         />
                     </FormRow>

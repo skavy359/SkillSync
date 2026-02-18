@@ -19,7 +19,8 @@ import {
     Trash2,
     Target
 } from 'lucide-react';
-import { skills } from '../data/dummyData';
+import { useEffect } from "react";
+import {addSession } from "../services/skillService";
 
 const SkillDetail = ({ skillId, onNavigate }) => {
     const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
@@ -29,14 +30,39 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         notes: ''
     });
 
-    const skill = skills.find(s => s.id === skillId) || skills[0];
+    const [skill, setSkill] = useState(null);
+    const [sessions, setSessions] = useState([]);
 
-    const handleAddSession = (e) => {
+    useEffect(() => {
+        if (!skillId) return;
+
+        getSkillById(skillId).then(setSkill);
+        fetchSessions(skillId).then(setSessions);
+    }, [skillId]);
+
+    const handleAddSession = async (e) => {
         e.preventDefault();
-        console.log('New session:', sessionForm);
-        setIsSessionModalOpen(false);
-        setSessionForm({ duration: '', date: new Date().toISOString().split('T')[0], notes: '' });
+
+        try {
+            const newSession = await addSession(skillId, {
+                durationMinutes: Number(sessionForm.duration),
+                sessionDate: sessionForm.date,
+                notes: sessionForm.notes,
+            });
+
+            setSessions(prev => [newSession, ...prev]);
+
+            setIsSessionModalOpen(false);
+            setSessionForm({
+                duration: '',
+                date: new Date().toISOString().split('T')[0],
+                notes: ''
+            });
+        } catch (err) {
+            console.error("Add session failed", err);
+        }
     };
+k
 
     const levelColors = {
         Beginner: 'success',
@@ -44,6 +70,10 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         Advanced: 'danger',
         Expert: 'purple',
     };
+
+    if (!skill) {
+        return <div className="p-8 text-gray-500">Loading skill...</div>;
+    }
 
     return (
         <div className="space-y-6">
@@ -70,15 +100,15 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
                             <div className="flex items-center">
                                 <Clock className="w-4 h-4 mr-1.5" />
-                                <span>{skill.totalHours} hours logged</span>
+                                <span>{sessions.reduce((a, s) => a + s.durationMinutes, 0)} minutes logged</span>
                             </div>
                             <div className="flex items-center">
                                 <Calendar className="w-4 h-4 mr-1.5" />
-                                <span>Last practiced {skill.lastPracticed}</span>
+                                <span>{sessions.reduce((a, s) => a + s.durationMinutes, 0)} minutes logged</span>
                             </div>
                             <div className="flex items-center">
                                 <TrendingUp className="w-4 h-4 mr-1.5" />
-                                <span>{skill.sessions.length} sessions</span>
+                                <span>{sessions.length} sessions</span>
                             </div>
                         </div>
                     </div>
@@ -117,7 +147,9 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                             <Clock className="w-6 h-6 text-indigo-600" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{skill.totalHours}h</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                        {Math.round(sessions.reduce((a,s)=>a+s.durationMinutes,0)/60)}h
+                    </h3>
                     <p className="text-sm text-gray-600">Total Time</p>
                 </Card>
 
@@ -127,7 +159,7 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                             <TrendingUp className="w-6 h-6 text-green-600" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{skill.sessions.length}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{sessions.length}</h3>
                     <p className="text-sm text-gray-600">Sessions</p>
                 </Card>
 
@@ -138,7 +170,9 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                         </div>
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-1">
-                        {Math.round((skill.totalHours / skill.sessions.length) * 10) / 10}h
+                        {sessions.length
+                            ? Math.round((sessions.reduce((a,s)=>a+s.durationMinutes,0)/sessions.length)/60*10)/10
+                            : 0}h
                     </h3>
                     <p className="text-sm text-gray-600">Avg per Session</p>
                 </Card>
@@ -158,10 +192,10 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                     </Button>
                 }
             >
-                {skill.sessions.length > 0 ? (
+                {sessions.length > 0 ? (
                     <Card className="p-4">
                         <div className="space-y-3">
-                            {skill.sessions.map((session) => (
+                            {sessions.map((session) => (
                                 <div
                                     key={session.id}
                                     className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
@@ -174,11 +208,11 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center space-x-3">
                         <span className="text-sm font-semibold text-gray-900">
-                          {session.duration} minutes
+                          {session.durationMinutes} minutes
                         </span>
                                                 <div className="flex items-center text-sm text-gray-500">
                                                     <Calendar className="w-4 h-4 mr-1.5" />
-                                                    {session.date}
+                                                    {session.sessionDate}
                                                 </div>
                                             </div>
                                             <div className="flex items-center space-x-2">
