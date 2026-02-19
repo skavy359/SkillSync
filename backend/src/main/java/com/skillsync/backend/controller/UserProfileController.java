@@ -445,4 +445,44 @@ public class UserProfileController {
                 )
         );
     }
+
+    @GetMapping("/me/achievements")
+    public ResponseEntity<ApiResponse<com.skillsync.backend.dto.stats.UserAchievementsResponse>> getMyAchievements() {
+        com.skillsync.backend.dto.stats.UserAchievementsResponse achievements = userService.getUserAchievements();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Achievements fetched",
+                        achievements
+                )
+        );
+    }
+
+    @PostMapping("/delete-account")
+    public ResponseEntity<ApiResponse<String>> deleteAccount() {
+        userService.deleteMyAccount();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Account deleted successfully",
+                        null
+                )
+        );
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<String>> changePassword(
+            @RequestBody com.skillsync.backend.dto.ChangePasswordRequest request) {
+        userService.changePassword(request.getOldPassword(), request.getNewPassword());
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Password changed successfully",
+                        null
+                )
+        );
+    }
 }

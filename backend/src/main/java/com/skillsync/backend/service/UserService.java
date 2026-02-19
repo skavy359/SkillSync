@@ -1,6 +1,34 @@
 package com.skillsync.backend.service;
 
-import com.skillsync.backend.dto.*;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.skillsync.backend.dto.AddSkillRequest;
+import com.skillsync.backend.dto.AdminUserResponse;
+import com.skillsync.backend.dto.CategoryResponse;
+import com.skillsync.backend.dto.CreateCategoryRequest;
+import com.skillsync.backend.dto.CreateUserRequest;
+import com.skillsync.backend.dto.LoginRequest;
+import com.skillsync.backend.dto.LoginResponse;
+import com.skillsync.backend.dto.NotificationPreferencesDTO;
+import com.skillsync.backend.dto.PlatformStatsResponse;
+import com.skillsync.backend.dto.RegisterRequest;
+import com.skillsync.backend.dto.SkillResponse;
+import com.skillsync.backend.dto.UpdateProfileRequest;
+import com.skillsync.backend.dto.UpdateSkillProgressRequest;
+import com.skillsync.backend.dto.UserProfileResponse;
+import com.skillsync.backend.dto.UserResponse;
 import com.skillsync.backend.dto.audit.AuditLogResponse;
 import com.skillsync.backend.dto.goal.CreateGoalRequest;
 import com.skillsync.backend.dto.goal.GoalAnalyticsResponse;
@@ -11,26 +39,43 @@ import com.skillsync.backend.dto.recommendation.UserRecommendationResponse;
 import com.skillsync.backend.dto.session.AddSessionRequest;
 import com.skillsync.backend.dto.session.SessionResponse;
 import com.skillsync.backend.dto.session.SessionStatsResponse;
-import com.skillsync.backend.dto.stats.*;
-import com.skillsync.backend.model.*;
-import com.skillsync.backend.repository.*;
-import com.skillsync.backend.security.JwtUtil;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.skillsync.backend.dto.stats.AchievementResponse;
+import com.skillsync.backend.dto.stats.AdminStatsResponse;
+import com.skillsync.backend.dto.stats.BurnoutRiskResponse;
+import com.skillsync.backend.dto.stats.CategoryAnalyticsResponse;
+import com.skillsync.backend.dto.stats.CompletionProbabilityResponse;
+import com.skillsync.backend.dto.stats.DailyActivityResponse;
+import com.skillsync.backend.dto.stats.DomainFocusResponse;
+import com.skillsync.backend.dto.stats.SkillDifficultyResponse;
+import com.skillsync.backend.dto.stats.SkillEtaResponse;
+import com.skillsync.backend.dto.stats.SkillVelocityResponse;
+import com.skillsync.backend.dto.stats.TimeWindowStatsResponse;
+import com.skillsync.backend.dto.stats.UserAchievementsResponse;
+import com.skillsync.backend.dto.stats.UserLearningStatsResponse;
+import com.skillsync.backend.dto.stats.UserStatsResponse;
+import com.skillsync.backend.dto.stats.UserStreakResponse;
 import com.skillsync.backend.exception.EmailAlreadyExistsException;
 import com.skillsync.backend.exception.InvalidCredentialsException;
-import com.skillsync.backend.exception.user.UserNotFoundException;
 import com.skillsync.backend.exception.skill.SkillNotFoundException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.Authentication;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.skillsync.backend.exception.user.UserNotFoundException;
+import com.skillsync.backend.model.AuditLog;
+import com.skillsync.backend.model.LearningGoal;
+import com.skillsync.backend.model.LearningSession;
+import com.skillsync.backend.model.RecommendationHistory;
+import com.skillsync.backend.model.Role;
+import com.skillsync.backend.model.Skill;
+import com.skillsync.backend.model.SkillCategory;
+import com.skillsync.backend.model.SkillLevel;
+import com.skillsync.backend.model.SkillStatus;
+import com.skillsync.backend.model.User;
+import com.skillsync.backend.repository.AuditLogRepository;
+import com.skillsync.backend.repository.LearningGoalRepository;
+import com.skillsync.backend.repository.LearningSessionRepository;
+import com.skillsync.backend.repository.RecommendationHistoryRepository;
+import com.skillsync.backend.repository.SkillCategoryRepository;
+import com.skillsync.backend.repository.SkillRepository;
+import com.skillsync.backend.repository.UserRepository;
+import com.skillsync.backend.security.JwtUtil;
 
 @Service
 public class UserService {
@@ -1395,6 +1440,158 @@ public class UserService {
         userRepository.save(user);
         
         return getNotificationPreferences();
+    }
+
+    public UserAchievementsResponse getUserAchievements() {
+        User user = getCurrentUser();
+        UserStatsResponse stats = getMyStats();
+        UserLearningStatsResponse learningStats = getMyLearningStats();
+        UserStreakResponse streak = getMyStreak();
+        
+        // Debug logging
+        System.out.println("=== Achievement Calculation Debug ===");
+        System.out.println("Streak: " + streak.getCurrentStreak());
+        System.out.println("Total Skills: " + stats.getTotalSkills());
+        System.out.println("Completed Skills: " + stats.getCompletedSkills());
+        System.out.println("Total Minutes: " + learningStats.getTotalMinutes());
+        System.out.println("===================================");
+        
+        List<AchievementResponse> achievements = new java.util.ArrayList<>();
+        int unlockedCount = 0;
+        
+        // Fire Starter - 7-day streak
+        AchievementResponse fireStarter = new AchievementResponse(
+                "fire-starter",
+                "Fire Starter",
+                "Maintained a learning streak for 7 consecutive days",
+                "Flame",
+                "from-yellow-50 to-orange-50 dark:from-yellow-500/10 dark:to-orange-500/10",
+                "border-yellow-200 dark:border-yellow-500/20",
+                streak.getCurrentStreak() >= 7,
+                "7-day streak",
+                streak.getCurrentStreak() + "/7 days"
+        );
+        achievements.add(fireStarter);
+        if (fireStarter.getUnlocked()) unlockedCount++;
+        
+        // Skill Collector - 5 skills
+        AchievementResponse skillCollector = new AchievementResponse(
+                "skill-collector",
+                "Skill Collector",
+                "Added 5 or more skills to your learning path",
+                "Lightbulb",
+                "from-indigo-50 to-blue-50 dark:from-indigo-500/10 dark:to-blue-500/10",
+                "border-indigo-200 dark:border-indigo-500/20",
+                stats.getTotalSkills() >= 5,
+                "5 skills tracked",
+                stats.getTotalSkills() + "/5 skills"
+        );
+        achievements.add(skillCollector);
+        if (skillCollector.getUnlocked()) unlockedCount++;
+        
+        // Century Club - 100+ hours
+        long totalHours = learningStats.getTotalMinutes() / 60;
+        AchievementResponse centuryClub = new AchievementResponse(
+                "century-club",
+                "Century Club",
+                "Logged over 100 hours of learning time",
+                "Clock",
+                "from-green-50 to-emerald-50 dark:from-green-500/10 dark:to-emerald-500/10",
+                "border-green-200 dark:border-green-500/20",
+                totalHours >= 100,
+                "100+ hours",
+                totalHours + "/100 hours"
+        );
+        achievements.add(centuryClub);
+        if (centuryClub.getUnlocked()) unlockedCount++;
+        
+        // Goal Getter - Create first goal
+        List<LearningGoal> goals = learningGoalRepository.findByUser(user);
+        AchievementResponse goalGetter = new AchievementResponse(
+                "goal-getter",
+                "Goal Getter",
+                "Created your first learning goal",
+                "Target",
+                "from-purple-50 to-pink-50 dark:from-purple-500/10 dark:to-pink-500/10",
+                "border-purple-200 dark:border-purple-500/20",
+                !goals.isEmpty(),
+                "First goal",
+                (goals.isEmpty() ? "0" : "1") + "/1 goal"
+        );
+        achievements.add(goalGetter);
+        if (goalGetter.getUnlocked()) unlockedCount++;
+        
+        // Completion Master - Complete first skill
+        AchievementResponse completionMaster = new AchievementResponse(
+                "completion-master",
+                "Completion Master",
+                "Successfully completed your first skill",
+                "Award",
+                "from-blue-50 to-cyan-50 dark:from-blue-500/10 dark:to-cyan-500/10",
+                "border-blue-200 dark:border-blue-500/20",
+                stats.getCompletedSkills() >= 1,
+                "Skill completed",
+                stats.getCompletedSkills() + "/1 completed"
+        );
+        achievements.add(completionMaster);
+        if (completionMaster.getUnlocked()) unlockedCount++;
+        
+        // Unstoppable - 30-day streak
+        AchievementResponse unstoppable = new AchievementResponse(
+                "unstoppable",
+                "Unstoppable",
+                "Maintain a 30-day learning streak",
+                "Flame",
+                "from-red-50 to-pink-50 dark:from-red-500/10 dark:to-pink-500/10",
+                "border-red-200 dark:border-red-500/20",
+                streak.getCurrentStreak() >= 30,
+                "30-day streak",
+                streak.getCurrentStreak() + "/30 days"
+        );
+        achievements.add(unstoppable);
+        if (unstoppable.getUnlocked()) unlockedCount++;
+        
+        return new UserAchievementsResponse(
+                unlockedCount,
+                achievements.size(),
+                achievements
+        );
+    }
+
+    public void deleteMyAccount() {
+        User user = getCurrentUser();
+        
+        // Audit log the deletion
+        auditService.log(
+                user,
+                "DELETE_ACCOUNT",
+                "USER",
+                user.getId()
+        );
+        
+        // Delete user (cascade should handle related entities)
+        userRepository.deleteById(user.getId());
+    }
+
+    public void changePassword(String oldPassword, String newPassword) {
+        User user = getCurrentUser();
+        
+        // Verify old password
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+        
+        // Encode and set new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        // Audit log the password change
+        auditService.log(
+                user,
+                "CHANGE_PASSWORD",
+                "USER",
+                user.getId()
+        );
     }
 
     // ─── Mapper Methods ──────────────────────────────────────────────────

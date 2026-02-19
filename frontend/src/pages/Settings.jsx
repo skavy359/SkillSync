@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, FileText, X, ChevronRight } from 'lucide-react';
+import { Shield, FileText, X, ChevronRight, AlertTriangle } from 'lucide-react';
 import notificationPreferenceService from '../services/notificationPreferenceService';
+import { deleteMyAccount } from '../services/profileService';
 
 const Settings = () => {
     const [modalOpen, setModalOpen] = useState(null);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [deleteInput, setDeleteInput] = useState('');
+    const [deleting, setDeleting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [notifPrefs, setNotifPrefs] = useState({
         sessionReminders: true,
@@ -62,6 +66,26 @@ const Settings = () => {
         }
     };
 
+    const handleDeleteAccount = async () => {
+        if (deleteInput !== 'DELETE') {
+            alert('Please type DELETE to confirm account deletion');
+            return;
+        }
+
+        setDeleting(true);
+        try {
+            await deleteMyAccount();
+            // Clear token and redirect to login
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('Failed to delete account:', error);
+            alert('Failed to delete account. Please try again.');
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     const notifItems = [
         { key: 'sessionReminders', label: 'Session reminders', desc: 'Get reminded to log your learning sessions' },
         { key: 'goalAlerts', label: 'Goal alerts', desc: 'Notifications when goals are due or completed' },
@@ -112,6 +136,97 @@ const Settings = () => {
                     )}
                 </div>
             </div>
+
+            {/* Danger Zone - Delete Account */}
+            <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-red-200 dark:border-red-500/20 overflow-hidden">
+                <div className="px-6 py-4 border-b border-red-100 dark:border-red-500/10 bg-red-50 dark:bg-red-500/5">
+                    <h2 className="text-base font-semibold text-red-900 dark:text-red-400 flex items-center">
+                        <AlertTriangle className="w-5 h-5 mr-2" />
+                        Danger Zone
+                    </h2>
+                    <p className="text-sm text-red-700 dark:text-red-300/80 mt-0.5">Irreversible and permanent actions</p>
+                </div>
+                <div className="px-6 py-4">
+                    <button
+                        onClick={() => setDeleteModalOpen(true)}
+                        className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-all"
+                    >
+                        Delete Account
+                    </button>
+                    <p className="text-xs text-red-600 dark:text-red-400/80 mt-3">
+                        Once you delete your account, there is no going back. Please be certain.
+                    </p>
+                </div>
+            </div>
+
+            {/* Delete Account Confirmation Modal */}
+            {deleteModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={() => {
+                            setDeleteModalOpen(false);
+                            setDeleteInput('');
+                        }}
+                    />
+                    <div className="relative bg-white dark:bg-[#1e1e2e] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-red-100 dark:border-red-500/10 bg-red-50 dark:bg-red-500/5">
+                            <h3 className="text-lg font-bold text-red-900 dark:text-red-400 flex items-center">
+                                <AlertTriangle className="w-5 h-5 mr-2" />
+                                Delete Account?
+                            </h3>
+                            <button
+                                onClick={() => {
+                                    setDeleteModalOpen(false);
+                                    setDeleteInput('');
+                                }}
+                                className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-500/10 transition-all"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="px-6 py-5 space-y-4">
+                            <p className="text-sm text-gray-600 dark:text-[#9399b2]">
+                                This action cannot be undone. All your data including skills, sessions, goals, and achievements will be permanently deleted.
+                            </p>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 dark:text-[#a6adc8] mb-2 block">
+                                    Type <strong className="text-red-600 dark:text-red-400">DELETE</strong> to confirm
+                                </label>
+                                <input
+                                    type="text"
+                                    value={deleteInput}
+                                    onChange={(e) => setDeleteInput(e.target.value)}
+                                    placeholder="Type DELETE"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-[#313244] rounded-lg bg-white dark:bg-[#272739] text-gray-900 dark:text-[#cdd6f4] placeholder-gray-500 dark:placeholder-[#7f849c] focus:outline-none focus:ring-2 focus:ring-red-500"
+                                />
+                            </div>
+                        </div>
+                        <div className="px-6 py-4 border-t border-gray-100 dark:border-[#272739] bg-gray-50 dark:bg-[#181825] flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setDeleteModalOpen(false);
+                                    setDeleteInput('');
+                                }}
+                                className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-[#313244] hover:bg-gray-300 dark:hover:bg-[#45475a] text-gray-900 dark:text-[#cdd6f4] text-sm font-semibold rounded-xl transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteAccount}
+                                disabled={deleting || deleteInput !== 'DELETE'}
+                                className={`flex-1 px-4 py-2.5 text-white text-sm font-semibold rounded-xl transition-all ${
+                                    deleteInput === 'DELETE' && !deleting
+                                        ? 'bg-red-600 hover:bg-red-700'
+                                        : 'bg-red-400 cursor-not-allowed opacity-50'
+                                }`}
+                            >
+                                {deleting ? 'Deleting...' : 'Delete Account'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Legal */}
             <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden">

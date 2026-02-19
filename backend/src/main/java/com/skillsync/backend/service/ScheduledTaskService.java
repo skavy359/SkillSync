@@ -30,10 +30,10 @@ public class ScheduledTaskService {
 
     /**
      * Runs every Monday at 9:00 AM to send weekly learning summaries
-     * Cron expression: 0 9 * * 1 (minute hour day month day-of-week)
+     * Cron expression: 0 0 9 * * 1 (second minute hour day month day-of-week)
      * This means: 9:00 AM on Mondays
      */
-    @Scheduled(cron = "0 9 * * 1")
+    @Scheduled(cron = "0 0 9 * * 1")
     public void sendWeeklySummaries() {
         List<User> allUsers = userRepository.findAll();
         

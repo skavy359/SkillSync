@@ -54,3 +54,21 @@ export const getMonthlyStats = async () => {
     const { data } = await api.get('/profile/me/monthly-stats');
     return data.data;
 };
+
+export const getMyAchievements = async () => {
+    const { data } = await api.get('/profile/me/achievements');
+    return data.data;
+};
+
+export const deleteMyAccount = async () => {
+    const { data } = await api.post('/profile/delete-account');
+    return data.data;
+};
+
+export const changePassword = async (oldPassword, newPassword) => {
+    const { data } = await api.post('/profile/change-password', {
+        oldPassword,
+        newPassword
+    });
+    return data.data;
+};
