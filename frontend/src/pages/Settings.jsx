@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Monitor, Shield, FileText, Info, X, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shield, FileText, X, ChevronRight } from 'lucide-react';
 
 const Settings = () => {
-    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'system');
     const [modalOpen, setModalOpen] = useState(null);
     const [notifPrefs, setNotifPrefs] = useState(() => {
         const stored = localStorage.getItem('notifPrefs');
@@ -12,41 +11,6 @@ const Settings = () => {
             weeklySummary: false,
         };
     });
-
-    // Apply the correct dark/light class based on theme setting
-    useEffect(() => {
-        localStorage.setItem('theme', theme);
-        console.log('[Theme] useEffect fired, theme =', theme);
-
-        const applyTheme = (isDark) => {
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-            console.log('[Theme] Applied isDark =', isDark, '| html classes =', document.documentElement.className);
-        };
-
-        if (theme === 'dark') {
-            applyTheme(true);
-        } else if (theme === 'light') {
-            applyTheme(false);
-        } else {
-            // System: match OS preference and listen for changes
-            const mq = window.matchMedia('(prefers-color-scheme: dark)');
-            applyTheme(mq.matches);
-
-            const handler = (e) => applyTheme(e.matches);
-            mq.addEventListener('change', handler);
-            return () => mq.removeEventListener('change', handler);
-        }
-    }, [theme]);
-
-    const themeOptions = [
-        { id: 'light', label: 'Light', icon: Sun, description: 'Classic bright interface' },
-        { id: 'dark', label: 'Dark', icon: Moon, description: 'Easy on the eyes' },
-        { id: 'system', label: 'System', icon: Monitor, description: 'Match your OS setting' },
-    ];
 
     const toggleNotif = (key) => {
         setNotifPrefs(prev => {
@@ -68,41 +32,6 @@ const Settings = () => {
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Settings</h1>
                 <p className="text-gray-500 dark:text-[#7f849c] mt-1">Manage your preferences and account settings.</p>
-            </div>
-
-            {/* Appearance */}
-            <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 dark:border-[#272739]">
-                    <h2 className="text-base font-semibold text-gray-900 dark:text-[#cdd6f4]">Appearance</h2>
-                    <p className="text-sm text-gray-500 dark:text-[#7f849c] mt-0.5">Choose your preferred theme</p>
-                </div>
-                <div className="p-6">
-                    <div className="grid grid-cols-3 gap-3">
-                        {themeOptions.map((opt) => {
-                            const Icon = opt.icon;
-                            const isActive = theme === opt.id;
-                            return (
-                                <button
-                                    key={opt.id}
-                                    onClick={() => setTheme(opt.id)}
-                                    className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all ${isActive
-                                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/15'
-                                        : 'border-gray-200 dark:border-[#313244] hover:border-gray-300 dark:hover:border-[#45475a] hover:bg-gray-50 dark:hover:bg-[#272739]'
-                                        }`}
-                                >
-                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${isActive ? 'bg-indigo-100 dark:bg-indigo-500/20' : 'bg-gray-100 dark:bg-[#313244]'
-                                        }`}>
-                                        <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-[#7f849c]'}`} />
-                                    </div>
-                                    <span className={`text-sm font-medium ${isActive ? 'text-indigo-700 dark:text-indigo-400' : 'text-gray-700 dark:text-[#a6adc8]'}`}>
-                                        {opt.label}
-                                    </span>
-                                    <span className="text-xs text-gray-400 dark:text-[#6c7086] mt-0.5">{opt.description}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
             </div>
 
             {/* Notifications Preferences */}

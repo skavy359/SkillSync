@@ -6,10 +6,12 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import ProgressBar from '../components/ui/ProgressBar';
-import LineChartCard from '../components/ui/LineChartCard';
+import ActivityHeatmap from '../components/ui/ActivityHeatmap';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
+import Textarea from '../components/ui/Textarea';
+import FormRow from '../components/ui/FormRow';
 import {
     Lightbulb,
     Zap,
@@ -54,6 +56,16 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     });
     const [logSubmitting, setLogSubmitting] = useState(false);
 
+    // Add Skill Modal state
+    const [showAddSkillModal, setShowAddSkillModal] = useState(false);
+    const [addSkillForm, setAddSkillForm] = useState({
+        name: '',
+        level: 'Beginner',
+        category: '',
+        description: ''
+    });
+    const [addSkillSubmitting, setAddSkillSubmitting] = useState(false);
+
     // Helper: fetch recent sessions from all user skills
     const loadRecentSessions = async (skillList) => {
         try {
@@ -76,6 +88,103 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         } catch { }
     };
 
+    // Helper: Get latest 4 skills by most recent session
+    const getLatestSkillsBySession = async () => {
+        try {
+            const { fetchSessions } = await import('../services/sessionService');
+            const skillsData = await getMySkills({ size: 100 });
+            const skillList = skillsData?.content || [];
+
+            // Get sessions for each skill and find most recent session date
+            const skillsWithLatestSession = await Promise.all(
+                skillList.map(async (skill) => {
+                    try {
+                        const sessions = await fetchSessions(skill.id);
+                        const sessionArray = Array.isArray(sessions) ? sessions : [];
+                        
+                        if (sessionArray.length > 0) {
+                            // Find most recent session date
+                            const latestSession = sessionArray.reduce((latest, session) => {
+                                const sessionDate = new Date(session.sessionDate);
+                                return sessionDate > new Date(latest.sessionDate) ? session : latest;
+                            });
+                            return {
+                                ...skill,
+                                lastSessionDate: new Date(latestSession.sessionDate)
+                            };
+                        }
+                        return {
+                            ...skill,
+                            lastSessionDate: new Date(0) // No sessions
+                        };
+                    } catch (err) {
+                        return {
+                            ...skill,
+                            lastSessionDate: new Date(0)
+                        };
+                    }
+                })
+            );
+
+            // Sort by most recent session date (descending) and take top 4
+            const sortedSkills = skillsWithLatestSession
+                .sort((a, b) => b.lastSessionDate - a.lastSessionDate)
+                .slice(0, 4)
+                .map(({ lastSessionDate, ...skill }) => skill); // Remove the helper field
+
+            return sortedSkills;
+        } catch (err) {
+            console.error('Failed to get latest skills', err);
+            return [];
+        }
+    };
+
+    // Helper: build heatmap data from sessions
+    const buildWeeklyHeatmap = async (skillList) => {
+        try {
+            const { fetchSessions } = await import('../services/sessionService');
+            
+            // Init 7 days
+            const today = new Date();
+            const days = {};
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                days[dateStr] = {
+                    date: dateStr,
+                    label: d.toLocaleDateString('en-US', { weekday: 'short' }),
+                    minutes: 0
+                };
+            }
+
+            // Fetch and aggregate sessions
+            const allSessions = await Promise.all(
+                skillList.slice(0, 15).map(async (skill) => {
+                    try {
+                        const sessions = await fetchSessions(skill.id);
+                        return Array.isArray(sessions) ? sessions : [];
+                    } catch { return []; }
+                })
+            );
+
+            // Aggregate by date
+            allSessions.flat().forEach(session => {
+                if (session.sessionDate && days[session.sessionDate]) {
+                    days[session.sessionDate].minutes += session.durationMinutes || 0;
+                }
+            });
+
+            // Convert to array, sorted by date
+            const heatmapData = Object.values(days).sort((a, b) => 
+                new Date(a.date) - new Date(b.date)
+            );
+            setWeeklyActivity(heatmapData);
+        } catch (err) {
+            console.error('Failed to build weekly heatmap', err);
+        }
+    };
+
     useEffect(() => {
         Promise.all([
             fetchDashboardStats().catch(() => null),
@@ -83,38 +192,22 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             getMyStreak().catch(() => ({ currentStreak: 0, longestStreak: 0 })),
             fetchBurnout().catch(() => ({ riskLevel: 'LOW', weeklyMinutes: 0, monthlyMinutes: 0, ratio: 0 })),
             getWeeklyStats().catch(() => ({ totalMinutes: 0, totalSessions: 0, activeDays: 0 })),
-            fetchRecentSkills().catch(() => ({ content: [] })),
-        ]).then(([learning, stats, streakData, burnoutData, weekly, skills]) => {
+            getLatestSkillsBySession().catch(() => []),
+        ]).then(([learning, stats, streakData, burnoutData, weekly, latestSkills]) => {
             setLearningStats(learning);
             setUserStats(stats);
             setStreak(streakData);
             setBurnout(burnoutData);
             setWeeklyStats(weekly);
 
-            // Recent skills from paginated response
-            const skillList = skills?.content || (Array.isArray(skills) ? skills : []);
-            setRecentSkills(skillList.slice(0, 3));
+            // Recent skills sorted by most recent session
+            setRecentSkills(latestSkills);
 
             // Fetch recent sessions from all skills
-            loadRecentSessions(skillList);
+            loadRecentSessions(latestSkills.length > 0 ? latestSkills : []);
 
-            // Build weekly activity chart from weekly stats
-            if (weekly && weekly.totalMinutes > 0) {
-                const today = new Date();
-                const days = [];
-                for (let i = 6; i >= 0; i--) {
-                    const d = new Date(today);
-                    d.setDate(d.getDate() - i);
-                    const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-                    const avgPerDay = weekly.activeDays > 0 ? weekly.totalMinutes / weekly.activeDays : 0;
-                    const isActive = i < (weekly.activeDays || 0);
-                    days.push({
-                        label: dayName,
-                        value: isActive ? Math.round(avgPerDay / 60 * 10) / 10 : 0
-                    });
-                }
-                setWeeklyActivity(days);
-            }
+            // Build weekly heatmap from sessions
+            buildWeeklyHeatmap(latestSkills.length > 0 ? latestSkills : []);
         }).finally(() => setLoading(false));
     }, []);
 
@@ -144,13 +237,48 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             // Refresh data
             fetchDashboardStats().then(setLearningStats).catch(() => { });
             getWeeklyStats().then(setWeeklyStats).catch(() => { });
-            // Refresh recent sessions
+            // Refresh recent sessions and heatmap
             const skillList = allSkills.length > 0 ? allSkills : recentSkills;
             loadRecentSessions(skillList);
+            buildWeeklyHeatmap(skillList);
         } catch (err) {
             console.error("Log session failed", err);
         } finally {
             setLogSubmitting(false);
+        }
+    };
+
+    const handleAddSkill = async (e) => {
+        e.preventDefault();
+        if (!addSkillForm.name) return;
+
+        setAddSkillSubmitting(true);
+        try {
+            const { addSkill } = await import('../services/skillService');
+            const newSkill = await addSkill({
+                name: addSkillForm.name,
+                level: addSkillForm.level.toUpperCase(),
+                category: addSkillForm.category || null,
+                description: addSkillForm.description || null
+            });
+            
+            setShowAddSkillModal(false);
+            setAddSkillForm({ name: '', level: 'Beginner', category: '', description: '' });
+            
+            // Refresh data
+            fetchDashboardStats().then(setLearningStats).catch(() => { });
+            getMyStats().then(setUserStats).catch(() => { });
+            
+            // Refresh recent skills sorted by latest session
+            getLatestSkillsBySession().then(latestSkills => {
+                setRecentSkills(latestSkills);
+                loadRecentSessions(latestSkills);
+                buildWeeklyHeatmap(latestSkills);
+            }).catch(() => { });
+        } catch (err) {
+            console.error("Add skill failed", err);
+        } finally {
+            setAddSkillSubmitting(false);
         }
     };
 
@@ -252,7 +380,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                     value={totalSkills}
                     icon={Lightbulb}
                     color="indigo"
-                    subtitle={completedSkills > 0 ? `${completedSkills} completed` : `${activeSkills} active`}
+                    subtitle={`${activeSkills} active • ${completedSkills} completed`}
                 />
                 <StatCard
                     title="Active Skills"
@@ -312,13 +440,11 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </div>
             </Card>
 
-            {/* Activity Chart */}
-            <LineChartCard
+            {/* Activity Heatmap */}
+            <ActivityHeatmap
                 title="Weekly Activity"
-                description="Your practice hours this week"
+                description="Your learning activity this week"
                 data={weeklyActivity}
-                color="indigo"
-                height={200}
             />
 
             {/* Two Column Layout */}
@@ -382,7 +508,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 <Section
                     title="Recent Sessions"
                     action={
-                        <Button variant="ghost" size="sm" onClick={() => onNavigate('analytics')}>
+                        <Button variant="ghost" size="sm" onClick={() => onNavigate('sessions')}>
                             View all
                             <ArrowRight className="w-4 h-4 ml-1" />
                         </Button>
@@ -427,13 +553,13 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             {/* Quick Actions */}
             <Section title="Quick Actions">
                 <Card className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Button
                             variant="primary"
                             size="lg"
                             fullWidth
                             icon={Lightbulb}
-                            onClick={() => onNavigate('skills')}
+                            onClick={() => setShowAddSkillModal(true)}
                         >
                             Add New Skill
                         </Button>
@@ -445,15 +571,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                             onClick={() => setShowLogModal(true)}
                         >
                             Log Session
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            size="lg"
-                            fullWidth
-                            icon={TrendingUp}
-                            onClick={() => onNavigate('analytics')}
-                        >
-                            View Analytics
                         </Button>
                     </div>
                 </Card>
@@ -511,6 +628,59 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                         placeholder="What did you work on?"
                         value={logForm.notes}
                         onChange={(e) => setLogForm({ ...logForm, notes: e.target.value })}
+                    />
+                </form>
+            </Modal>
+
+            {/* Add Skill Modal */}
+            <Modal
+                isOpen={showAddSkillModal}
+                onClose={() => setShowAddSkillModal(false)}
+                title="Add a New Skill"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setShowAddSkillModal(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="primary" onClick={handleAddSkill} disabled={addSkillSubmitting}>
+                            {addSkillSubmitting ? 'Adding...' : 'Add Skill'}
+                        </Button>
+                    </>
+                }
+            >
+                <form onSubmit={handleAddSkill} className="space-y-4">
+                    <Input
+                        label="Skill Name"
+                        type="text"
+                        placeholder="e.g., React.js, Python, Guitar"
+                        value={addSkillForm.name}
+                        onChange={(e) => setAddSkillForm({ ...addSkillForm, name: e.target.value })}
+                        required
+                    />
+
+                    <FormRow columns={2} gap={4}>
+                        <Select
+                            label="Level"
+                            value={addSkillForm.level}
+                            onChange={(e) => setAddSkillForm({ ...addSkillForm, level: e.target.value })}
+                            options={['Beginner', 'Intermediate', 'Advanced', 'Expert']}
+                        />
+
+                        <Select
+                            label="Category"
+                            value={addSkillForm.category}
+                            onChange={(e) => setAddSkillForm({ ...addSkillForm, category: e.target.value })}
+                            options={[]}
+                            placeholder="Select a category"
+                        />
+                    </FormRow>
+
+                    <Textarea
+                        label="Description"
+                        placeholder="What do you want to learn about this skill?"
+                        value={addSkillForm.description}
+                        onChange={(e) => setAddSkillForm({ ...addSkillForm, description: e.target.value })}
+                        rows={3}
                     />
                 </form>
             </Modal>

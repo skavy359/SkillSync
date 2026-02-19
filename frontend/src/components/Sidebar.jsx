@@ -5,6 +5,7 @@ import {
     FolderKanban,
     Target,
     TrendingUp,
+    Clock,
     Bell,
     User,
     Settings
@@ -39,6 +40,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
         { id: 'skills', label: 'Skills', icon: Lightbulb },
         { id: 'categories', label: 'Categories', icon: FolderKanban },
         { id: 'goals', label: 'Goals', icon: Target },
+        { id: 'sessions', label: 'Sessions', icon: Clock },
         { id: 'analytics', label: 'Analytics', icon: TrendingUp },
         { id: 'notifications', label: 'Notifications', icon: Bell },
         { id: 'profile', label: 'Profile', icon: User },

@@ -10,7 +10,7 @@ export const fetchBurnout= async () => {
     return res.data.data;
 }
 export const fetchRecentSkills = async () => {
-    const res= await api.get("/skills?size=3&sort=updatedAt,desc");
+    const res= await api.get("/skills?size=4&sort=updatedAt,desc");
     return res.data.data;
 }
 // export const fetchRecentSessions = async () => {

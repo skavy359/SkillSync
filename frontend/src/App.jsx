@@ -6,6 +6,7 @@ import Skills from './pages/Skills';
 import SkillDetail from './pages/SkillDetail';
 import Categories from './pages/Categories';
 import Goals from './pages/Goals';
+import Sessions from './pages/Sessions';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
@@ -130,6 +131,8 @@ function App() {
                 return <Categories />;
             case 'goals':
                 return <Goals />;
+            case 'sessions':
+                return <Sessions onNavigate={setCurrentPage} />;
             case 'analytics':
                 return <Analytics />;
             case 'notifications':
