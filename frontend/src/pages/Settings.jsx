@@ -1,29 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, FileText, X, ChevronRight } from 'lucide-react';
+import notificationPreferenceService from '../services/notificationPreferenceService';
 
 const Settings = () => {
     const [modalOpen, setModalOpen] = useState(null);
-    const [notifPrefs, setNotifPrefs] = useState(() => {
-        const stored = localStorage.getItem('notifPrefs');
-        return stored ? JSON.parse(stored) : {
-            sessionReminders: true,
-            goalAlerts: true,
-            weeklySummary: false,
-        };
+    const [loading, setLoading] = useState(true);
+    const [notifPrefs, setNotifPrefs] = useState({
+        sessionReminders: true,
+        goalAlerts: true,
+        skillCompletions: true,
+        learningStreaks: true,
+        categoryMilestones: false,
+        burnoutWarnings: true,
+        weeklySummary: true,
+        achievementNotifications: true,
     });
 
-    const toggleNotif = (key) => {
-        setNotifPrefs(prev => {
-            const updated = { ...prev, [key]: !prev[key] };
-            localStorage.setItem('notifPrefs', JSON.stringify(updated));
-            return updated;
-        });
+    // Load preferences from backend on mount
+    useEffect(() => {
+        const loadPreferences = async () => {
+            try {
+                setLoading(true);
+                const prefs = await notificationPreferenceService.getPreferences();
+                setNotifPrefs({
+                    sessionReminders: prefs.sessionReminders ?? true,
+                    goalAlerts: prefs.goalAlerts ?? true,
+                    skillCompletions: prefs.skillCompletions ?? true,
+                    learningStreaks: prefs.learningStreaks ?? true,
+                    categoryMilestones: prefs.categoryMilestones ?? false,
+                    burnoutWarnings: prefs.burnoutWarnings ?? true,
+                    weeklySummary: prefs.weeklySummary ?? true,
+                    achievementNotifications: prefs.achievementNotifications ?? true,
+                });
+            } catch (error) {
+                // Fallback to localStorage if API fails
+                const stored = localStorage.getItem('notifPrefs');
+                if (stored) {
+                    setNotifPrefs(JSON.parse(stored));
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadPreferences();
+    }, []);
+
+    const toggleNotif = async (key) => {
+        const updated = { ...notifPrefs, [key]: !notifPrefs[key] };
+        setNotifPrefs(updated);
+        
+        // Save to localStorage as cache
+        localStorage.setItem('notifPrefs', JSON.stringify(updated));
+        
+        // Save to backend
+        try {
+            await notificationPreferenceService.updatePreferences(updated);
+        } catch (error) {
+            console.error('Failed to update preferences:', error);
+            // Show error feedback if needed
+        }
     };
 
     const notifItems = [
         { key: 'sessionReminders', label: 'Session reminders', desc: 'Get reminded to log your learning sessions' },
         { key: 'goalAlerts', label: 'Goal alerts', desc: 'Notifications when goals are due or completed' },
-        { key: 'weeklySummary', label: 'Weekly summary', desc: 'Receive a weekly learning summary' },
+        { key: 'skillCompletions', label: 'Skill completions', desc: 'Celebrate when you complete a skill' },
+        { key: 'learningStreaks', label: 'Learning streaks', desc: 'Alert when your streak is at risk of breaking' },
+        { key: 'categoryMilestones', label: 'Category milestones', desc: 'Notifications for reaching milestones in a category' },
+        { key: 'burnoutWarnings', label: 'Burnout warnings', desc: 'Alert when overworking patterns are detected' },
+        { key: 'weeklySummary', label: 'Weekly summary', desc: 'Receive a weekly learning summary every Monday showing what you accomplished' },
+        { key: 'achievementNotifications', label: 'Achievement notifications', desc: 'Get notified when earning new achievements and badges' },
     ];
 
     return (
@@ -41,22 +88,28 @@ const Settings = () => {
                     <p className="text-sm text-gray-500 dark:text-[#7f849c] mt-0.5">Manage how you receive notifications</p>
                 </div>
                 <div className="divide-y divide-gray-100 dark:divide-[#272739]">
-                    {notifItems.map((item) => (
-                        <div key={item.key} className="flex items-center justify-between px-6 py-4">
-                            <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">{item.label}</p>
-                                <p className="text-xs text-gray-500 dark:text-[#7f849c] mt-0.5">{item.desc}</p>
-                            </div>
-                            <button
-                                onClick={() => toggleNotif(item.key)}
-                                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${notifPrefs[item.key] ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-[#45475a]'
-                                    }`}
-                            >
-                                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${notifPrefs[item.key] ? 'translate-x-5' : 'translate-x-0'
-                                    }`} />
-                            </button>
+                    {loading ? (
+                        <div className="px-6 py-8 text-center">
+                            <p className="text-sm text-gray-500 dark:text-[#7f849c]">Loading preferences...</p>
                         </div>
-                    ))}
+                    ) : (
+                        notifItems.map((item) => (
+                            <div key={item.key} className="flex items-center justify-between px-6 py-4">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">{item.label}</p>
+                                    <p className="text-xs text-gray-500 dark:text-[#7f849c] mt-0.5">{item.desc}</p>
+                                </div>
+                                <button
+                                    onClick={() => toggleNotif(item.key)}
+                                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${notifPrefs[item.key] ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-[#45475a]'
+                                        }`}
+                                >
+                                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${notifPrefs[item.key] ? 'translate-x-5' : 'translate-x-0'
+                                        }`} />
+                                </button>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 

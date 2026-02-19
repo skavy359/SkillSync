@@ -1,6 +1,23 @@
 package com.skillsync.backend.controller;
 
-import com.skillsync.backend.dto.*;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.skillsync.backend.dto.ApiResponse;
+import com.skillsync.backend.dto.CategoryResponse;
+import com.skillsync.backend.dto.CreateCategoryRequest;
+import com.skillsync.backend.dto.NotificationPreferencesDTO;
+import com.skillsync.backend.dto.SkillResponse;
+import com.skillsync.backend.dto.UpdateProfileRequest;
+import com.skillsync.backend.dto.UserProfileResponse;
 import com.skillsync.backend.dto.audit.AuditLogResponse;
 import com.skillsync.backend.dto.goal.CreateGoalRequest;
 import com.skillsync.backend.dto.goal.GoalAnalyticsResponse;
@@ -8,15 +25,20 @@ import com.skillsync.backend.dto.goal.GoalResponse;
 import com.skillsync.backend.dto.recommendation.RecommendationHistoryResponse;
 import com.skillsync.backend.dto.recommendation.SkillRecommendationResponse;
 import com.skillsync.backend.dto.recommendation.UserRecommendationResponse;
-import com.skillsync.backend.dto.stats.*;
+import com.skillsync.backend.dto.stats.BurnoutRiskResponse;
+import com.skillsync.backend.dto.stats.CategoryAnalyticsResponse;
+import com.skillsync.backend.dto.stats.DailyActivityResponse;
+import com.skillsync.backend.dto.stats.DomainFocusResponse;
+import com.skillsync.backend.dto.stats.TimeWindowStatsResponse;
+import com.skillsync.backend.dto.stats.UserLearningStatsResponse;
+import com.skillsync.backend.dto.stats.UserStatsResponse;
+import com.skillsync.backend.dto.stats.UserStreakResponse;
 import com.skillsync.backend.model.Notification;
 import com.skillsync.backend.model.User;
 import com.skillsync.backend.service.NotificationService;
 import com.skillsync.backend.service.UserService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+
 import jakarta.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -129,7 +151,32 @@ public class UserProfileController {
                 )
         );
     }
+    @GetMapping("/me/notification-preferences")
+    public ResponseEntity<ApiResponse<NotificationPreferencesDTO>> getNotificationPreferences() {
+        NotificationPreferencesDTO prefs = userService.getNotificationPreferences();
 
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Notification preferences fetched",
+                        prefs
+                )
+        );
+    }
+
+    @PatchMapping("/me/notification-preferences")
+    public ResponseEntity<ApiResponse<NotificationPreferencesDTO>> updateNotificationPreferences(
+            @RequestBody NotificationPreferencesDTO preferences) {
+        NotificationPreferencesDTO updated = userService.updateNotificationPreferences(preferences);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Notification preferences updated",
+                        updated
+                )
+        );
+    }
     @PostMapping("/categories")
     public ResponseEntity<ApiResponse<CategoryResponse>>
     createCategory(@RequestBody CreateCategoryRequest request) {

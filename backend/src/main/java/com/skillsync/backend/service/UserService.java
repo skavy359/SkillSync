@@ -587,9 +587,9 @@ public class UserService {
         int streak = current;
 
         if (streak > 0 && !hasLearningToday(user)) {
-            notificationService.createNotification(
+            notificationService.createNotificationIfPreferenceEnabled(
                     user,
-                    "STREAK_RISK",
+                    NotificationService.NotificationType.LEARNING_STREAKS,
                     "Your learning streak is at risk. Study today to keep it alive!"
             );
         }
@@ -925,9 +925,9 @@ public class UserService {
                     }
 
                     if ("HIGH".equals(risk)) {
-                        notificationService.createNotification(
+                        notificationService.createNotificationIfPreferenceEnabled(
                                 user,
-                                "GOAL_RISK",
+                                NotificationService.NotificationType.GOAL_ALERTS,
                                 "Your goal deadline is at high risk. Increase learning time to stay on track."
                         );
                     }
@@ -1029,9 +1029,9 @@ public class UserService {
         }
 
         if ("HIGH".equals(risk)) {
-            notificationService.createNotification(
+            notificationService.createNotificationIfPreferenceEnabled(
                     user,
-                    "BURNOUT",
+                    NotificationService.NotificationType.BURNOUT_WARNINGS,
                     "Your learning activity dropped significantly this week. Consider revisiting your skills."
             );
         }
@@ -1170,9 +1170,9 @@ public class UserService {
                 .min(Comparator.comparingInt(Skill::getProgress))
                 .orElse(skills.get(0));
 
-        notificationService.createNotification(
+        notificationService.createNotificationIfPreferenceEnabled(
                 user,
-                "RECOMMENDATION",
+                NotificationService.NotificationType.ACHIEVEMENT_NOTIFICATIONS,
                 "We recommend focusing on " +
                         recommended.getName() +
                         " to improve your progress."
@@ -1347,6 +1347,54 @@ public class UserService {
         return logs.stream()
                 .map(this::mapToAuditLogResponse)
                 .collect(Collectors.toList());
+    }
+
+    public NotificationPreferencesDTO getNotificationPreferences() {
+        User user = getCurrentUser();
+        
+        return new NotificationPreferencesDTO(
+                user.getNotifSessionReminders(),
+                user.getNotifGoalAlerts(),
+                user.getNotifSkillCompletions(),
+                user.getNotifLearningStreaks(),
+                user.getNotifCategoryMilestones(),
+                user.getNotifBurnoutWarnings(),
+                user.getNotifWeeklySummary(),
+                user.getNotifAchievementNotifications()
+        );
+    }
+
+    public NotificationPreferencesDTO updateNotificationPreferences(NotificationPreferencesDTO preferences) {
+        User user = getCurrentUser();
+        
+        if (preferences.getSessionReminders() != null) {
+            user.setNotifSessionReminders(preferences.getSessionReminders());
+        }
+        if (preferences.getGoalAlerts() != null) {
+            user.setNotifGoalAlerts(preferences.getGoalAlerts());
+        }
+        if (preferences.getSkillCompletions() != null) {
+            user.setNotifSkillCompletions(preferences.getSkillCompletions());
+        }
+        if (preferences.getLearningStreaks() != null) {
+            user.setNotifLearningStreaks(preferences.getLearningStreaks());
+        }
+        if (preferences.getCategoryMilestones() != null) {
+            user.setNotifCategoryMilestones(preferences.getCategoryMilestones());
+        }
+        if (preferences.getBurnoutWarnings() != null) {
+            user.setNotifBurnoutWarnings(preferences.getBurnoutWarnings());
+        }
+        if (preferences.getWeeklySummary() != null) {
+            user.setNotifWeeklySummary(preferences.getWeeklySummary());
+        }
+        if (preferences.getAchievementNotifications() != null) {
+            user.setNotifAchievementNotifications(preferences.getAchievementNotifications());
+        }
+        
+        userRepository.save(user);
+        
+        return getNotificationPreferences();
     }
 
     // ─── Mapper Methods ──────────────────────────────────────────────────

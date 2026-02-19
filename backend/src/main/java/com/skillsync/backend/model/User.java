@@ -1,5 +1,12 @@
 package com.skillsync.backend.model;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,4 +28,29 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    // Notification Preferences
+    @Column(columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean notifSessionReminders = true;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean notifGoalAlerts = true;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean notifSkillCompletions = true;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean notifLearningStreaks = true;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT false")
+    private Boolean notifCategoryMilestones = false;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean notifBurnoutWarnings = true;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean notifWeeklySummary = true;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean notifAchievementNotifications = true;
 }

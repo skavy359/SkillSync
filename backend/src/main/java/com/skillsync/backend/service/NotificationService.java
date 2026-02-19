@@ -1,10 +1,12 @@
 package com.skillsync.backend.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.skillsync.backend.model.Notification;
 import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.NotificationRepository;
-import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 public class NotificationService {
@@ -17,6 +19,27 @@ public class NotificationService {
         this.notificationRepository = notificationRepository;
     }
 
+    public enum NotificationType {
+        SESSION_REMINDERS("sessionReminders"),
+        GOAL_ALERTS("goalAlerts"),
+        SKILL_COMPLETIONS("skillCompletions"),
+        LEARNING_STREAKS("learningStreaks"),
+        CATEGORY_MILESTONES("categoryMilestones"),
+        BURNOUT_WARNINGS("burnoutWarnings"),
+        WEEKLY_SUMMARY("weeklySummary"),
+        ACHIEVEMENT_NOTIFICATIONS("achievementNotifications");
+
+        private final String preferenceKey;
+
+        NotificationType(String preferenceKey) {
+            this.preferenceKey = preferenceKey;
+        }
+
+        public String getPreferenceKey() {
+            return preferenceKey;
+        }
+    }
+
     public void createNotification(
             User user,
             String type,
@@ -26,6 +49,32 @@ public class NotificationService {
                 new Notification(type, message, user);
 
         notificationRepository.save(notification);
+    }
+
+    public void createNotificationIfPreferenceEnabled(
+            User user,
+            NotificationType type,
+            String message
+    ) {
+        // Check user's preference for this notification type
+        boolean isEnabled = isNotificationTypeEnabled(user, type);
+        
+        if (isEnabled) {
+            createNotification(user, type.name(), message);
+        }
+    }
+
+    private boolean isNotificationTypeEnabled(User user, NotificationType type) {
+        return switch (type) {
+            case SESSION_REMINDERS -> user.getNotifSessionReminders() != null && user.getNotifSessionReminders();
+            case GOAL_ALERTS -> user.getNotifGoalAlerts() != null && user.getNotifGoalAlerts();
+            case SKILL_COMPLETIONS -> user.getNotifSkillCompletions() != null && user.getNotifSkillCompletions();
+            case LEARNING_STREAKS -> user.getNotifLearningStreaks() != null && user.getNotifLearningStreaks();
+            case CATEGORY_MILESTONES -> user.getNotifCategoryMilestones() != null && user.getNotifCategoryMilestones();
+            case BURNOUT_WARNINGS -> user.getNotifBurnoutWarnings() != null && user.getNotifBurnoutWarnings();
+            case WEEKLY_SUMMARY -> user.getNotifWeeklySummary() != null && user.getNotifWeeklySummary();
+            case ACHIEVEMENT_NOTIFICATIONS -> user.getNotifAchievementNotifications() != null && user.getNotifAchievementNotifications();
+        };
     }
 
     public List<Notification> getUserNotifications(User user) {
