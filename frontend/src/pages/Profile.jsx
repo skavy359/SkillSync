@@ -3,7 +3,6 @@ import PageHeader from '../components/ui/PageHeader';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import {
@@ -17,7 +16,8 @@ import {
     Target,
     Flame,
     Award,
-    TrendingUp
+    TrendingUp,
+    Check
 } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { getMyProfile, getMyStats, getMyStreak, getMyAchievements, getMyLearningStats, updateMyProfile, changePassword } from "../services/profileService";
@@ -44,6 +44,7 @@ const Profile = () => {
     });
     const [editLoading, setEditLoading] = useState(false);
     const [editError, setEditError] = useState('');
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
     useEffect(() => {
         getMyProfile().then(setProfile).catch(() => { });
@@ -129,7 +130,17 @@ const Profile = () => {
             const updatedProfile = await getMyProfile();
             setProfile(updatedProfile);
 
+            // Close modal instantly
             setIsEditModalOpen(false);
+            
+            // Show success message after modal closes
+            setTimeout(() => {
+                setShowSuccessMessage(true);
+                // Hide success message after 3 seconds
+                setTimeout(() => {
+                    setShowSuccessMessage(false);
+                }, 3000);
+            }, 100);
         } catch (err) {
             setEditError(err.response?.data?.message || 'Failed to update profile');
             console.error('Error updating profile:', err);
@@ -289,6 +300,14 @@ const Profile = () => {
                 action={false}
             />
 
+            {/* Success Notification */}
+            {showSuccessMessage && (
+                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Profile saved successfully!</p>
+                </div>
+            )}
+
             {/* Profile Card */}
             <Card className="p-8">
                 <div className="flex items-start justify-between mb-6">
@@ -313,14 +332,13 @@ const Profile = () => {
                                 <div className="flex items-center text-gray-600 dark:text-[#9399b2]">
                                     <Calendar className="w-4 h-4 mr-2" />
                                     <span className="text-sm">
-                                        Member since {new Date(profile.createdAt).toLocaleDateString("en-US", {
+                                        Member since {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString("en-US", {
                                             month: "long",
                                             year: "numeric"
-                                        })}
+                                        }) : 'N/A'}
                                     </span>
                                 </div>
                             </div>
-                            <Badge variant="primary" size="lg">Pro Member</Badge>
                         </div>
                     </div>
 
@@ -333,7 +351,7 @@ const Profile = () => {
                 <div className="pt-6 border-t border-gray-100 dark:border-[#272739]">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] mb-2">About</h3>
                     <p className="text-sm text-gray-600 dark:text-[#9399b2]">
-                        {profile.about || 'No bio added yet. Click Edit Profile to add one.'}
+                        {(profile.about && profile.about.trim()) ? profile.about : 'No bio added yet. Click Edit Profile to add one.'}
                     </p>
                 </div>
             </Card>

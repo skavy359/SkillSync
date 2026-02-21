@@ -6,9 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UpdateProfileRequest {
-    @NotBlank(message = "Name cannot be empty")
+public class UpdateSkillRequest {
+    @NotBlank(message = "Skill name is required")
     private String name;
-
-    private String about;
 }

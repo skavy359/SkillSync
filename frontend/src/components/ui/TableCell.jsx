@@ -1,5 +1,3 @@
-import React from 'react';
-
 const TableCell = ({ 
   children, 
   header = false,

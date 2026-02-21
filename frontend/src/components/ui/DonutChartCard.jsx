@@ -1,4 +1,3 @@
-import React from 'react';
 import Card from './Card';
 import { PieChart } from 'lucide-react';
 
@@ -24,15 +23,13 @@ const DonutChartCard = ({
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
 
-  let currentAngle = -90; // Start from top
-
   const segments = data.map((item, index) => {
     const percentage = (item.value / total) * 100;
-    const angle = (item.value / total) * 360;
     const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
-    const rotation = currentAngle;
-
-    currentAngle += angle;
+    
+    const rotation = -90 + data.slice(0, index).reduce((sum, prev) => {
+      return sum + (prev.value / total) * 360;
+    }, 0);
 
     return {
       ...item,
@@ -57,10 +54,8 @@ const DonutChartCard = ({
 
       {data.length > 0 ? (
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Donut Chart */}
           <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
             <svg viewBox="0 0 100 100" className="transform -rotate-90">
-              {/* Background circle */}
               <circle
                 cx="50"
                 cy="50"
@@ -70,7 +65,6 @@ const DonutChartCard = ({
                 strokeWidth="12"
               />
 
-              {/* Segments */}
               {segments.map((segment, index) => (
                 <circle
                   key={index}
@@ -90,20 +84,18 @@ const DonutChartCard = ({
               ))}
             </svg>
 
-            {/* Center text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">{total}</span>
-              <span className="text-xs text-gray-500 dark:text-[#7f849c]">Total</span>
+              <span className="text-xs">Total</span>
             </div>
           </div>
 
-          {/* Legend */}
           <div className="flex-1 space-y-2 min-w-0">
             {segments.map((segment, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center space-x-2 min-w-0 flex-1">
                   <div
-                    className={`w-3 h-3 rounded-full flex-shrink-0 ${segment.color.replace('stroke-', 'bg-').split(' ')[1]}`}
+                    className={`w-3 h-3 rounded-full shrink-0 ${segment.color.replace('stroke-', 'bg-').split(' ')[1]}`}
                   />
                   <span className="text-sm text-gray-700 dark:text-[#a6adc8] truncate">
                     {segment.label}

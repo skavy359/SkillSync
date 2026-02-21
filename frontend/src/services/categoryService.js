@@ -24,3 +24,13 @@ export const getDomainFocus = async () => {
     const { data } = await api.get('/profile/categories/focus');
     return data.data;
 };
+
+export const updateCategory = async (categoryId, categoryData) => {
+    const { data } = await api.put(`/profile/categories/${categoryId}`, categoryData);
+    return data.data;
+};
+
+export const deleteCategory = async (categoryId) => {
+    const { data } = await api.delete(`/profile/categories/${categoryId}`);
+    return data.data;
+};

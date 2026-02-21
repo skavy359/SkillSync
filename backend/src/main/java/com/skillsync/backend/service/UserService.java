@@ -1,6 +1,7 @@
 package com.skillsync.backend.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -27,6 +28,7 @@ import com.skillsync.backend.dto.RegisterRequest;
 import com.skillsync.backend.dto.SkillResponse;
 import com.skillsync.backend.dto.UpdateProfileRequest;
 import com.skillsync.backend.dto.UpdateSkillProgressRequest;
+import com.skillsync.backend.dto.UpdateSkillRequest;
 import com.skillsync.backend.dto.UserProfileResponse;
 import com.skillsync.backend.dto.UserResponse;
 import com.skillsync.backend.dto.audit.AuditLogResponse;
@@ -200,11 +202,19 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(null));
 
+        // Set createdAt to current time if it's null (for existing users)
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(LocalDateTime.now());
+            userRepository.save(user);
+        }
+
         return new UserProfileResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getAbout(),
+                user.getCreatedAt()
         );
     }
 
@@ -216,6 +226,13 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(null));
 
         user.setName(request.getName());
+        
+        // Handle about field - set to null if empty or whitespace only
+        if (request.getAbout() != null && !request.getAbout().trim().isEmpty()) {
+            user.setAbout(request.getAbout().trim());
+        } else {
+            user.setAbout(null);
+        }
 
         User updatedUser = userRepository.save(user);
 
@@ -223,7 +240,9 @@ public class UserService {
                 updatedUser.getId(),
                 updatedUser.getName(),
                 updatedUser.getEmail(),
-                updatedUser.getRole().name()
+                updatedUser.getRole().name(),
+                updatedUser.getAbout(),
+                updatedUser.getCreatedAt()
         );
     }
 
@@ -258,6 +277,16 @@ public class UserService {
                 "SKILL",
                 savedSkill.getId()
         );
+
+        // Check if this is the 5th skill to unlock achievement
+        long totalSkills = skillRepository.countByUser(user);
+        if (totalSkills == 5) {
+            notificationService.createNotificationIfPreferenceEnabled(
+                    user,
+                    NotificationService.NotificationType.ACHIEVEMENT_NOTIFICATIONS,
+                    "🏆 Achievement Unlocked! Skill Collector - You've added 5 skills to your learning path!"
+            );
+        }
 
         return mapSkill(savedSkill);
     }
@@ -328,6 +357,28 @@ public class UserService {
                 skill.getId()
         );
 
+        // Send notification if skill was just completed
+        if (request.getProgress() == 100) {
+            notificationService.createNotificationIfPreferenceEnabled(
+                    user,
+                    NotificationService.NotificationType.SKILL_COMPLETIONS,
+                    "Congratulations! You've successfully completed the skill \"" + skill.getName() + "\". Great achievement!"
+            );
+            
+            // Check if this is the first completed skill  
+            long completedCount = skillRepository.countByUserAndStatus(user, SkillStatus.COMPLETED);
+            if (completedCount == 1) {
+                notificationService.createNotificationIfPreferenceEnabled(
+                        user,
+                        NotificationService.NotificationType.ACHIEVEMENT_NOTIFICATIONS,
+                        "🏆 Achievement Unlocked! Completion Master - You've successfully completed your first skill!"
+                );
+            }
+            
+            // Check for category milestone
+            checkAndNotifyForCategoryMilestone(user, skill);
+        }
+
         return mapSkill(updatedSkill);
     }
 
@@ -350,6 +401,31 @@ public class UserService {
                 "SKILL",
                 skill.getId()
         );
+    }
+
+    public SkillResponse updateSkill(Long skillId, UpdateSkillRequest request) {
+
+        String email = getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(null));
+
+        Skill skill = skillRepository
+                .findByIdAndUser(skillId, user)
+                .orElseThrow(() -> new SkillNotFoundException(skillId));
+
+        skill.setName(request.getName());
+
+        Skill updatedSkill = skillRepository.save(skill);
+
+        auditService.log(
+                user,
+                "UPDATE",
+                "SKILL",
+                skill.getId()
+        );
+
+        return mapSkill(updatedSkill);
     }
 
     public Page<AdminUserResponse> getAllUsersForAdmin(
@@ -405,12 +481,23 @@ public class UserService {
     }
 
     private SkillResponse mapSkill(Skill skill) {
+        // Calculate total minutes from all sessions
+        int totalMinutes = skill.getSessions() != null 
+            ? skill.getSessions().stream()
+                .mapToInt(session -> session.getDurationMinutes())
+                .sum()
+            : 0;
+
+        String categoryName = skill.getCategory() != null ? skill.getCategory().getName() : null;
+
         return new SkillResponse(
                 skill.getId(),
                 skill.getName(),
                 skill.getLevel().name(),
                 skill.getProgress(),
-                skill.getStatus().name()
+                skill.getStatus().name(),
+                totalMinutes,
+                categoryName
         );
     }
 
@@ -512,6 +599,13 @@ public class UserService {
                 session.getId()
         );
 
+        // Send notification for session logged
+        notificationService.createNotificationIfPreferenceEnabled(
+                user,
+                NotificationService.NotificationType.SESSION_REMINDERS,
+                "Great job! You've logged a learning session of " + request.getDurationMinutes() + " minutes for " + skill.getName() + "."
+        );
+
         return new SessionResponse(
                 saved.getId(),
                 saved.getDurationMinutes(),
@@ -540,6 +634,81 @@ public class UserService {
                         s.getNotes()
                 ))
                 .toList();
+    }
+
+    public SessionResponse updateSession(
+            Long skillId,
+            Long sessionId,
+            AddSessionRequest request
+    ) {
+
+        String email = getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(null));
+
+        Skill skill = skillRepository
+                .findByIdAndUser(skillId, user)
+                .orElseThrow(() -> new SkillNotFoundException(skillId));
+
+        LearningSession session = learningSessionRepository
+                .findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        // Verify session belongs to the skill
+        if (!session.getSkill().getId().equals(skillId)) {
+            throw new RuntimeException("Session does not belong to this skill");
+        }
+
+        session.setDurationMinutes(request.getDurationMinutes());
+        session.setSessionDate(request.getSessionDate());
+        session.setNotes(request.getNotes());
+
+        LearningSession updated = learningSessionRepository.save(session);
+
+        auditService.log(
+                user,
+                "UPDATE",
+                "SESSION",
+                session.getId()
+        );
+
+        return new SessionResponse(
+                updated.getId(),
+                updated.getDurationMinutes(),
+                updated.getSessionDate(),
+                updated.getNotes()
+        );
+    }
+
+    public void deleteSession(Long skillId, Long sessionId) {
+
+        String email = getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(null));
+
+        Skill skill = skillRepository
+                .findByIdAndUser(skillId, user)
+                .orElseThrow(() -> new SkillNotFoundException(skillId));
+
+        LearningSession session = learningSessionRepository
+                .findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        // Verify session belongs to the skill
+        if (!session.getSkill().getId().equals(skillId)) {
+            throw new RuntimeException("Session does not belong to this skill");
+        }
+
+        learningSessionRepository.delete(session);
+
+        auditService.log(
+                user,
+                "DELETE",
+                "SESSION",
+                sessionId
+        );
     }
 
     public SessionStatsResponse getSessionStats(Long skillId) {
@@ -636,6 +805,21 @@ public class UserService {
                     user,
                     NotificationService.NotificationType.LEARNING_STREAKS,
                     "Your learning streak is at risk. Study today to keep it alive!"
+            );
+        }
+
+        // Check for achievement unlocks
+        if (streak == 7) {
+            notificationService.createNotificationIfPreferenceEnabled(
+                    user,
+                    NotificationService.NotificationType.ACHIEVEMENT_NOTIFICATIONS,
+                    "🏆 Achievement Unlocked! Fire Starter - You've maintained a 7-day learning streak!"
+            );
+        } else if (streak == 30) {
+            notificationService.createNotificationIfPreferenceEnabled(
+                    user,
+                    NotificationService.NotificationType.ACHIEVEMENT_NOTIFICATIONS,
+                    "🏆 Achievement Unlocked! Unstoppable - You've maintained an impressive 30-day learning streak!"
             );
         }
 
@@ -797,6 +981,38 @@ public class UserService {
         SkillCategory saved = skillCategoryRepository.save(category);
 
         return mapToCategoryResponse(saved);
+    }
+
+    public CategoryResponse updateCategory(Long categoryId, CreateCategoryRequest request) {
+
+        String email = getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(null));
+
+        SkillCategory category = skillCategoryRepository
+                .findByIdAndUser(categoryId, user)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        category.setName(request.getName());
+
+        SkillCategory updated = skillCategoryRepository.save(category);
+
+        return mapToCategoryResponse(updated);
+    }
+
+    public void deleteCategory(Long categoryId) {
+
+        String email = getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(null));
+
+        SkillCategory category = skillCategoryRepository
+                .findByIdAndUser(categoryId, user)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        skillCategoryRepository.delete(category);
     }
 
     public List<SkillResponse> getSkillsByCategory(Long categoryId) {
@@ -1041,6 +1257,27 @@ public class UserService {
         );
     }
 
+    private void checkAndNotifyForCategoryMilestone(User user, Skill completedSkill) {
+        if (completedSkill.getCategory() == null) return;
+        
+        // Count completed skills in this category
+        int completedInCategory = (int) skillRepository.findAllByUser(user).stream()
+                .filter(s -> s.getCategory() != null && 
+                           s.getCategory().getId().equals(completedSkill.getCategory().getId()) &&
+                           s.getStatus() == SkillStatus.COMPLETED)
+                .count();
+        
+        // Send milestone notification at 5, 10, 15 skills
+        if (completedInCategory == 5 || completedInCategory == 10 || completedInCategory == 15) {
+            notificationService.createNotificationIfPreferenceEnabled(
+                    user,
+                    NotificationService.NotificationType.CATEGORY_MILESTONES,
+                    "🎯 Milestone achieved! You've completed " + completedInCategory + " skills in the \"" + 
+                    completedSkill.getCategory().getName() + "\" category!"
+            );
+        }
+    }
+
     public BurnoutRiskResponse getBurnoutRisk() {
 
         String email = getCurrentUserEmail();
@@ -1065,9 +1302,12 @@ public class UserService {
         }
 
         String risk;
-        if (ratio < 0.5) {
+        // High risk if working significantly more than average (ratio > 2.0)
+        // Medium risk if working moderately more than average (ratio > 1.25)
+        // Low risk otherwise
+        if (ratio > 2.0) {
             risk = "HIGH";
-        } else if (ratio < 0.75) {
+        } else if (ratio > 1.25) {
             risk = "MEDIUM";
         } else {
             risk = "LOW";
@@ -1077,7 +1317,7 @@ public class UserService {
             notificationService.createNotificationIfPreferenceEnabled(
                     user,
                     NotificationService.NotificationType.BURNOUT_WARNINGS,
-                    "Your learning activity dropped significantly this week. Consider revisiting your skills."
+                    "Your learning pace is intense this week. You're working significantly more than your average. Consider taking a break to avoid burnout."
             );
         }
 
@@ -1266,12 +1506,23 @@ public class UserService {
     }
 
     private SkillResponse mapSkillToResponse(Skill skill) {
+        // Calculate total minutes from all sessions
+        int totalMinutes = skill.getSessions() != null 
+            ? skill.getSessions().stream()
+                .mapToInt(session -> session.getDurationMinutes())
+                .sum()
+            : 0;
+
+        String categoryName = skill.getCategory() != null ? skill.getCategory().getName() : null;
+
         return new SkillResponse(
                 skill.getId(),
                 skill.getName(),
                 skill.getLevel().name(),
                 skill.getProgress(),
-                skill.getStatus().name()
+                skill.getStatus().name(),
+                totalMinutes,
+                categoryName
         );
     }
 
@@ -1626,12 +1877,23 @@ public class UserService {
     }
 
     private SkillResponse mapToSkillResponse(Skill skill) {
+        // Calculate total minutes from all sessions
+        int totalMinutes = skill.getSessions() != null 
+            ? skill.getSessions().stream()
+                .mapToInt(session -> session.getDurationMinutes())
+                .sum()
+            : 0;
+
+        String categoryName = skill.getCategory() != null ? skill.getCategory().getName() : null;
+
         return new SkillResponse(
                 skill.getId(),
                 skill.getName(),
                 skill.getLevel().name(),
                 skill.getProgress(),
-                skill.getStatus().name()
+                skill.getStatus().name(),
+                totalMinutes,
+                categoryName
         );
     }
 

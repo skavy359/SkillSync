@@ -8,25 +8,39 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 import FormRow from '../components/ui/FormRow';
-import { Plus, Search, Lightbulb } from 'lucide-react';
+import { Plus, Search, Lightbulb, Check } from 'lucide-react';
 import { useEffect } from "react"
 import { addSkill, getMySkills } from "../services/skillService"
+import { getAllCategories } from "../services/categoryService"
 
 const Skills = ({ onNavigate, onSelectSkill }) => {
     const [initialSkills, setInitialSkills] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
         level: 'Beginner',
-        category: '',
+        categoryId: '',
         description: ''
     });
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         getMySkills().then(data => setInitialSkills(data?.content || []))
     }, [])
+
+    useEffect(() => {
+        getAllCategories()
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setCategories(data);
+                }
+            })
+            .catch(() => { });
+    }, []);
 
     const filteredSkills = initialSkills.filter(skill => {
         const matchesSearch =
@@ -43,12 +57,18 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e && e.preventDefault) e.preventDefault();
+        if (!formData.name) {
+            alert('Please enter a skill name');
+            return;
+        }
 
+        setIsSubmitting(true);
         try {
             const newSkill = await addSkill({
                 name: formData.name,
                 level: formData.level.toUpperCase(),
+                categoryId: formData.categoryId ? parseInt(formData.categoryId) : null
             });
 
             setInitialSkills(prev => [...prev, newSkill]);
@@ -57,11 +77,17 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
             setFormData({
                 name: '',
                 level: 'Beginner',
-                category: '',
+                categoryId: '',
                 description: ''
             });
+            setShowSuccessMessage(true);
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 3000);
         } catch (err) {
             console.error("Add skill failed", err);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -69,7 +95,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
         all: initialSkills.length,
         active: initialSkills.filter(s => s.status.toLowerCase() === 'active').length,
         completed: initialSkills.filter(s => s.status.toLowerCase() === 'completed').length,
-        paused: initialSkills.filter(s => s.status.toLowerCase() === 'paused').length,
     };
 
     return (
@@ -77,10 +102,24 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
             <PageHeader
                 title="Skills"
                 description="Manage and track your learning skills"
-                actionLabel="Add Skill"
-                actionIcon={Plus}
-                onAction={() => setIsModalOpen(true)}
+                action={
+                    <Button
+                        variant="primary"
+                        icon={Plus}
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        Add Skill
+                    </Button>
+                }
             />
+
+            {/* Success Notification */}
+            {showSuccessMessage && (
+                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Skill added successfully!</p>
+                </div>
+            )}
 
             {/* Filters and Search */}
             <div className="flex flex-col sm:flex-row gap-4">
@@ -144,11 +183,11 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                 title="Add New Skill"
                 footer={
                     <>
-                        <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+                        <Button variant="secondary" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>
                             Cancel
                         </Button>
-                        <Button variant="primary" onClick={handleSubmit}>
-                            Add Skill
+                        <Button variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? 'Adding...' : 'Add Skill'}
                         </Button>
                     </>
                 }
@@ -168,25 +207,17 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                             label="Level"
                             value={formData.level}
                             onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                            options={['Beginner', 'Intermediate', 'Advanced', 'Expert']}
+                            options={['Beginner', 'Intermediate', 'Advanced']}
                         />
 
                         <Select
                             label="Category"
-                            value={formData.category}
-                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                            options={[]}
+                            value={formData.categoryId}
+                            onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                            options={categories.map(cat => ({ value: cat.id, label: cat.name }))}
                             placeholder="Select a category"
                         />
                     </FormRow>
-
-                    <Textarea
-                        label="Description"
-                        placeholder="What do you want to learn about this skill?"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        rows={3}
-                    />
                 </form>
             </Modal>
         </div>

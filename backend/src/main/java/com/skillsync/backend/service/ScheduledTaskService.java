@@ -56,10 +56,10 @@ public class ScheduledTaskService {
             // Note: This would need additional methods in UserService to fetch week-specific stats
             String summaryMessage = buildWeeklySummaryMessage(user, lastMonday, lastSunday);
             
-            // Send notification with the summary
-            notificationService.createNotification(
+            // Send notification with the summary using preference-aware method
+            notificationService.createNotificationIfPreferenceEnabled(
                     user,
-                    NotificationService.NotificationType.WEEKLY_SUMMARY.name(),
+                    NotificationService.NotificationType.WEEKLY_SUMMARY,
                     summaryMessage
             );
         } catch (Exception e) {

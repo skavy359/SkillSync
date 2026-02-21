@@ -15,7 +15,16 @@ const Notifications = () => {
             .finally(() => setLoading(false));
     }, []);
 
-    const unreadCount = notifications.filter(n => !n.read).length;
+    // Filter notifications to show only last 24 hours
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const recentNotifications = notifications.filter(n => {
+        if (!n.createdAt) return false;
+        const notifDate = new Date(n.createdAt);
+        return notifDate >= oneDayAgo;
+    });
+
+    const unreadCount = recentNotifications.filter(n => !n.read).length;
 
     const handleMarkRead = (notif) => {
         if (notif.read) return;
@@ -61,7 +70,7 @@ const Notifications = () => {
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Notifications</h1>
                     <p className="text-gray-500 dark:text-[#7f849c] mt-1">
-                        {unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}
+                        {unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''} from the last 24 hours` : 'All caught up! No notifications in the last 24 hours'}
                     </p>
                 </div>
                 {unreadCount > 0 && (
@@ -76,9 +85,9 @@ const Notifications = () => {
             </div>
 
             {/* Notifications List */}
-            {notifications.length > 0 ? (
+            {recentNotifications.length > 0 ? (
                 <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden divide-y divide-gray-100 dark:divide-[#272739]">
-                    {notifications.map((notif, idx) => (
+                    {recentNotifications.map((notif, idx) => (
                         <div
                             key={notif.id || idx}
                             className={`flex items-start space-x-4 px-5 py-4 transition-colors ${!notif.read ? 'bg-indigo-50/40 dark:bg-indigo-500/10' : 'hover:bg-gray-50 dark:hover:bg-[#272739]'}`}

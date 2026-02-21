@@ -144,7 +144,7 @@ const Login = ({ onNavigate, onLogin }) => {
         ];
 
     return (
-        <div className="min-h-screen flex bg-gray-50">
+        <div className="min-h-screen flex bg-[#0f0f1a] dark:bg-[#0f0f1a]">
 
             {/* ─── Left Branding Panel ───────────────────────────── */}
             <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 flex-col justify-between p-12 overflow-hidden">
@@ -242,20 +242,20 @@ const Login = ({ onNavigate, onLogin }) => {
                         <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
                             <Lightbulb className="w-5 h-5 text-white" />
                         </div>
-                        <span className="text-xl font-bold text-gray-900">SkillSync</span>
+                        <span className="text-xl font-bold text-[#cdd6f4]">SkillSync</span>
                     </div>
 
                     {/* Heading */}
                     <div className="mb-8">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
-                        <p className="text-gray-500">Sign in to continue your learning journey</p>
+                        <h2 className="text-3xl font-bold text-[#cdd6f4] mb-2">Welcome back</h2>
+                        <p className="text-[#9399b2]">Sign in to continue your learning journey</p>
                     </div>
 
                     {/* Email & Password Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[#a6adc8] mb-2">
                                 Email address
                             </label>
                             <input
@@ -266,17 +266,17 @@ const Login = ({ onNavigate, onLogin }) => {
                                     if (errors.email) setErrors({ ...errors, email: '' });
                                 }}
                                 placeholder="john@example.com"
-                                className={`w-full px-4 py-3 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                                className={`w-full px-4 py-3 bg-[#1e1e2e] border rounded-xl text-sm text-[#cdd6f4] placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.email ? 'border-red-500 bg-red-500/10' : 'border-[#313244]'
                                     }`}
                             />
                             {errors.email && (
-                                <p className="mt-1.5 text-xs text-red-600">{errors.email}</p>
+                                <p className="mt-1.5 text-xs text-red-400">{errors.email}</p>
                             )}
                         </div>
 
                         {/* Password */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[#a6adc8] mb-2">
                                 Password
                             </label>
                             <div className="relative">
@@ -288,19 +288,19 @@ const Login = ({ onNavigate, onLogin }) => {
                                         if (errors.password) setErrors({ ...errors, password: '' });
                                     }}
                                     placeholder="Enter your password"
-                                    className={`w-full px-4 py-3 pr-12 bg-white border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                                    className={`w-full px-4 py-3 pr-12 bg-[#1e1e2e] border rounded-xl text-sm text-[#cdd6f4] placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.password ? 'border-red-500 bg-red-500/10' : 'border-[#313244]'
                                         }`}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6c7086] hover:text-[#a6adc8] transition-colors p-1 rounded"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
                             {errors.password && (
-                                <p className="mt-1.5 text-xs text-red-600">{errors.password}</p>
+                                <p className="mt-1.5 text-xs text-red-400">{errors.password}</p>
                             )}
                         </div>
 
@@ -311,9 +311,9 @@ const Login = ({ onNavigate, onLogin }) => {
                                 type="checkbox"
                                 checked={rememberMe}
                                 onChange={(e) => setRememberMe(e.target.checked)}
-                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+                                className="w-4 h-4 text-indigo-600 border-[#313244] rounded focus:ring-indigo-500 cursor-pointer bg-[#1e1e2e]"
                             />
-                            <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer select-none">
+                            <label htmlFor="remember" className="text-sm text-[#9399b2] cursor-pointer select-none">
                                 Keep me signed in for 5 days
                             </label>
                         </div>
@@ -342,11 +342,11 @@ const Login = ({ onNavigate, onLogin }) => {
                     </form>
 
                     {/* Footer link */}
-                    <p className="mt-8 text-center text-sm text-gray-500">
+                    <p className="mt-8 text-center text-sm text-[#9399b2]">
                         Don't have an account?{' '}
                         <button
                             onClick={() => onNavigate && onNavigate('register')}
-                            className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+                            className="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
                         >
                             Create one free
                         </button>

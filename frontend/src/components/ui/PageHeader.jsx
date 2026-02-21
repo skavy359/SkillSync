@@ -14,7 +14,6 @@ const PageHeader = ({
 }) => {
   return (
     <div className={`mb-6 ${className}`}>
-      {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
         <div className="flex items-center space-x-2 text-sm text-gray-500 mb-3">
           {breadcrumbs.map((crumb, index) => (
@@ -36,7 +35,6 @@ const PageHeader = ({
         </div>
       )}
 
-      {/* Header Content */}
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-2">{title}</h1>
@@ -45,18 +43,19 @@ const PageHeader = ({
           )}
         </div>
 
-        {/* Action Button or Custom Children */}
         {children ? (
           <div className="ml-4">{children}</div>
-        ) : action !== false && (
-          <Button
-            variant="primary"
-            icon={actionIcon}
-            onClick={onAction}
-          >
-            {actionLabel || 'Add New'}
-          </Button>
-        )}
+        ) : action && action !== false ? (
+          <div className="ml-4">{typeof action === 'object' ? action : (
+            <Button
+              variant="primary"
+              icon={actionIcon}
+              onClick={onAction}
+            >
+              {actionLabel || 'Add New'}
+            </Button>
+          )}</div>
+        ) : null}
       </div>
     </div>
   );

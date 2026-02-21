@@ -21,7 +21,9 @@ import {
     Plus,
     ArrowRight,
     Calendar,
-    BookOpen
+    BookOpen,
+    Check,
+    AlertTriangle
 } from 'lucide-react';
 import { useEffect, useState } from "react";
 import {
@@ -30,7 +32,8 @@ import {
     fetchRecentSkills,
 } from "../services/dashboardService";
 import { getMyStats, getMyStreak, getWeeklyStats } from "../services/profileService";
-import { getMySkills } from "../services/skillService";
+import { getMySkills, addSkill } from "../services/skillService";
+import { getAllCategories } from "../services/categoryService";
 
 
 const Dashboard = ({ onNavigate, onSelectSkill }) => {
@@ -58,13 +61,15 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
 
     // Add Skill Modal state
     const [showAddSkillModal, setShowAddSkillModal] = useState(false);
+    const [dashboardCategories, setDashboardCategories] = useState([]);
     const [addSkillForm, setAddSkillForm] = useState({
         name: '',
         level: 'Beginner',
-        category: '',
-        description: ''
+        categoryId: '',
     });
     const [addSkillSubmitting, setAddSkillSubmitting] = useState(false);
+    const [showAddSkillSuccess, setShowAddSkillSuccess] = useState(false);
+    const [validationError, setValidationError] = useState(false);
 
     // Helper: fetch recent sessions from all user skills
     const loadRecentSessions = async (skillList) => {
@@ -220,9 +225,24 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         }
     }, [showLogModal]);
 
+    // Load categories when add skill modal opens
+    useEffect(() => {
+        if (showAddSkillModal && dashboardCategories.length === 0) {
+            getAllCategories().then(data => {
+                setDashboardCategories(Array.isArray(data) ? data : []);
+            }).catch(() => { });
+        }
+    }, [showAddSkillModal]);
+
     const handleLogSession = async (e) => {
         e.preventDefault();
         if (!logForm.skillId || !logForm.durationMinutes) return;
+        
+        const duration = Number(logForm.durationMinutes);
+        if (duration > 1440) {
+            setValidationError(true);
+            return;
+        }
 
         setLogSubmitting(true);
         try {
@@ -249,21 +269,26 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     };
 
     const handleAddSkill = async (e) => {
-        e.preventDefault();
-        if (!addSkillForm.name) return;
+        if (e && e.preventDefault) e.preventDefault();
+        if (!addSkillForm.name) {
+            alert('Please enter a skill name');
+            return;
+        }
 
         setAddSkillSubmitting(true);
         try {
-            const { addSkill } = await import('../services/skillService');
             const newSkill = await addSkill({
                 name: addSkillForm.name,
                 level: addSkillForm.level.toUpperCase(),
-                category: addSkillForm.category || null,
-                description: addSkillForm.description || null
+                categoryId: addSkillForm.categoryId ? parseInt(addSkillForm.categoryId) : null
             });
             
             setShowAddSkillModal(false);
-            setAddSkillForm({ name: '', level: 'Beginner', category: '', description: '' });
+            setAddSkillForm({ name: '', level: 'Beginner', categoryId: '' });
+            setShowAddSkillSuccess(true);
+            setTimeout(() => {
+                setShowAddSkillSuccess(false);
+            }, 3000);
             
             // Refresh data
             fetchDashboardStats().then(setLearningStats).catch(() => { });
@@ -372,6 +397,14 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 description="Welcome back! Here's your learning overview."
                 action={false}
             />
+
+            {/* Success Notification */}
+            {showAddSkillSuccess && (
+                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Skill added successfully!</p>
+                </div>
+            )}
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -615,6 +648,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                         onChange={(e) => setLogForm({ ...logForm, durationMinutes: e.target.value })}
                         required
                         min="1"
+                        max="1440"
                     />
                     <Input
                         label="Date"
@@ -632,11 +666,30 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </form>
             </Modal>
 
+            {/* Validation Error Modal */}
+            <Modal
+                isOpen={validationError}
+                onClose={() => setValidationError(false)}
+                title="Duration Exceeds Limit"
+                footer={
+                    <Button variant="primary" onClick={() => setValidationError(false)}>
+                        Got it
+                    </Button>
+                }
+            >
+                <div className="flex items-start space-x-4">
+                    <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-gray-700 dark:text-[#a6adc8]">
+                        Session duration cannot exceed 24 hours (1440 minutes). Please enter a shorter duration.
+                    </p>
+                </div>
+            </Modal>
+
             {/* Add Skill Modal */}
             <Modal
                 isOpen={showAddSkillModal}
                 onClose={() => setShowAddSkillModal(false)}
-                title="Add a New Skill"
+                title="Add New Skill"
                 footer={
                     <>
                         <Button variant="secondary" onClick={() => setShowAddSkillModal(false)}>
@@ -663,25 +716,17 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                             label="Level"
                             value={addSkillForm.level}
                             onChange={(e) => setAddSkillForm({ ...addSkillForm, level: e.target.value })}
-                            options={['Beginner', 'Intermediate', 'Advanced', 'Expert']}
+                            options={['Beginner', 'Intermediate', 'Advanced']}
                         />
 
                         <Select
                             label="Category"
-                            value={addSkillForm.category}
-                            onChange={(e) => setAddSkillForm({ ...addSkillForm, category: e.target.value })}
-                            options={[]}
+                            value={addSkillForm.categoryId}
+                            onChange={(e) => setAddSkillForm({ ...addSkillForm, categoryId: e.target.value })}
+                            options={dashboardCategories.map(cat => ({ value: cat.id, label: cat.name }))}
                             placeholder="Select a category"
                         />
                     </FormRow>
-
-                    <Textarea
-                        label="Description"
-                        placeholder="What do you want to learn about this skill?"
-                        value={addSkillForm.description}
-                        onChange={(e) => setAddSkillForm({ ...addSkillForm, description: e.target.value })}
-                        rows={3}
-                    />
                 </form>
             </Modal>
         </div>

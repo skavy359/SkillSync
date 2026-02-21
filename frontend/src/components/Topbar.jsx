@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, Bell, Settings, LogOut, User, ChevronDown, X, Lightbulb } from 'lucide-react';
 import { getMySkills } from '../services/skillService';
 import { getMyNotifications, markNotificationRead, markAllNotificationsRead } from '../services/profileService';
@@ -8,14 +8,12 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
     const [notifOpen, setNotifOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
 
-    // Search state
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [searchLoading, setSearchLoading] = useState(false);
     const [searchFocused, setSearchFocused] = useState(false);
     const searchRef = useRef(null);
 
-    // Fetch real notifications
     useEffect(() => {
         getMyNotifications()
             .then((data) => {
@@ -23,10 +21,11 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                     setNotifications(data.slice(0, 4));
                 }
             })
-            .catch(() => { });
+            .catch(() => {
+                console.error('Failed to fetch notifications');
+            });
     }, []);
 
-    // Debounced search
     useEffect(() => {
         if (!searchQuery.trim()) {
             setSearchResults([]);
@@ -46,7 +45,6 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
-    // Close search on outside click
     useEffect(() => {
         const handler = (e) => {
             if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -57,7 +55,6 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    // User initials
     const getInitials = (name) => {
         if (!name) return '??';
         return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -73,7 +70,6 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
 
     return (
         <header className="h-16 bg-white dark:bg-[#1e1e2e] border-b border-gray-200 dark:border-[#313244] flex items-center justify-between px-6 relative z-20">
-            {/* Search Bar */}
             <div className="flex-1 max-w-xl" ref={searchRef}>
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-[#6c7086]" />
@@ -94,7 +90,6 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                         </button>
                     )}
 
-                    {/* Search Results Dropdown */}
                     {showSearchDropdown && (
                         <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1e1e2e] border border-gray-200 dark:border-[#313244] rounded-xl shadow-lg overflow-hidden z-50">
                             {searchLoading ? (
@@ -112,7 +107,7 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                                             }}
                                             className="w-full flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-[#272739] transition-colors text-left"
                                         >
-                                            <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-500/15 rounded-lg flex items-center justify-center shrink-0">
                                                 <Lightbulb className="w-4 h-4 text-indigo-500" />
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -132,9 +127,7 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                 </div>
             </div>
 
-            {/* Right Section */}
             <div className="flex items-center space-x-3 ml-6">
-                {/* Settings */}
                 <button
                     onClick={() => onNavigate && onNavigate('settings')}
                     className="p-2 text-gray-400 dark:text-[#6c7086] hover:text-gray-600 dark:hover:text-[#cdd6f4] hover:bg-gray-50 dark:hover:bg-[#272739] rounded-lg transition-all"
@@ -142,7 +135,6 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                     <Settings className="w-5 h-5" />
                 </button>
 
-                {/* Notifications */}
                 <div className="relative">
                     <button
                         onClick={() => { setNotifOpen(!notifOpen); setDropdownOpen(false); }}
@@ -154,7 +146,6 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                         )}
                     </button>
 
-                    {/* Notification Dropdown */}
                     {notifOpen && (
                         <>
                             <div className="fixed inset-0 z-10" onClick={() => setNotifOpen(false)} />
@@ -172,7 +163,9 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                                                         try {
                                                             await markAllNotificationsRead();
                                                             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-                                                        } catch { }
+                                                        } catch (error) {
+                                                            console.error('Failed to mark notifications as read:', error);
+                                                        }
                                                     }}
                                                     className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-medium transition-colors"
                                                 >
@@ -201,7 +194,7 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                                             >
                                                 <div className="flex items-start space-x-3">
                                                     {!notif.read && (
-                                                        <div className="w-2 h-2 bg-indigo-500 rounded-full mt-1.5 flex-shrink-0" />
+                                                        <div className="w-2 h-2 bg-indigo-500 rounded-full mt-1.5 shrink-0" />
                                                     )}
                                                     <div className={`flex-1 ${notif.read ? 'ml-5' : ''}`}>
                                                         <p className="text-sm text-gray-700 dark:text-[#a6adc8]">{notif.message || notif.text || 'Notification'}</p>

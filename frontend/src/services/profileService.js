@@ -50,6 +50,24 @@ export const getWeeklyStats = async () => {
     return data.data;
 };
 
+export const getActivityHeatmap = async () => {
+    const { data } = await api.get('/profile/me/activity-heatmap');
+    return data.data;
+};
+
+export const getTodayMinutes = async () => {
+    try {
+        const activities = await getActivityHeatmap();
+        if (!Array.isArray(activities)) return 0;
+        
+        const today = new Date().toISOString().split('T')[0];
+        const todayActivity = activities.find(a => a.date === today);
+        return todayActivity ? todayActivity.minutes : 0;
+    } catch {
+        return 0;
+    }
+};
+
 export const getMonthlyStats = async () => {
     const { data } = await api.get('/profile/me/monthly-stats');
     return data.data;

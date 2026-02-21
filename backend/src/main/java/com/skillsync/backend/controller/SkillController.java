@@ -1,8 +1,26 @@
 package com.skillsync.backend.controller;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.skillsync.backend.dto.AddSkillRequest;
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.SkillResponse;
+import com.skillsync.backend.dto.UpdateSkillProgressRequest;
+import com.skillsync.backend.dto.UpdateSkillRequest;
 import com.skillsync.backend.dto.session.AddSessionRequest;
 import com.skillsync.backend.dto.session.SessionResponse;
 import com.skillsync.backend.dto.session.SessionStatsResponse;
@@ -13,13 +31,8 @@ import com.skillsync.backend.dto.stats.SkillVelocityResponse;
 import com.skillsync.backend.model.SkillLevel;
 import com.skillsync.backend.model.SkillStatus;
 import com.skillsync.backend.service.UserService;
+
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import com.skillsync.backend.dto.UpdateSkillProgressRequest;
 
 @RestController
 @RequestMapping("/api/skills")
@@ -97,6 +110,22 @@ public class SkillController {
         );
     }
 
+    @PutMapping("/{skillId}")
+    public ResponseEntity<ApiResponse<SkillResponse>> updateSkill(
+            @PathVariable Long skillId,
+            @Valid @RequestBody UpdateSkillRequest request) {
+
+        SkillResponse updatedSkill = userService.updateSkill(skillId, request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Skill updated successfully",
+                        updatedSkill
+                )
+        );
+    }
+
     @PostMapping("/{skillId}/sessions")
     public ResponseEntity<ApiResponse<SessionResponse>> addSession(
             @PathVariable Long skillId,
@@ -126,6 +155,40 @@ public class SkillController {
                         true,
                         "Sessions fetched",
                         result
+                )
+        );
+    }
+
+    @PatchMapping("/{skillId}/sessions/{sessionId}")
+    public ResponseEntity<ApiResponse<SessionResponse>> updateSession(
+            @PathVariable Long skillId,
+            @PathVariable Long sessionId,
+            @RequestBody AddSessionRequest request
+    ) {
+        SessionResponse result =
+                userService.updateSession(skillId, sessionId, request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Session updated successfully",
+                        result
+                )
+        );
+    }
+
+    @DeleteMapping("/{skillId}/sessions/{sessionId}")
+    public ResponseEntity<ApiResponse<String>> deleteSession(
+            @PathVariable Long skillId,
+            @PathVariable Long sessionId
+    ) {
+        userService.deleteSession(skillId, sessionId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Session deleted successfully",
+                        null
                 )
         );
     }

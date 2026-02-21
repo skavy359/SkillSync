@@ -1,8 +1,7 @@
-import React from 'react';
 import Card from './ui/Card';
 import Badge from './ui/Badge';
 import ProgressBar from './ui/ProgressBar';
-import { Clock, Calendar } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 const SkillCard = ({
     skill,
@@ -12,7 +11,6 @@ const SkillCard = ({
         Beginner: 'success',
         Intermediate: 'warning',
         Advanced: 'danger',
-        Expert: 'purple',
     };
 
     const statusColors = {
@@ -20,6 +18,9 @@ const SkillCard = ({
         completed: 'success',
         paused: 'default',
     };
+
+    // Calculate hours from minutes
+    const totalHours = Math.round(skill.totalMinutes / 60);
 
     return (
         <Card hover onClick={onClick} className="p-5">
@@ -47,14 +48,10 @@ const SkillCard = ({
                 <ProgressBar progress={skill.progress} size="md" />
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[#272739]">
+            <div className="flex items-center pt-3 border-t border-gray-100 dark:border-[#272739]">
                 <div className="flex items-center text-sm text-gray-500 dark:text-[#7f849c]">
                     <Clock className="w-4 h-4 mr-1.5" />
-                    <span>{skill.totalHours}h logged</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-500 dark:text-[#7f849c]">
-                    <Calendar className="w-4 h-4 mr-1.5" />
-                    <span>{skill.lastPracticed}</span>
+                    <span>{totalHours}h logged</span>
                 </div>
             </div>
 

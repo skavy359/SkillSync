@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { X } from 'lucide-react';
-import Button from './Button';
 
 const Modal = ({
     isOpen,
@@ -33,13 +32,11 @@ const Modal = ({
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-            {/* Backdrop */}
             <div
                 className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
                 onClick={onClose}
             />
 
-            {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
                 <div
                     className={`
@@ -49,7 +46,6 @@ const Modal = ({
           `}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Header */}
                     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-[#313244]">
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-[#cdd6f4]">{title}</h2>
                         <button
@@ -60,12 +56,10 @@ const Modal = ({
                         </button>
                     </div>
 
-                    {/* Content */}
                     <div className="px-6 py-4">
                         {children}
                     </div>
 
-                    {/* Footer */}
                     {footer && (
                         <div className="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-[#313244] bg-gray-50 dark:bg-[#181825] rounded-b-2xl">
                             {footer}

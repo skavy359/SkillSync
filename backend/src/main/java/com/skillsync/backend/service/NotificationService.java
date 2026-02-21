@@ -1,5 +1,6 @@
 package com.skillsync.backend.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +13,9 @@ import com.skillsync.backend.repository.NotificationRepository;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    
+    // Default deduplication window: 12 hours
+    private static final int DEDUPLICATION_HOURS = 12;
 
     public NotificationService(
             NotificationRepository notificationRepository
@@ -60,8 +64,21 @@ public class NotificationService {
         boolean isEnabled = isNotificationTypeEnabled(user, type);
         
         if (isEnabled) {
-            createNotification(user, type.name(), message);
+            // Check if a similar notification was created recently to avoid duplicates
+            if (!isDuplicateNotification(user, type)) {
+                createNotification(user, type.name(), message);
+            }
         }
+    }
+    
+    /**
+     * Check if a notification of the same type was created within the deduplication window
+     */
+    private boolean isDuplicateNotification(User user, NotificationType type) {
+        LocalDateTime cutoffTime = LocalDateTime.now().minusHours(DEDUPLICATION_HOURS);
+        Notification recentNotification = notificationRepository
+                .findLatestNotificationOfType(user, type.name(), cutoffTime);
+        return recentNotification != null;
     }
 
     private boolean isNotificationTypeEnabled(User user, NotificationType type) {

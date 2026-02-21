@@ -1,5 +1,7 @@
 package com.skillsync.backend.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,4 +12,6 @@ public class UserProfileResponse {
     private String name;
     private String email;
     private String role;
+    private String about;
+    private LocalDateTime createdAt;
 }

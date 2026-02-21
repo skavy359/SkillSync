@@ -10,29 +10,19 @@ import {
     User,
     Settings
 } from 'lucide-react';
-import { getGoalAnalytics } from '../services/goalService';
+import { getTodayMinutes } from '../services/profileService';
 
 const Sidebar = ({ currentPage, onNavigate }) => {
-    const [goalData, setGoalData] = useState(null);
+    const [todayMinutes, setTodayMinutes] = useState(0);
 
     useEffect(() => {
-        getGoalAnalytics()
-            .then((analytics) => {
-                if (Array.isArray(analytics) && analytics.length > 0) {
-                    // Pick the goal with the nearest deadline (smallest daysLeft >= 0)
-                    const activeGoals = analytics.filter(g => g.daysLeft >= 0);
-                    if (activeGoals.length > 0) {
-                        const nearest = activeGoals.reduce((best, g) =>
-                            g.daysLeft < best.daysLeft ? g : best
-                        );
-                        setGoalData(nearest);
-                    } else {
-                        // If all are overdue, show the most recent one
-                        setGoalData(analytics[0]);
-                    }
-                }
+        getTodayMinutes()
+            .then((minutes) => {
+                setTodayMinutes(minutes || 0);
             })
-            .catch(() => { });
+            .catch(() => {
+                setTodayMinutes(0);
+            });
     }, []);
 
     const menuItems = [
@@ -47,20 +37,8 @@ const Sidebar = ({ currentPage, onNavigate }) => {
         { id: 'settings', label: 'Settings', icon: Settings },
     ];
 
-    // Determine risk color
-    const getRiskColor = (risk) => {
-        switch (risk?.toLowerCase()) {
-            case 'high': return { bar: 'bg-red-500', text: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-500/10' };
-            case 'medium': return { bar: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-500/10' };
-            default: return { bar: 'bg-indigo-500', text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10' };
-        }
-    };
-
-    const riskColors = goalData ? getRiskColor(goalData.riskLevel) : null;
-
     return (
         <aside className="w-64 bg-white dark:bg-[#1e1e2e] border-r border-gray-200 dark:border-[#313244] flex flex-col">
-            {/* Logo */}
             <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-[#313244]">
                 <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center">
@@ -70,7 +48,6 @@ const Sidebar = ({ currentPage, onNavigate }) => {
                 </div>
             </div>
 
-            {/* Navigation */}
             <nav className="flex-1 px-3 py-4 space-y-1">
                 {menuItems.map((item) => {
                     const Icon = item.icon;
@@ -96,58 +73,30 @@ const Sidebar = ({ currentPage, onNavigate }) => {
                 })}
             </nav>
 
-            {/* Footer — Dynamic Goal Widget */}
             <div className="p-4 border-t border-gray-200 dark:border-[#313244]">
-                {goalData ? (
-                    <button
-                        onClick={() => onNavigate('goals')}
-                        className="w-full text-left bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-500/15 dark:to-blue-500/10 rounded-xl p-4 hover:shadow-md transition-all group"
-                    >
-                        <div className="flex items-start space-x-3">
-                            <div className={`w-8 h-8 ${riskColors.bg} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                                <Target className={`w-4 h-4 ${riskColors.text}`} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-gray-900 dark:text-[#cdd6f4] truncate">
-                                    {goalData.skillName}
-                                </p>
-                                <div className="w-full bg-white dark:bg-[#181825] rounded-full h-1.5 my-2">
-                                    <div
-                                        className={`${riskColors.bar} h-1.5 rounded-full transition-all duration-500`}
-                                        style={{ width: `${Math.min(goalData.progress, 100)}%` }}
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <p className="text-xs text-gray-600 dark:text-[#9399b2]">
-                                        {goalData.progress}% complete
-                                    </p>
-                                    <p className={`text-xs font-medium ${goalData.daysLeft <= 3 ? 'text-red-500' : 'text-gray-500 dark:text-[#7f849c]'}`}>
-                                        {goalData.daysLeft >= 0 ? `${goalData.daysLeft}d left` : 'Overdue'}
-                                    </p>
-                                </div>
-                            </div>
+                <button
+                    onClick={() => onNavigate('sessions')}
+                    className="w-full text-left bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-500/15 dark:to-indigo-500/10 rounded-xl p-4 hover:shadow-md transition-all"
+                >
+                    <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0 flex-shrink-0">
+                            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
-                    </button>
-                ) : (
-                    <button
-                        onClick={() => onNavigate('goals')}
-                        className="w-full text-left bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-500/15 dark:to-blue-500/10 rounded-xl p-4 hover:shadow-md transition-all"
-                    >
-                        <div className="flex items-start space-x-3">
-                            <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Target className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-gray-900 dark:text-[#cdd6f4] mb-1">
-                                    No Active Goals
+                        <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-gray-900 dark:text-[#cdd6f4]">
+                                Today's Progress
+                            </p>
+                            <div className="flex items-baseline space-x-1">
+                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 leading-none">
+                                    {Math.round(todayMinutes / 60)}
                                 </p>
-                                <p className="text-xs text-gray-500 dark:text-[#7f849c]">
-                                    Set a goal to track progress
+                                <p className="text-xs text-gray-600 dark:text-[#9399b2] font-medium">
+                                    hours logged
                                 </p>
                             </div>
                         </div>
-                    </button>
-                )}
+                    </div>
+                </button>
             </div>
         </aside>
     );

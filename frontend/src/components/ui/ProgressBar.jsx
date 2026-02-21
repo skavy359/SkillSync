@@ -1,5 +1,3 @@
-import React from 'react';
-
 const ProgressBar = ({
     progress = 0,
     size = 'md',
@@ -7,7 +5,6 @@ const ProgressBar = ({
     showLabel = false,
     className = ''
 }) => {
-    // Ensure progress is between 0 and 100
     const normalizedProgress = Math.min(Math.max(progress, 0), 100);
 
     const colors = {

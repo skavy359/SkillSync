@@ -13,6 +13,11 @@ export const addSkill = async (skillData) => {
     return data.data;
 };
 
+export const updateSkill = async (skillId, skillData) => {
+    const { data } = await api.put(`/skills/${skillId}`, skillData);
+    return data.data;
+};
+
 export const updateSkillProgress = async (skillId, progressData) => {
     const { data } = await api.patch(`/skills/${skillId}/progress`, progressData);
     return data.data;

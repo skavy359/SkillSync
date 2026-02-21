@@ -1,4 +1,6 @@
 package com.skillsync.backend.model;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -6,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +31,11 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Column(columnDefinition = "TEXT")
+    private String about;
+
+    private LocalDateTime createdAt;
 
     // Notification Preferences
     @Column(columnDefinition = "BOOLEAN DEFAULT true")
@@ -53,4 +61,11 @@ public class User {
 
     @Column(columnDefinition = "BOOLEAN DEFAULT true")
     private Boolean notifAchievementNotifications = true;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+    }
 }

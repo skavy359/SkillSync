@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Skills from './pages/Skills';
 import SkillDetail from './pages/SkillDetail';
 import Categories from './pages/Categories';
+import CategoryDetail from './pages/CategoryDetail';
 import Goals from './pages/Goals';
 import Sessions from './pages/Sessions';
 import Analytics from './pages/Analytics';
@@ -24,7 +25,9 @@ function App() {
     const [currentUser, setCurrentUser] = useState(null);
     const [currentPage, setCurrentPage] = useState('dashboard');
     const [selectedSkillId, setSelectedSkillId] = useState(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [adminPage, setAdminPage] = useState('admin');
+    const [showCategoryDeleteSuccess, setShowCategoryDeleteSuccess] = useState(false);
 
     // Apply saved theme on app mount
     useEffect(() => {
@@ -128,7 +131,12 @@ function App() {
             case 'skill-detail':
                 return <SkillDetail skillId={selectedSkillId} onNavigate={setCurrentPage} />;
             case 'categories':
-                return <Categories />;
+                return <Categories onNavigate={setCurrentPage} onSelectCategory={setSelectedCategoryId} onShowDeleteSuccess={showCategoryDeleteSuccess} onDismissDeleteSuccess={() => setShowCategoryDeleteSuccess(false)} />;
+            case 'category-detail':
+                return <CategoryDetail categoryId={selectedCategoryId} onNavigate={setCurrentPage} onSelectSkill={setSelectedSkillId} onCategoryDeleted={() => {
+                    setShowCategoryDeleteSuccess(true);
+                    setCurrentPage('categories');
+                }} />;
             case 'goals':
                 return <Goals />;
             case 'sessions':
