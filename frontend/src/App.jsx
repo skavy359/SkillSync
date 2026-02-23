@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
@@ -98,9 +99,19 @@ function App() {
     // ── Not authenticated → show Login / Register ──────────────────────────
     if (!isAuthenticated) {
         if (authPage === 'register') {
-            return <Register onNavigate={setAuthPage} onLogin={handleLogin} />;
+            return (
+                <>
+                    <Register onNavigate={setAuthPage} onLogin={handleLogin} />
+                    <VercelAnalytics />
+                </>
+            );
         }
-        return <Login onNavigate={setAuthPage} onLogin={handleLogin} />;
+        return (
+            <>
+                <Login onNavigate={setAuthPage} onLogin={handleLogin} />
+                <VercelAnalytics />
+            </>
+        );
     }
 
     // ── Admin panel (safe null check with optional chaining) ──────────────
@@ -132,6 +143,7 @@ function App() {
                 adminName={currentUser?.name}
             >
                 {renderAdminPage()}
+                <VercelAnalytics />
             </AdminLayout>
         );
     }
@@ -184,6 +196,7 @@ function App() {
                     </div>
                 </main>
             </div>
+            <VercelAnalytics />
         </div>
     );
 }
