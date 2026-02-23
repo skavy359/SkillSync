@@ -12,13 +12,14 @@ import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
+import Leaderboard from './pages/Leaderboard';
+import SkillSharing from './pages/SkillSharing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminLayout from './pages/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
 import AdminAuditLogs from './pages/AdminAuditLogs';
-import AdminSettings from './pages/AdminSettings';
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminAccounts from './pages/AdminAccounts';
 import AdminNotifications from './pages/AdminNotifications';
@@ -112,8 +113,6 @@ function App() {
                     return <AdminUsers />;
                 case 'admin/audit-logs':
                     return <AdminAuditLogs />;
-                case 'admin/settings':
-                    return <AdminSettings />;
                 case 'admin/analytics':
                     return <AdminAnalytics />;
                 case 'admin/accounts':
@@ -130,6 +129,7 @@ function App() {
                 currentPage={adminPage}
                 onNavigate={handleAdminNavigate}
                 onLogout={handleLogout}
+                adminName={currentUser?.name}
             >
                 {renderAdminPage()}
             </AdminLayout>
@@ -158,6 +158,10 @@ function App() {
                 return <Sessions onNavigate={setCurrentPage} />;
             case 'analytics':
                 return <Analytics />;
+            case 'leaderboard':
+                return <Leaderboard />;
+            case 'skill-sharing':
+                return <SkillSharing />;
             case 'notifications':
                 return <Notifications />;
             case 'profile':

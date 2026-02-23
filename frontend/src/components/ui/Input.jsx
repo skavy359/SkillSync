@@ -35,14 +35,14 @@ const Input = ({
           placeholder={placeholder}
           disabled={disabled}
           className={`
-            w-full px-4 py-2.5 bg-white border rounded-lg text-sm text-gray-900
-            placeholder-gray-500 transition-all
+            w-full px-4 py-2.5 bg-white dark:bg-[#181825] border rounded-lg text-sm text-gray-900 dark:text-[#cdd6f4]
+            placeholder-gray-500 dark:placeholder-[#6c7086] transition-all
             focus:outline-none focus:ring-2 focus:border-transparent
-            disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
+            disabled:bg-gray-50 dark:disabled:bg-[#0f0f1b] disabled:text-gray-500 dark:disabled:text-[#6c7086] disabled:cursor-not-allowed
             ${Icon ? 'pl-11' : ''}
             ${error
-              ? 'border-red-300 focus:ring-red-500'
-              : 'border-gray-300 focus:ring-indigo-500'
+              ? 'border-red-300 dark:border-red-500/50 focus:ring-red-500'
+              : 'border-gray-300 dark:border-[#313244] focus:ring-indigo-500 dark:focus:ring-indigo-500'
             }
           `}
           {...props}

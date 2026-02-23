@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Bell, Settings, LogOut, User, ChevronDown, X, Lightbulb } from 'lucide-react';
+import { Search, Bell, Settings, LogOut, User, ChevronDown, X, Lightbulb, BookOpen, Target } from 'lucide-react';
 import { getMySkills } from '../services/skillService';
+import { getAllCategories } from '../services/categoryService';
+import { getMyGoals } from '../services/goalService';
 import { getMyNotifications, markNotificationRead, markAllNotificationsRead } from '../services/profileService';
 
 const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
@@ -34,8 +36,41 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
         setSearchLoading(true);
         const timer = setTimeout(async () => {
             try {
-                const result = await getMySkills({ search: searchQuery.trim(), size: 5 });
-                setSearchResults(result?.content || []);
+                const query = searchQuery.trim().toLowerCase();
+                
+                // Search skills
+                const skillsResult = await getMySkills({ search: searchQuery.trim(), size: 5 }).catch(() => ({ content: [] }));
+                const skills = (skillsResult?.content || []).map(skill => ({
+                    ...skill,
+                    type: 'skill',
+                    icon: 'Lightbulb'
+                }));
+                
+                // Search categories
+                const categoriesResult = await getAllCategories().catch(() => []);
+                const categories = (Array.isArray(categoriesResult) ? categoriesResult : []).filter(cat => 
+                    cat.name.toLowerCase().includes(query)
+                ).slice(0, 3).map(cat => ({
+                    ...cat,
+                    type: 'category',
+                    icon: 'BookOpen'
+                }));
+                
+                // Search goals
+                const goalsResult = await getMyGoals().catch(() => []);
+                const goals = (Array.isArray(goalsResult) ? goalsResult : []).filter(goal => {
+                    // Try to match goal by skill name if available
+                    return (goal.skillName && goal.skillName.toLowerCase().includes(query)) ||
+                           (goal.targetDate && goal.targetDate.toLowerCase().includes(query));
+                }).slice(0, 3).map(goal => ({
+                    ...goal,
+                    type: 'goal',
+                    icon: 'Target'
+                }));
+                
+                // Combine results with skills first, then categories, then goals (max 8 total)
+                const combined = [...skills, ...categories, ...goals].slice(0, 8);
+                setSearchResults(combined);
             } catch {
                 setSearchResults([]);
             } finally {
@@ -94,28 +129,54 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                         <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1e1e2e] border border-gray-200 dark:border-[#313244] rounded-xl shadow-lg overflow-hidden z-50">
                             {searchLoading ? (
                                 <div className="px-4 py-3 text-sm text-gray-500 dark:text-[#7f849c] text-center">Searching...</div>
-                            ) : searchResults.length > 0 ? (
+                            ) : searchResults && searchResults.length > 0 ? (
                                 <div className="py-1">
-                                    {searchResults.map((skill) => (
-                                        <button
-                                            key={skill.id}
-                                            onClick={() => {
-                                                onSelectSkill && onSelectSkill(skill.id);
-                                                onNavigate && onNavigate('skill-detail');
-                                                setSearchQuery('');
-                                                setSearchFocused(false);
-                                            }}
-                                            className="w-full flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-[#272739] transition-colors text-left"
-                                        >
-                                            <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-500/15 rounded-lg flex items-center justify-center shrink-0">
-                                                <Lightbulb className="w-4 h-4 text-indigo-500" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4] truncate">{skill.name}</p>
-                                                <p className="text-xs text-gray-500 dark:text-[#7f849c]">{skill.level} · {skill.status}</p>
-                                            </div>
-                                        </button>
-                                    ))}
+                                    {searchResults.map((item) => {
+                                        const getItemIcon = () => {
+                                            if (item.type === 'category') return <BookOpen className="w-4 h-4 text-amber-500" />;
+                                            if (item.type === 'goal') return <Target className="w-4 h-4 text-purple-500" />;
+                                            return <Lightbulb className="w-4 h-4 text-indigo-500" />;
+                                        };
+                                        
+                                        const getBgColor = () => {
+                                            if (item.type === 'category') return 'bg-amber-50 dark:bg-amber-500/15';
+                                            if (item.type === 'goal') return 'bg-purple-50 dark:bg-purple-500/15';
+                                            return 'bg-indigo-50 dark:bg-indigo-500/15';
+                                        };
+                                        
+                                        return (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => {
+                                                    if (item.type === 'skill') {
+                                                        onSelectSkill && onSelectSkill(item.id);
+                                                        onNavigate && onNavigate('skill-detail');
+                                                    } else if (item.type === 'category') {
+                                                        onNavigate && onNavigate('categories');
+                                                    } else if (item.type === 'goal') {
+                                                        onNavigate && onNavigate('goals');
+                                                    }
+                                                    setSearchQuery('');
+                                                    setSearchFocused(false);
+                                                }}
+                                                className="w-full flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-[#272739] transition-colors text-left"
+                                            >
+                                                <div className={`w-8 h-8 ${getBgColor()} rounded-lg flex items-center justify-center shrink-0`}>
+                                                    {getItemIcon()}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4] truncate">
+                                                        {item.name || item.skillName || 'Goal'}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 dark:text-[#7f849c]">
+                                                        {item.type === 'skill' && `${item.level} · ${item.status}`}
+                                                        {item.type === 'category' && 'Category'}
+                                                        {item.type === 'goal' && `Target: ${item.targetDate}`}
+                                                    </p>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <div className="px-4 py-3 text-sm text-gray-500 dark:text-[#7f849c] text-center">

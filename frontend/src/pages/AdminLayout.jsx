@@ -9,9 +9,7 @@ import {
     Menu,
     X,
     FileText,
-    Settings,
     BarChart3,
-    Lock,
     Bell,
 } from 'lucide-react';
 
@@ -28,11 +26,6 @@ const NAV_ITEMS = [
         icon: Users,
     },
     {
-        id: 'admin/accounts',
-        label: 'Accounts',
-        icon: Lock,
-    },
-    {
         id: 'admin/audit-logs',
         label: 'Audit Logs',
         icon: FileText,
@@ -46,11 +39,6 @@ const NAV_ITEMS = [
         id: 'admin/notifications',
         label: 'Notifications',
         icon: Bell,
-    },
-    {
-        id: 'admin/settings',
-        label: 'Settings',
-        icon: Settings,
     },
 ];
 
@@ -142,8 +130,15 @@ const AdminSidebar = ({ currentPage, onNavigate, onLogout, mobileOpen, onMobileC
 };
 
 // ─── Topbar ───────────────────────────────────────────────────────────────────
-const AdminTopbar = ({ onMobileMenuOpen }) => {
+const AdminTopbar = ({ onMobileMenuOpen, adminName, onLogout }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const displayName = adminName || 'Admin';
+    const initials = displayName.charAt(0).toUpperCase();
+
+    const handleSignOut = () => {
+        setDropdownOpen(false);
+        onLogout();
+    };
 
     return (
         <header className="h-14 bg-white dark:bg-[#1e1e2e] border-b border-gray-200 dark:border-[#313244] flex items-center justify-between px-5 flex-shrink-0">
@@ -168,11 +163,11 @@ const AdminTopbar = ({ onMobileMenuOpen }) => {
                     className="flex items-center space-x-2.5 hover:bg-gray-100 dark:hover:bg-[#313244] rounded-xl px-3 py-1.5 transition-colors"
                 >
                     <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        A
+                        {initials}
                     </div>
                     <span className="hidden sm:block text-sm font-medium text-gray-800 dark:text-[#cdd6f4]">
-            Admin
-          </span>
+                        {displayName}
+                    </span>
                     <ChevronDown
                         className={`w-4 h-4 text-gray-400 dark:text-[#7f849c] transition-transform duration-200 ${
                             dropdownOpen ? 'rotate-180' : ''
@@ -191,11 +186,11 @@ const AdminTopbar = ({ onMobileMenuOpen }) => {
                                 <p className="text-xs font-semibold text-gray-500 dark:text-[#7f849c] uppercase tracking-wider">
                                     Signed in as
                                 </p>
-                                <p className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] mt-0.5">Administrator</p>
+                                <p className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] mt-0.5">{displayName}</p>
                             </div>
                             <div className="p-1.5">
                                 <button
-                                    onClick={() => setDropdownOpen(false)}
+                                    onClick={handleSignOut}
                                     className="w-full flex items-center space-x-2.5 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                 >
                                     <LogOut className="w-4 h-4" />
@@ -211,7 +206,7 @@ const AdminTopbar = ({ onMobileMenuOpen }) => {
 };
 
 // ─── Layout wrapper ───────────────────────────────────────────────────────────
-const AdminLayout = ({ children, currentPage, onNavigate, onLogout }) => {
+const AdminLayout = ({ children, currentPage, onNavigate, onLogout, adminName }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
@@ -225,7 +220,7 @@ const AdminLayout = ({ children, currentPage, onNavigate, onLogout }) => {
             />
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                <AdminTopbar onMobileMenuOpen={() => setMobileOpen(true)} />
+                <AdminTopbar onMobileMenuOpen={() => setMobileOpen(true)} adminName={adminName} onLogout={onLogout} />
                 <main className="flex-1 overflow-y-auto">
                     <div className="max-w-7xl mx-auto px-5 py-7">
                         {children}
@@ -234,6 +229,6 @@ const AdminLayout = ({ children, currentPage, onNavigate, onLogout }) => {
             </div>
         </div>
     );
-};
+}
 
 export default AdminLayout;

@@ -1,13 +1,19 @@
 package com.skillsync.backend.repository;
 
-import com.skillsync.backend.model.*;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.List;
-import java.util.Optional;
+
+import com.skillsync.backend.model.Skill;
+import com.skillsync.backend.model.SkillCategory;
+import com.skillsync.backend.model.SkillLevel;
+import com.skillsync.backend.model.SkillStatus;
+import com.skillsync.backend.model.User;
 
 public interface SkillRepository extends JpaRepository<Skill, Long> {
 
@@ -44,4 +50,18 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
        WHERE s.category = :category
        """)
     double avgProgressByCategory(@Param("category") SkillCategory category);
+
+    @Query("""
+       SELECT COUNT(s)
+       FROM Skill s
+       WHERE s.user.id = :userId
+       """)
+    long countByUserId(@Param("userId") Long userId);
+
+    @Query("""
+       SELECT s
+       FROM Skill s
+       WHERE s.user.id = :userId
+       """)
+    List<Skill> findByUserId(@Param("userId") Long userId);
 }

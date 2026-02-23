@@ -38,7 +38,28 @@ const RadarChartCard = ({
     );
   }
 
-  const maxValue = Math.max(...data.map(d => d.value));
+  const maxValue = Math.max(...data.map(d => d.value || 0));
+  
+  // Return empty state if maxValue is 0 or NaN
+  if (!maxValue || maxValue === 0) {
+    return (
+      <Card className={`p-6 ${className}`}>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4]">{title}</h3>
+            {description && (
+              <p className="text-sm text-gray-600 dark:text-[#9399b2] mt-1">{description}</p>
+            )}
+          </div>
+          <Radar className="w-5 h-5 text-gray-400 dark:text-[#6c7086]" />
+        </div>
+        <div className="flex items-center justify-center py-12 text-gray-400 dark:text-[#6c7086]">
+          <p className="text-sm">No data available yet</p>
+        </div>
+      </Card>
+    );
+  }
+
   const levels = 5;
   const angleSlice = (Math.PI * 2) / data.length;
   const radius = size / 2 - 50;
@@ -46,7 +67,7 @@ const RadarChartCard = ({
   // Calculate points for radar polygon
   const points = data.map((item, index) => {
     const angle = angleSlice * index - Math.PI / 2;
-    const ratio = item.value / maxValue;
+    const ratio = (item.value || 0) / maxValue;
     const x = size / 2 + ratio * radius * Math.cos(angle);
     const y = size / 2 + ratio * radius * Math.sin(angle);
     return { x, y, ...item };

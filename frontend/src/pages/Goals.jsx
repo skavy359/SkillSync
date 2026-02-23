@@ -116,6 +116,10 @@ const Goals = () => {
             setShowSuccessMessage(true);
             setSuccessMessage('Goal created successfully!');
             setTimeout(() => {
+                const mainElement = document.querySelector('main');
+                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 0);
+            setTimeout(() => {
                 setShowSuccessMessage(false);
             }, 3000);
 
@@ -166,6 +170,10 @@ const Goals = () => {
             setShowSuccessMessage(true);
             setSuccessMessage('Goal updated successfully!');
             setTimeout(() => {
+                const mainElement = document.querySelector('main');
+                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 0);
+            setTimeout(() => {
                 setShowSuccessMessage(false);
             }, 3000);
 
@@ -196,6 +204,10 @@ const Goals = () => {
             
             setShowSuccessMessage(true);
             setSuccessMessage('Goal deleted successfully!');
+            setTimeout(() => {
+                const mainElement = document.querySelector('main');
+                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 0);
             setTimeout(() => {
                 setShowSuccessMessage(false);
             }, 3000);

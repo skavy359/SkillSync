@@ -8,7 +8,9 @@ import {
     Clock,
     Bell,
     User,
-    Settings
+    Settings,
+    Trophy,
+    Share2
 } from 'lucide-react';
 import { getTodayMinutes } from '../services/profileService';
 
@@ -32,6 +34,8 @@ const Sidebar = ({ currentPage, onNavigate }) => {
         { id: 'goals', label: 'Goals', icon: Target },
         { id: 'sessions', label: 'Sessions', icon: Clock },
         { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+        { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
+        { id: 'skill-sharing', label: 'Share Progress', icon: Share2 },
         { id: 'notifications', label: 'Notifications', icon: Bell },
         { id: 'profile', label: 'Profile', icon: User },
         { id: 'settings', label: 'Settings', icon: Settings },

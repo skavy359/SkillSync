@@ -7,6 +7,7 @@ import Badge from '../components/ui/Badge';
 import ProgressBar from '../components/ui/ProgressBar';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 import EmptyState from '../components/ui/EmptyState';
 import {
@@ -22,15 +23,19 @@ import {
     Check
 } from 'lucide-react';
 import { useEffect } from "react";
-import { getMySkills, addSession, getSessions, updateSkillProgress, deleteSkill, updateSkill } from "../services/skillService";
+import { getMySkills, addSession, getSessions, updateSkillProgress, deleteSkill, updateSkill, assignCategory } from "../services/skillService";
 import { updateSession, deleteSession } from "../services/sessionService";
+import { getAllCategories } from "../services/categoryService";
 
 const SkillDetail = ({ skillId, onNavigate }) => {
     const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
     const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-    const [editForm, setEditForm] = useState({ name: '' });
+    const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+    const [isEditLoading, setIsEditLoading] = useState(false);
+    const [editForm, setEditForm] = useState({ name: '', categoryId: '' });
+    const [editCategories, setEditCategories] = useState([]);
     const [sessionForm, setSessionForm] = useState({
         duration: '',
         date: new Date().toISOString().split('T')[0],
@@ -61,7 +66,7 @@ const SkillDetail = ({ skillId, onNavigate }) => {
             const found = skills.find(s => String(s.id) === String(skillId));
             if (found) {
                 setSkill(found);
-                setEditForm({ name: found.name });
+                setEditForm({ name: found.name, categoryId: found.categoryId || '' });
                 setProgressForm({ progress: found.progress });
             }
         }).catch(() => { });
@@ -104,12 +109,31 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         e.preventDefault();
 
         try {
+            const newProgress = Number(progressForm.progress);
             const updated = await updateSkillProgress(skillId, {
-                progress: Number(progressForm.progress)
+                progress: newProgress
             });
 
             setSkill(updated);
             setIsProgressModalOpen(false);
+            
+            // Show success message if skill is completed
+            if (newProgress >= 100) {
+                setSuccessMessage('🎉 Skill completed successfully! Congratulations!');
+            } else {
+                setSuccessMessage('Progress updated successfully!');
+            }
+            setShowSuccessMessage(true);
+            
+            // Scroll to top
+            setTimeout(() => {
+                const mainElement = document.querySelector('main');
+                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 0);
+            
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 3000);
         } catch (err) {
             console.error("Update progress failed", err);
         }
@@ -117,25 +141,59 @@ const SkillDetail = ({ skillId, onNavigate }) => {
 
     const handleEditSkill = async (e) => {
         e.preventDefault();
+        setIsEditLoading(true);
 
         try {
+            // Update skill name
             const updated = await updateSkill(skillId, {
                 name: editForm.name
             });
 
+            // Assign category if provided
+            if (editForm.categoryId) {
+                await assignCategory(skillId, editForm.categoryId);
+                updated.categoryId = editForm.categoryId;
+                setSuccessMessage('Skill updated and category assigned successfully!');
+            } else {
+                setSuccessMessage('Skill updated successfully!');
+            }
+
             setSkill(updated);
             setIsEditModalOpen(false);
+            setShowSuccessMessage(true);
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 3000);
         } catch (err) {
             console.error("Update skill failed", err);
+            alert('Failed to update skill. Please try again.');
+        } finally {
+            setIsEditLoading(false);
         }
     };
 
     const handleDeleteSkill = async () => {
+        setIsDeleteLoading(true);
         try {
             await deleteSkill(skillId);
-            onNavigate('skills');
+            setIsDeleteConfirmOpen(false);
+            setSuccessMessage('Skill deleted successfully!');
+            setShowSuccessMessage(true);
+            
+            // Scroll to top
+            setTimeout(() => {
+                const mainElement = document.querySelector('main');
+                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 0);
+            
+            // Navigate after a short delay
+            setTimeout(() => {
+                onNavigate('skills');
+            }, 1500);
         } catch (err) {
             console.error("Delete skill failed", err);
+            alert('Failed to delete skill. Please try again.');
+            setIsDeleteLoading(false);
         }
     };
 
@@ -270,6 +328,14 @@ const SkillDetail = ({ skillId, onNavigate }) => {
 
     return (
         <div className="space-y-6">
+            {/* Success Notification */}
+            {showSuccessMessage && (
+                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">{successMessage}</p>
+                </div>
+            )}
+
             {/* Back Button */}
             <Button
                 variant="ghost"
@@ -308,7 +374,14 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                             icon={Edit} 
                             size="sm"
                             onClick={() => {
-                                setEditForm({ name: skill.name });
+                                setEditForm({ name: skill.name, categoryId: skill.categoryId || '' });
+                                getAllCategories()
+                                    .then(data => {
+                                        if (Array.isArray(data)) {
+                                            setEditCategories(data);
+                                        }
+                                    })
+                                    .catch(() => { });
                                 setIsEditModalOpen(true);
                             }}
                         >
@@ -559,14 +632,14 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 title="Edit Skill"
                 footer={
                     <>
-                        <Button variant="secondary" onClick={() => setIsEditModalOpen(false)}>
+                        <Button variant="secondary" onClick={() => setIsEditModalOpen(false)} disabled={isEditLoading}>
                             Cancel
                         </Button>
                         <Button variant="primary" onClick={(e) => {
                             e.preventDefault();
                             handleEditSkill(e);
-                        }}>
-                            Save Changes
+                        }} disabled={isEditLoading}>
+                            {isEditLoading ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </>
                 }
@@ -580,6 +653,13 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                         required
                     />
+                    <Select
+                        label="Category (Optional)"
+                        value={editForm.categoryId}
+                        onChange={(e) => setEditForm({ ...editForm, categoryId: e.target.value })}
+                        options={editCategories.map(cat => ({ value: cat.id, label: cat.name }))}
+                        placeholder="Select a category"
+                    />
                 </form>
             </Modal>
 
@@ -590,11 +670,11 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 title="Delete Skill"
                 footer={
                     <>
-                        <Button variant="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>
+                        <Button variant="secondary" onClick={() => setIsDeleteConfirmOpen(false)} disabled={isDeleteLoading}>
                             Cancel
                         </Button>
-                        <Button variant="danger" onClick={handleDeleteSkill}>
-                            Delete Skill
+                        <Button variant="danger" onClick={handleDeleteSkill} disabled={isDeleteLoading}>
+                            {isDeleteLoading ? 'Deleting...' : 'Delete Skill'}
                         </Button>
                     </>
                 }
@@ -616,14 +696,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                     </div>
                 </div>
             </Modal>
-
-            {/* Success Notification */}
-            {showSuccessMessage && (
-                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3 mb-6">
-                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                    <p className="text-sm font-medium text-green-700 dark:text-green-400">{successMessage}</p>
-                </div>
-            )}
 
             {/* Edit Session Modal */}
             <Modal

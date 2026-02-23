@@ -77,10 +77,11 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         targetDate: ''
     });
     const [goalSubmitting, setGoalSubmitting] = useState(false);
-    const [goalSuccessMessage, setGoalSuccessMessage] = useState('');
     const [addSkillSubmitting, setAddSkillSubmitting] = useState(false);
     const [showAddSkillSuccess, setShowAddSkillSuccess] = useState(false);
     const [validationError, setValidationError] = useState(false);
+    const [showLogSessionSuccess, setShowLogSessionSuccess] = useState(false);
+    const [showCreateGoalSuccess, setShowCreateGoalSuccess] = useState(false);
 
     // Helper: fetch recent sessions from all user skills
     const loadRecentSessions = async (skillList) => {
@@ -274,6 +275,14 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             });
             setShowLogModal(false);
             setLogForm({ skillId: '', durationMinutes: '', notes: '', sessionDate: new Date().toISOString().split('T')[0] });
+            setShowLogSessionSuccess(true);
+            setTimeout(() => {
+                const mainElement = document.querySelector('main');
+                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 0);
+            setTimeout(() => {
+                setShowLogSessionSuccess(false);
+            }, 3000);
             // Refresh data
             fetchDashboardStats().then(setLearningStats).catch(() => { });
             getWeeklyStats().then(setWeeklyStats).catch(() => { });
@@ -306,6 +315,10 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             setShowAddSkillModal(false);
             setAddSkillForm({ name: '', level: 'Beginner', categoryId: '' });
             setShowAddSkillSuccess(true);
+            setTimeout(() => {
+                const mainElement = document.querySelector('main');
+                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 0);
             setTimeout(() => {
                 setShowAddSkillSuccess(false);
             }, 3000);
@@ -342,12 +355,16 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 targetDate: goalForm.targetDate
             });
 
+            setShowCreateGoalModal(false);
             setGoalForm({ skillId: '', targetDate: '' });
-            setGoalSuccessMessage('Goal created successfully!');
+            setShowCreateGoalSuccess(true);
             setTimeout(() => {
-                setGoalSuccessMessage('');
-                setShowCreateGoalModal(false);
-            }, 2000);
+                const mainElement = document.querySelector('main');
+                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 0);
+            setTimeout(() => {
+                setShowCreateGoalSuccess(false);
+            }, 3000);
         } catch (err) {
             console.error("Create goal failed", err);
             alert('Failed to create goal: ' + (err.response?.data?.message || err.message));
@@ -447,11 +464,23 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 action={false}
             />
 
-            {/* Success Notification */}
+            {/* Success Notifications */}
             {showAddSkillSuccess && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                     <p className="text-sm font-medium text-green-700 dark:text-green-400">Skill added successfully!</p>
+                </div>
+            )}
+            {showLogSessionSuccess && (
+                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Session logged successfully!</p>
+                </div>
+            )}
+            {showCreateGoalSuccess && (
+                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Goal created successfully!</p>
                 </div>
             )}
 
@@ -804,11 +833,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                     </>
                 }
             >
-                {goalSuccessMessage && (
-                    <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                        <p className="text-sm text-green-700 dark:text-green-300">{goalSuccessMessage}</p>
-                    </div>
-                )}
                 <form onSubmit={handleCreateGoal} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-[#a6adc8] mb-1">Skill</label>

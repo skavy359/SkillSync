@@ -6,7 +6,6 @@ import Badge from '../components/ui/Badge';
 import StatCard from '../components/ui/StatCard';
 import ProgressBar from '../components/ui/ProgressBar';
 import BarChartCard from '../components/ui/BarChartCard';
-import RadarChartCard from '../components/ui/RadarChartCard';
 import {
     Flame,
     TrendingUp,
@@ -500,17 +499,19 @@ const Analytics = () => {
                     color="indigo"
                 />
 
-                <RadarChartCard
+                <BarChartCard
                     title="Category Distribution"
                     description="Time spent by category"
                     data={categoryStats && categoryStats.length > 0 && categoryStats.some(cat => cat.totalMinutes > 0) ? categoryStats
                         .filter(cat => cat.totalMinutes > 0)
                         .map(cat => ({
                             label: cat.categoryName || cat.name || 'Uncategorized',
-                            value: Number(((cat.totalMinutes || 0) / 60).toFixed(2))
+                            value: Number(((cat.totalMinutes || 0) / 60).toFixed(2)),
+                            unit: "h"
                         })) : [
-                        { label: 'No data', value: 0 }
+                        { label: 'No data yet', value: 0, unit: 'h' }
                     ]}
+                    color="purple"
                 />
             </div>
 

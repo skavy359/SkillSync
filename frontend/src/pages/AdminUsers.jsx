@@ -200,6 +200,10 @@ const AdminUsers = () => {
                 }
             }
             showSuccess(`${user.name} role changed to ${newRole}`);
+            // Close modal after role change
+            setTimeout(() => {
+                setDetailModal({ open: false, user: null });
+            }, 500);
         } catch (err) {
             setRoleError(
                 err?.response?.data?.message ?? `Failed to update role for ${user.name}.`
@@ -336,12 +340,12 @@ const AdminUsers = () => {
                         {/* Head */}
                         <thead className="bg-gray-50 dark:bg-[#181825] border-b border-gray-200 dark:border-[#313244]">
                         <tr>
-                            {['User', 'Role', 'Joined', 'Skills', 'Sessions', 'Actions'].map(
+                            {['User', 'Joined', 'Skills', 'Sessions', 'Actions'].map(
                                 (h, i) => (
                                     <th
                                         key={h}
                                         className={`px-6 py-3 text-xs font-semibold text-gray-500 dark:text-[#a6adc8] uppercase tracking-wider ${
-                                            i === 5 ? 'text-right' : 'text-left'
+                                            i === 4 ? 'text-right' : 'text-left'
                                         }`}
                                     >
                                         {h}
@@ -366,7 +370,7 @@ const AdminUsers = () => {
                                             </div>
                                         </div>
                                     </td>
-                                    {[...Array(4)].map((_, j) => (
+                                    {[...Array(3)].map((_, j) => (
                                         <td key={j} className="px-6 py-4">
                                             <div className="h-3 bg-gray-100 rounded w-16" />
                                         </td>
@@ -374,8 +378,6 @@ const AdminUsers = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex justify-end space-x-2">
                                             <div className="h-7 w-20 bg-gray-100 rounded-lg" />
-                                            <div className="h-7 w-16 bg-gray-100 rounded-lg" />
-                                            <div className="h-7 w-7 bg-gray-100 rounded-lg" />
                                         </div>
                                     </td>
                                 </tr>
@@ -384,7 +386,7 @@ const AdminUsers = () => {
                         {/* Empty state */}
                         {!loading && !error && users.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="px-6 py-16">
+                                <td colSpan={5} className="px-6 py-16">
                                     <div className="text-center">
                                         <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                             <Users className="w-7 h-7 text-gray-300" />
@@ -414,40 +416,17 @@ const AdminUsers = () => {
                                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                                                 {user.name?.[0]?.toUpperCase() ?? '?'}
                                             </div>
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] truncate max-w-[160px]">
-                                                    {user.name}
-                                                </p>
-                                                <p className="text-xs text-gray-400 truncate max-w-[160px]">
-                                                    {user.email}
-                                                </p>
+                                            <div className="min-w-0 flex items-center space-x-2">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] truncate max-w-[160px]">
+                                                        {user.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-400 truncate max-w-[160px]">
+                                                        {user.email}
+                                                    </p>
+                                                </div>
+                                                <RoleBadge role={user.role} />
                                             </div>
-                                        </div>
-                                    </td>
-
-                                    {/* Role — inline dropdown */}
-                                    <td className="px-6 py-4">
-                                        <div className="relative inline-flex items-center">
-                                            {roleChanging[user.id] ? (
-                                                <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
-                                            ) : (
-                                                <select
-                                                    value={user.role}
-                                                    onChange={(e) => handleRoleChange(user, e.target.value)}
-                                                    className={`
-                              text-xs font-semibold rounded-full px-2 py-0.5 cursor-pointer
-                              appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500
-                              transition-colors
-                              ${user.role === 'ADMIN'
-                                                        ? 'bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-400'
-                                                        : 'bg-indigo-100 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400'
-                                                    }
-                            `}
-                                                >
-                                                    <option value="USER">User</option>
-                                                    <option value="ADMIN">Admin</option>
-                                                </select>
-                                            )}
                                         </div>
                                     </td>
 
@@ -556,7 +535,7 @@ const AdminUsers = () => {
                 }
                 size="lg"
                 footer={
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-start">
                         <Button
                             variant="danger"
                             size="sm"
@@ -566,20 +545,13 @@ const AdminUsers = () => {
                             <Trash2 className="w-4 h-4" />
                             Delete User
                         </Button>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => setDetailModal({ open: false, user: null })}
-                        >
-                            Close
-                        </Button>
                     </div>
                 }
             >
-                <div className="space-y-6">
+                <div className="space-y-8">
                     {/* User Info Card */}
-                    <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="p-5 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                             {/* User Email */}
                             <div>
                                 <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium uppercase tracking-wider">Email</p>
@@ -615,7 +587,7 @@ const AdminUsers = () => {
                     </div>
 
                     {/* Role Management */}
-                    <div className="p-4 bg-gray-50 dark:bg-[#181825] rounded-xl border border-gray-200 dark:border-[#313244]">
+                    <div className="p-5 bg-gray-50 dark:bg-[#181825] rounded-xl border border-gray-200 dark:border-[#313244]">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4]">User Role</p>
@@ -629,7 +601,7 @@ const AdminUsers = () => {
                                     value={detailModal.user?.role ?? 'USER'}
                                     onChange={(e) => handleRoleChange(detailModal.user, e.target.value)}
                                     disabled={roleChanging[detailModal.user?.id]}
-                                    className="px-3 py-2 text-sm font-semibold rounded-lg border border-gray-200 dark:border-[#313244] bg-white dark:bg-[#0f0f1b] text-gray-900 dark:text-[#cdd6f4] cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                                    className="px-3 py-2 text-sm font-semibold rounded-lg border border-gray-200 dark:border-[#313244] bg-white dark:bg-[#1a1a27] text-gray-900 dark:text-[#cdd6f4] cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all hover:bg-gray-50 dark:hover:bg-[#252530]"
                                 >
                                     <option value="USER">User</option>
                                     <option value="ADMIN">Admin</option>
@@ -676,7 +648,7 @@ const AdminUsers = () => {
                                         <div className="flex items-center justify-between">
                                             <div className="flex-1">
                                                 <p className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">{skill.name}</p>
-                                                <p className="text-xs text-gray-500 dark:text-[#7f849c]">{skill.category?.name || 'Uncategorized'}</p>
+                                                <p className="text-xs text-gray-500 dark:text-[#7f849c]">{skill.category || 'Uncategorized'}</p>
                                             </div>
                                             <div className="flex items-center space-x-2">
                                                 <Badge variant={skill.status === 'completed' ? 'success' : skill.status === 'active' ? 'primary' : 'default'} size="sm">

@@ -401,6 +401,19 @@ public class UserService {
                 .findByIdAndUser(skillId, user)
                 .orElseThrow(() -> new SkillNotFoundException(skillId));
 
+        // First delete all learning goals referencing this skill
+        List<LearningGoal> goals = learningGoalRepository.findBySkill(skill);
+        if (!goals.isEmpty()) {
+            learningGoalRepository.deleteAll(goals);
+        }
+
+        // Then delete all learning sessions for this skill
+        List<LearningSession> sessions = learningSessionRepository.findBySkill(skill);
+        if (!sessions.isEmpty()) {
+            learningSessionRepository.deleteAll(sessions);
+        }
+
+        // Finally delete the skill itself
         skillRepository.delete(skill);
 
         auditService.log(
@@ -1664,6 +1677,22 @@ public class UserService {
     }
 
     public void adminDeleteSkill(Long skillId) {
+        Skill skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new SkillNotFoundException(skillId));
+
+        // First delete all learning goals referencing this skill
+        List<LearningGoal> goals = learningGoalRepository.findBySkill(skill);
+        if (!goals.isEmpty()) {
+            learningGoalRepository.deleteAll(goals);
+        }
+
+        // Then delete all learning sessions for this skill
+        List<LearningSession> sessions = learningSessionRepository.findBySkill(skill);
+        if (!sessions.isEmpty()) {
+            learningSessionRepository.deleteAll(sessions);
+        }
+
+        // Finally delete the skill itself
         skillRepository.deleteById(skillId);
     }
 

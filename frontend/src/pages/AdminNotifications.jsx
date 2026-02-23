@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Bell, Send, Check, AlertCircle, Users } from 'lucide-react';
+import React, { useState } from 'react';
+import { Bell, Send, Check, AlertCircle } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -12,12 +12,10 @@ const AdminNotifications = () => {
   const [form, setForm] = useState({
     title: '',
     message: '',
-    targetUserIds: []
   });
   const [sending, setSending] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState(null);
-  const [broadcastToAll, setBroadcastToAll] = useState(true);
 
   const handleChange = (field, value) => {
     setForm(prev => ({
@@ -37,13 +35,13 @@ const AdminNotifications = () => {
       const payload = {
         title: form.title,
         message: form.message,
-        targetUserIds: broadcastToAll ? null : form.targetUserIds
+        targetUserIds: null
       };
       
       await adminService.broadcastNotification(payload);
       
       setSuccessMessage('Notification sent successfully!');
-      setForm({ title: '', message: '', targetUserIds: [] });
+      setForm({ title: '', message: '' });
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send notification');
@@ -75,58 +73,6 @@ const AdminNotifications = () => {
         )}
 
         <div className="space-y-6">
-          {/* Recipient Selection */}
-          <Card>
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-[#cdd6f4] mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                Recipient Selection
-              </h3>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="radio"
-                      checked={broadcastToAll}
-                      onChange={() => setBroadcastToAll(true)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-[#cdd6f4]">Send to all users</span>
-                  </label>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="radio"
-                      checked={!broadcastToAll}
-                      onChange={() => setBroadcastToAll(false)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-[#cdd6f4]">Send to specific users</span>
-                  </label>
-                </div>
-
-                {!broadcastToAll && (
-                  <div>
-                    <Label>User IDs (comma-separated)</Label>
-                    <textarea
-                      value={form.targetUserIds.join(', ')}
-                      onChange={(e) => {
-                        const ids = e.target.value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
-                        handleChange('targetUserIds', ids);
-                      }}
-                      placeholder="e.g., 1, 2, 3, 4"
-                      className="w-full p-3 bg-[#45475a] border border-[#6c7086] rounded text-[#cdd6f4] focus:outline-none focus:border-[#89b4fa] resize-none"
-                      rows="3"
-                    ></textarea>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
-
           {/* Notification Content */}
           <Card>
             <div className="p-6">
@@ -167,9 +113,9 @@ const AdminNotifications = () => {
           <Card>
             <div className="p-6">
               <h3 className="text-lg font-semibold text-[#cdd6f4] mb-4">Preview</h3>
-              <div className="p-4 bg-[#45475a] rounded-lg border border-[#6c7086]">
-                <p className="font-semibold text-[#cdd6f4]">{form.title || 'Notification Title'}</p>
-                <p className="text-sm text-[#cdd6f4] mt-2">
+              <div className="p-4 bg-gray-50 dark:bg-[#181825] rounded-lg border border-gray-200 dark:border-[#313244]">
+                <p className="font-semibold text-gray-900 dark:text-[#cdd6f4]">{form.title || 'Notification Title'}</p>
+                <p className="text-sm text-gray-600 dark:text-[#a6adc8] mt-2">
                   {form.message || 'Your notification message will appear here...'}
                 </p>
               </div>
@@ -190,9 +136,9 @@ const AdminNotifications = () => {
 
           {/* Usage Tips */}
           <Card>
-            <div className="p-6 bg-blue-500/10 border-blue-500/20">
-              <h4 className="font-semibold text-blue-400 mb-2">Tips</h4>
-              <ul className="text-sm text-blue-300 space-y-1 list-disc list-inside">
+            <div className="p-6 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
+              <h4 className="font-semibold text-blue-900 dark:text-blue-400 mb-2">Tips</h4>
+              <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
                 <li>Send important announcements and system updates</li>
                 <li>Remind users about ongoing events or challenges</li>
                 <li>Notify about maintenance or downtime</li>

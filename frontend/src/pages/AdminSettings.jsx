@@ -18,7 +18,7 @@ const AdminSettings = () => {
     try {
       setLoading(true);
       const response = await adminService.getSystemSettings();
-      setSettings(response.data);
+      setSettings(response);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load settings');

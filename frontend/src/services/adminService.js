@@ -51,7 +51,7 @@ export const getInactiveUsers = async (days = 30) => {
 
 // ==================== Audit Logs ====================
 
-export const getAuditLogs = async (page = 0, size = 20) => {
+export const getAuditLogs = async (page = 0, size = 100) => {
     const { data } = await api.get('/admin/audit-logs', {
         params: { page, size }
     });
@@ -60,12 +60,12 @@ export const getAuditLogs = async (page = 0, size = 20) => {
 
 export const getAuditLogsByAction = async (action) => {
     const { data } = await api.get(`/admin/audit-logs/action/${action}`);
-    return data.data;
+    return Array.isArray(data) ? data : data.data || data;
 };
 
 export const getAuditLogsByEntityType = async (entityType) => {
     const { data } = await api.get(`/admin/audit-logs/entity/${entityType}`);
-    return data.data;
+    return Array.isArray(data) ? data : data.data || data;
 };
 
 // ==================== System Settings ====================

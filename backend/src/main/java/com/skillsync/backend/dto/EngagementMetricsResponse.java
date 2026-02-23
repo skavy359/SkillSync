@@ -41,4 +41,16 @@ public class EngagementMetricsResponse {
 
     @JsonProperty("topUsers")
     private java.util.List<Map<String, Object>> topUsers;
+
+    @JsonProperty("topUsersBySessionMinutes")
+    private java.util.List<Map<String, Object>> topUsersBySessionMinutes;
+
+    @JsonProperty("usersWithoutActivity")
+    private Long usersWithoutActivity;
+
+    @JsonProperty("averageSessionsPerUser")
+    private Double averageSessionsPerUser;
+
+    @JsonProperty("totalCategoriesUsed")
+    private Long totalCategoriesUsed;
 }

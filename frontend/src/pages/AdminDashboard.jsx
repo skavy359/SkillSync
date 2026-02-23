@@ -365,7 +365,8 @@ const AdminDashboard = ({ onNavigate }) => {
                                 {recentUsers.map((user) => (
                                     <tr
                                         key={user.id}
-                                        className="hover:bg-gray-50 transition-colors"
+                                        onClick={() => onNavigate && onNavigate('admin/users')}
+                                        className="hover:bg-gray-100 dark:hover:bg-[#1a1a27] transition-colors cursor-pointer"
                                     >
                                         {/* User cell */}
                                         <td className="px-6 py-4">
