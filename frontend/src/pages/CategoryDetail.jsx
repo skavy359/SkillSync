@@ -141,6 +141,7 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
     const handleDeleteCategory = async () => {
         try {
             await deleteCategory(category.id);
+            setIsDeleteConfirmOpen(false);
             onCategoryDeleted();
         } catch (err) {
             console.error('Error deleting category:', err);

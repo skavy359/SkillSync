@@ -36,6 +36,7 @@ const Sessions = ({ onNavigate }) => {
     const [editError, setEditError] = useState('');
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [validationError, setValidationError] = useState(false);
 
     useEffect(() => {
         // Fetch all skills
@@ -128,7 +129,8 @@ const Sessions = ({ onNavigate }) => {
             
             const duration = Number(editForm.durationMinutes);
             if (duration > 1440) {
-                setEditError('Session duration cannot exceed 24 hours (1440 minutes)');
+                setIsEditModalOpen(false);
+                setValidationError(true);
                 setEditLoading(false);
                 return;
             }
@@ -208,7 +210,8 @@ const Sessions = ({ onNavigate }) => {
         
         const duration = Number(logForm.durationMinutes);
         if (duration > 1440) {
-            alert('Session duration cannot exceed 24 hours (1440 minutes)');
+            setShowLogModal(false);
+            setValidationError(true);
             return;
         }
 
@@ -408,7 +411,7 @@ const Sessions = ({ onNavigate }) => {
                 </Section>
             )}
 
-            {/* Edit Session Modal */}
+            {/* Delete Confirm Modal */}
             <Modal
                 isOpen={isDeleteConfirmOpen}
                 onClose={() => setIsDeleteConfirmOpen(false)}
@@ -424,7 +427,22 @@ const Sessions = ({ onNavigate }) => {
                     </>
                 }
             >
-                {/* Validation Error Modal */}
+                <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-2">
+                            Are you sure you want to delete this session?
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-[#9399b2]">
+                            This action cannot be undone.
+                        </p>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Validation Error Modal */}
             <Modal
                 isOpen={validationError}
                 onClose={() => setValidationError(false)}
@@ -440,20 +458,6 @@ const Sessions = ({ onNavigate }) => {
                     <p className="text-sm text-gray-700 dark:text-[#a6adc8]">
                         Session duration cannot exceed 24 hours (1440 minutes). Please enter a shorter duration.
                     </p>
-                </div>
-            </Modal>
-                <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-red-100 dark:bg-red-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-2">
-                            Are you sure you want to delete this session?
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-[#9399b2]">
-                            This action cannot be undone.
-                        </p>
-                    </div>
                 </div>
             </Modal>
 

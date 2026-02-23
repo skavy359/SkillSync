@@ -17,6 +17,11 @@ import Register from './pages/Register';
 import AdminLayout from './pages/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
+import AdminAuditLogs from './pages/AdminAuditLogs';
+import AdminSettings from './pages/AdminSettings';
+import AdminAnalytics from './pages/AdminAnalytics';
+import AdminAccounts from './pages/AdminAccounts';
+import AdminNotifications from './pages/AdminNotifications';
 import { getMyProfile } from './services/profileService';
 
 function App() {
@@ -105,6 +110,16 @@ function App() {
                     return <AdminDashboard onNavigate={handleAdminNavigate} />;
                 case 'admin/users':
                     return <AdminUsers />;
+                case 'admin/audit-logs':
+                    return <AdminAuditLogs />;
+                case 'admin/settings':
+                    return <AdminSettings />;
+                case 'admin/analytics':
+                    return <AdminAnalytics />;
+                case 'admin/accounts':
+                    return <AdminAccounts />;
+                case 'admin/notifications':
+                    return <AdminNotifications />;
                 default:
                     return <AdminDashboard onNavigate={handleAdminNavigate} />;
             }

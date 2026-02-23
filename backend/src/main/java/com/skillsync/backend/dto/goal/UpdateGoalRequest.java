@@ -7,7 +7,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateGoalRequest {
-    private Long skillId;
+public class UpdateGoalRequest {
     private LocalDate targetDate;
 }

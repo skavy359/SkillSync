@@ -23,7 +23,8 @@ import {
     Calendar,
     BookOpen,
     Check,
-    AlertTriangle
+    AlertTriangle,
+    Target
 } from 'lucide-react';
 import { useEffect, useState } from "react";
 import {
@@ -34,6 +35,7 @@ import {
 import { getMyStats, getMyStreak, getWeeklyStats } from "../services/profileService";
 import { getMySkills, addSkill } from "../services/skillService";
 import { getAllCategories } from "../services/categoryService";
+import { createGoal } from "../services/goalService";
 
 
 const Dashboard = ({ onNavigate, onSelectSkill }) => {
@@ -67,6 +69,15 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         level: 'Beginner',
         categoryId: '',
     });
+
+    // Create Goal Modal state
+    const [showCreateGoalModal, setShowCreateGoalModal] = useState(false);
+    const [goalForm, setGoalForm] = useState({
+        skillId: '',
+        targetDate: ''
+    });
+    const [goalSubmitting, setGoalSubmitting] = useState(false);
+    const [goalSuccessMessage, setGoalSuccessMessage] = useState('');
     const [addSkillSubmitting, setAddSkillSubmitting] = useState(false);
     const [showAddSkillSuccess, setShowAddSkillSuccess] = useState(false);
     const [validationError, setValidationError] = useState(false);
@@ -234,6 +245,15 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         }
     }, [showAddSkillModal]);
 
+    // Load skills when create goal modal opens
+    useEffect(() => {
+        if (showCreateGoalModal && allSkills.length === 0) {
+            getMySkills({ size: 50 }).then(data => {
+                setAllSkills(data?.content || []);
+            }).catch(() => { });
+        }
+    }, [showCreateGoalModal]);
+
     const handleLogSession = async (e) => {
         e.preventDefault();
         if (!logForm.skillId || !logForm.durationMinutes) return;
@@ -304,6 +324,35 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             console.error("Add skill failed", err);
         } finally {
             setAddSkillSubmitting(false);
+        }
+    };
+
+    const handleCreateGoal = async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        
+        if (!goalForm.skillId || !goalForm.targetDate) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        setGoalSubmitting(true);
+        try {
+            const newGoal = await createGoal({
+                skillId: Number(goalForm.skillId),
+                targetDate: goalForm.targetDate
+            });
+
+            setGoalForm({ skillId: '', targetDate: '' });
+            setGoalSuccessMessage('Goal created successfully!');
+            setTimeout(() => {
+                setGoalSuccessMessage('');
+                setShowCreateGoalModal(false);
+            }, 2000);
+        } catch (err) {
+            console.error("Create goal failed", err);
+            alert('Failed to create goal: ' + (err.response?.data?.message || err.message));
+        } finally {
+            setGoalSubmitting(false);
         }
     };
 
@@ -586,7 +635,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             {/* Quick Actions */}
             <Section title="Quick Actions">
                 <Card className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <Button
                             variant="primary"
                             size="lg"
@@ -604,6 +653,15 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                             onClick={() => setShowLogModal(true)}
                         >
                             Log Session
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="lg"
+                            fullWidth
+                            icon={Target}
+                            onClick={() => setShowCreateGoalModal(true)}
+                        >
+                            Create Goal
                         </Button>
                     </div>
                 </Card>
@@ -727,6 +785,52 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                             placeholder="Select a category"
                         />
                     </FormRow>
+                </form>
+            </Modal>
+
+            {/* Create Goal Modal */}
+            <Modal
+                isOpen={showCreateGoalModal}
+                onClose={() => setShowCreateGoalModal(false)}
+                title="Create Goal"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setShowCreateGoalModal(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="primary" onClick={handleCreateGoal} disabled={goalSubmitting}>
+                            {goalSubmitting ? 'Creating...' : 'Create Goal'}
+                        </Button>
+                    </>
+                }
+            >
+                {goalSuccessMessage && (
+                    <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <p className="text-sm text-green-700 dark:text-green-300">{goalSuccessMessage}</p>
+                    </div>
+                )}
+                <form onSubmit={handleCreateGoal} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-[#a6adc8] mb-1">Skill</label>
+                        <select
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            value={goalForm.skillId}
+                            onChange={(e) => setGoalForm({ ...goalForm, skillId: e.target.value })}
+                            required
+                        >
+                            <option value="">Select a skill</option>
+                            {allSkills.map(s => (
+                                <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <Input
+                        label="Target Date"
+                        type="date"
+                        value={goalForm.targetDate}
+                        onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })}
+                        required
+                    />
                 </form>
             </Modal>
         </div>

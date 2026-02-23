@@ -19,98 +19,230 @@ import {
     TrendingUp,
     Flag,
     Edit,
-    Trash2
+    Trash2,
+    AlertTriangle,
+    Check
 } from 'lucide-react';
 import { useEffect } from "react";
-import { getMyGoals, createGoal, getGoalAnalytics } from "../services/goalService";
+import { getMyGoals, createGoal, getGoalAnalytics, updateGoal, deleteGoal } from "../services/goalService";
+import { getMySkills } from "../services/skillService";
 
 const Goals = () => {
     const [goals, setGoals] = useState([]);
+    const [analytics, setAnalytics] = useState([]);
+    const [skills, setSkills] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingGoalId, setEditingGoalId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
     const [goalForm, setGoalForm] = useState({
-        title: '',
-        description: '',
-        targetHours: '',
-        deadline: '',
-        priority: 'medium'
+        skillId: '',
+        targetDate: ''
     });
+    const [editForm, setEditForm] = useState({
+        targetDate: ''
+    });
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [goalToDelete, setGoalToDelete] = useState(null);
 
     useEffect(() => {
-        Promise.all([getMyGoals(), getGoalAnalytics().catch(() => [])])
-            .then(([goalsData, analyticsData]) => {
-                const analytics = Array.isArray(analyticsData) ? analyticsData : [];
-                const mapped = (Array.isArray(goalsData) ? goalsData : []).map(g => {
-                    const a = analytics.find(an => an.goalId === g.id);
-                    return {
-                        ...g,
-                        title: g.skillName || 'Untitled Goal',
-                        description: `Target: ${g.targetDate || 'No date'}`,
-                        targetHours: 100,
-                        currentHours: a ? a.progress : 0,
-                        status: a && a.progress >= 100 ? 'completed' : 'in_progress',
-                        priority: a ? (a.riskLevel === 'HIGH' ? 'high' : a.riskLevel === 'MEDIUM' ? 'medium' : 'low') : 'medium',
-                        deadline: g.targetDate,
-                    };
-                });
-                setGoals(mapped);
-            })
-            .catch(() => { });
+        loadData();
     }, []);
 
-    const priorityColors = {
-        high: 'danger',
-        medium: 'warning',
-        low: 'info'
+    const loadData = async () => {
+        try {
+            setLoading(true);
+            // Fetch skills
+            const skillsData = await getMySkills({ size: 100 });
+            const skillsList = skillsData?.content || [];
+            setSkills(skillsList);
+
+            // Fetch goals
+            const goalsData = await getMyGoals();
+            setGoals(Array.isArray(goalsData) ? goalsData : []);
+
+            // Fetch analytics
+            const analyticsData = await getGoalAnalytics();
+            setAnalytics(Array.isArray(analyticsData) ? analyticsData : []);
+        } catch (err) {
+            console.error('Error loading goals:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const statusColors = {
-        in_progress: 'primary',
-        completed: 'success',
-        paused: 'default'
+    const getRiskColor = (riskLevel) => {
+        if (!riskLevel) return 'default';
+        const level = riskLevel.toUpperCase();
+        if (level === 'HIGH') return 'danger';
+        if (level === 'MEDIUM') return 'warning';
+        return 'info';
+    };
+
+    const getAnalytics = (goalId) => {
+        return analytics.find(a => a.goalId === goalId);
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+
+        if (!goalForm.skillId || !goalForm.targetDate) {
+            alert('Please fill in all required fields');
+            return;
+        }
 
         try {
+            console.log('Creating goal with:', { skillId: goalForm.skillId, targetDate: goalForm.targetDate });
+            
             const newGoal = await createGoal({
-                title: goalForm.title,
-                description: goalForm.description,
-                targetHours: Number(goalForm.targetHours),
-                deadline: goalForm.deadline,
-                priority: goalForm.priority.toUpperCase()
+                skillId: Number(goalForm.skillId),
+                targetDate: goalForm.targetDate
             });
 
+            console.log('Goal created:', newGoal);
+            
             setGoals(prev => [newGoal, ...prev]);
 
             setIsModalOpen(false);
             setGoalForm({
-                title: '',
-                description: '',
-                targetHours: '',
-                deadline: '',
-                priority: 'medium'
+                skillId: '',
+                targetDate: ''
             });
+
+            setShowSuccessMessage(true);
+            setSuccessMessage('Goal created successfully!');
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 3000);
+
+            // Refresh analytics
+            const analyticsData = await getGoalAnalytics();
+            setAnalytics(Array.isArray(analyticsData) ? analyticsData : []);
         } catch (err) {
             console.error("Goal creation failed", err);
+            alert('Failed to create goal: ' + (err.response?.data?.message || err.message));
         }
     };
 
+    const handleEditClick = (goal) => {
+        setEditingGoalId(goal.id);
+        setEditForm({
+            targetDate: goal.targetDate
+        });
+        setIsEditModalOpen(true);
+    };
 
-    const activeGoals = goals.filter(g => g.status === 'in_progress');
-    const totalTargetHours = goals.reduce((sum, g) => sum + g.targetHours, 0);
-    const totalCurrentHours = goals.reduce((sum, g) => sum + g.currentHours, 0);
-    const overallProgress = Math.round((totalCurrentHours / totalTargetHours) * 100);
+    const handleEditSubmit = async (e) => {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+
+        if (!editForm.targetDate) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        try {
+            console.log('Updating goal with:', { targetDate: editForm.targetDate });
+            
+            const updatedGoal = await updateGoal(editingGoalId, {
+                targetDate: editForm.targetDate
+            });
+
+            console.log('Goal updated:', updatedGoal);
+            
+            setGoals(prev => prev.map(g => g.id === editingGoalId ? updatedGoal : g));
+
+            setIsEditModalOpen(false);
+            setEditingGoalId(null);
+            setEditForm({
+                targetDate: ''
+            });
+
+            setShowSuccessMessage(true);
+            setSuccessMessage('Goal updated successfully!');
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 3000);
+
+            // Refresh analytics
+            const analyticsData = await getGoalAnalytics();
+            setAnalytics(Array.isArray(analyticsData) ? analyticsData : []);
+        } catch (err) {
+            console.error("Goal update failed", err);
+            alert('Failed to update goal: ' + (err.response?.data?.message || err.message));
+        }
+    };
+
+    const handleDeleteClick = (goal) => {
+        setGoalToDelete(goal);
+        setIsDeleteConfirmOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!goalToDelete) return;
+
+        try {
+            await deleteGoal(goalToDelete.id);
+            setGoals(prev => prev.filter(g => g.id !== goalToDelete.id));
+            setAnalytics(prev => prev.filter(a => a.goalId !== goalToDelete.id));
+            
+            setIsDeleteConfirmOpen(false);
+            setGoalToDelete(null);
+            
+            setShowSuccessMessage(true);
+            setSuccessMessage('Goal deleted successfully!');
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 3000);
+        } catch (err) {
+            console.error('Error deleting goal:', err);
+            alert('Failed to delete goal: ' + (err.response?.data?.message || err.message));
+            setIsDeleteConfirmOpen(false);
+            setGoalToDelete(null);
+        }
+    };
+
+    const activeGoals = goals.filter(g => {
+        const analytics = getAnalytics(g.id);
+        return !analytics || analytics.progress < 100;
+    });
+
+    const completedGoals = goals.filter(g => {
+        const analytics = getAnalytics(g.id);
+        return analytics && analytics.progress >= 100;
+    });
+
+    const totalProgress = analytics.length > 0
+        ? Math.round(analytics.reduce((sum, a) => sum + a.progress, 0) / analytics.length)
+        : 0;
+
+    if (loading) {
+        return <div className="p-8 text-gray-500">Loading goals...</div>;
+    }
 
     return (
         <div className="space-y-6">
             <PageHeader
                 title="Goals"
                 description="Set and track your learning goals"
+                action={true}
                 actionLabel="Add Goal"
                 actionIcon={Plus}
                 onAction={() => setIsModalOpen(true)}
             />
+
+            {/* Success Message */}
+            {showSuccessMessage && (
+                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">{successMessage}</p>
+                </div>
+            )}
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -130,32 +262,29 @@ const Goals = () => {
                             <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{overallProgress}%</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{totalProgress}%</h3>
                     <p className="text-sm text-gray-600 dark:text-[#9399b2]">Overall Progress</p>
                 </Card>
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
                         <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/15 rounded-xl flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            <Flag className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{totalCurrentHours}h</h3>
-                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">of {totalTargetHours}h target</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{completedGoals.length}</h3>
+                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Completed Goals</p>
                 </Card>
             </div>
 
-            {/* Goals List */}
-            {goals.length > 0 ? (
-                <Section>
+            {/* Active Goals */}
+            {activeGoals.length > 0 ? (
+                <Section title="Active Goals" description="Goals currently in progress">
                     <div className="space-y-4">
-                        {goals.map((goal) => {
-                            const progress = goal.targetHours
-                                ? Math.round((goal.currentHours / goal.targetHours) * 100)
-                                : 0;
-                            const daysUntilDeadline = Math.ceil(
-                                (new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24)
-                            );
+                        {activeGoals.map((goal) => {
+                            const goalAnalytics = getAnalytics(goal.id);
+                            const progress = goalAnalytics ? goalAnalytics.progress : 0;
+                            const daysLeft = goalAnalytics ? goalAnalytics.daysLeft : 0;
 
                             return (
                                 <Card key={goal.id} hover className="p-6">
@@ -163,44 +292,50 @@ const Goals = () => {
                                         <div className="flex-1">
                                             <div className="flex items-center space-x-3 mb-2">
                                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4]">
-                                                    {goal.title}
+                                                    {goal.skillName}
                                                 </h3>
-                                                <Badge variant={priorityColors[goal.priority]} size="sm">
-                                                    {goal.priority.toUpperCase()}
-                                                </Badge>
-                                                <Badge variant={statusColors[goal.status]} size="sm">
-                                                    {goal.status.replace('_', ' ').toUpperCase()}
-                                                </Badge>
+                                                {goalAnalytics && (
+                                                    <Badge variant={getRiskColor(goalAnalytics.riskLevel)} size="sm">
+                                                        {goalAnalytics.riskLevel || 'UNKNOWN'}
+                                                    </Badge>
+                                                )}
                                             </div>
-                                            <p className="text-sm text-gray-600 dark:text-[#9399b2] mb-4">{goal.description}</p>
 
-                                            <div className="flex items-center space-x-6 text-sm">
-                                                <div className="flex items-center text-gray-700 dark:text-[#a6adc8]">
-                                                    <Clock className="w-4 h-4 mr-1.5 text-gray-400 dark:text-[#6c7086]" />
-                                                    <span className="font-medium">{goal.currentHours}</span>
-                                                    <span className="text-gray-500 dark:text-[#7f849c] mx-1">/</span>
-                                                    <span className="text-gray-500 dark:text-[#7f849c]">{goal.targetHours}h</span>
-                                                </div>
+                                            <div className="flex items-center space-x-6 text-sm mb-4">
                                                 <div className="flex items-center text-gray-700 dark:text-[#a6adc8]">
                                                     <Calendar className="w-4 h-4 mr-1.5 text-gray-400 dark:text-[#6c7086]" />
-                                                    <span className="text-gray-500 dark:text-[#7f849c]">Due: {goal.deadline}</span>
-                                                    {daysUntilDeadline > 0 && (
-                                                        <span className="ml-2 text-xs font-medium text-indigo-600">
-                                                            ({daysUntilDeadline} days left)
+                                                    <span className="text-gray-500 dark:text-[#7f849c]">Target: {goal.targetDate}</span>
+                                                    {daysLeft > 0 && (
+                                                        <span className="ml-2 text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                                                            ({daysLeft} days left)
+                                                        </span>
+                                                    )}
+                                                    {daysLeft <= 0 && (
+                                                        <span className="ml-2 text-xs font-medium text-red-600 dark:text-red-400">
+                                                            Overdue
                                                         </span>
                                                     )}
                                                 </div>
+                                                {goalAnalytics && (
+                                                    <div className="flex items-center text-gray-700 dark:text-[#a6adc8]">
+                                                        <TrendingUp className="w-4 h-4 mr-1.5 text-gray-400 dark:text-[#6c7086]" />
+                                                        <span className="text-gray-500 dark:text-[#7f849c]">
+                                                            Velocity: {goalAnalytics.currentVelocity.toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
                                         <div className="flex items-center space-x-2 ml-4">
-                                            <button className="p-2 text-gray-400 dark:text-[#6c7086] hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/15 rounded-lg transition-all">
+                                            <button
+                                                onClick={() => handleEditClick(goal)}
+                                                className="p-2 text-gray-400 dark:text-[#6c7086] hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/15 rounded-lg transition-all"
+                                            >
                                                 <Edit className="w-4 h-4" />
                                             </button>
                                             <button
-                                                onClick={() => {
-                                                    setGoals(prev => prev.filter(g => g.id !== goal.id));
-                                                }}
+                                                onClick={() => handleDeleteClick(goal)}
                                                 className="p-2 text-gray-400 dark:text-[#6c7086] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/15 rounded-lg transition-all"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -209,7 +344,7 @@ const Goals = () => {
                                     </div>
 
                                     {/* Progress Bar */}
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium text-gray-600 dark:text-[#9399b2]">Progress</span>
                                             <span className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4]">{progress}%</span>
@@ -219,6 +354,63 @@ const Goals = () => {
                                             size="md"
                                             color={progress >= 75 ? 'green' : progress >= 50 ? 'indigo' : 'yellow'}
                                         />
+
+                                        {/* Stats Badges */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+                                            {/* Progress Badge */}
+                                            <div className="bg-indigo-50 dark:bg-indigo-500/15 rounded-lg p-2.5 text-center">
+                                                <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Progress</p>
+                                                <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{progress}%</p>
+                                            </div>
+
+                                            {/* Days Badge */}
+                                            <div className={`rounded-lg p-2.5 text-center ${
+                                                daysLeft > 0
+                                                    ? 'bg-green-50 dark:bg-green-500/15'
+                                                    : 'bg-red-50 dark:bg-red-500/15'
+                                            }`}>
+                                                <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Days</p>
+                                                <p className={`text-sm font-bold ${
+                                                    daysLeft > 0
+                                                        ? 'text-green-600 dark:text-green-400'
+                                                        : 'text-red-600 dark:text-red-400'
+                                                }`}>
+                                                    {daysLeft > 0 ? daysLeft : 'Overdue'}
+                                                </p>
+                                            </div>
+
+                                            {/* Velocity Badge */}
+                                            {goalAnalytics && (
+                                                <>
+                                                    <div className="bg-blue-50 dark:bg-blue-500/15 rounded-lg p-2.5 text-center">
+                                                        <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Velocity</p>
+                                                        <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                                                            {goalAnalytics.currentVelocity.toFixed(1)}%
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Risk Badge */}
+                                                    <div className={`rounded-lg p-2.5 text-center ${
+                                                        goalAnalytics.riskLevel === 'HIGH'
+                                                            ? 'bg-red-50 dark:bg-red-500/15'
+                                                            : goalAnalytics.riskLevel === 'MEDIUM'
+                                                                ? 'bg-yellow-50 dark:bg-yellow-500/15'
+                                                                : 'bg-green-50 dark:bg-green-500/15'
+                                                    }`}>
+                                                        <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Risk</p>
+                                                        <p className={`text-sm font-bold ${
+                                                            goalAnalytics.riskLevel === 'HIGH'
+                                                                ? 'text-red-600 dark:text-red-400'
+                                                                : goalAnalytics.riskLevel === 'MEDIUM'
+                                                                    ? 'text-yellow-600 dark:text-yellow-400'
+                                                                    : 'text-green-600 dark:text-green-400'
+                                                        }`}>
+                                                            {goalAnalytics.riskLevel[0]}
+                                                        </p>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Milestone Indicator */}
@@ -231,11 +423,11 @@ const Goals = () => {
                                         </div>
                                     )}
 
-                                    {progress >= 100 && (
-                                        <div className="mt-4 p-3 bg-green-50 dark:bg-green-500/15 rounded-lg flex items-center space-x-2">
-                                            <Target className="w-4 h-4 text-green-600 dark:text-green-400" />
-                                            <span className="text-sm font-medium text-green-900 dark:text-green-300">
-                                                🎉 Goal completed! Amazing work!
+                                    {goalAnalytics && goalAnalytics.riskLevel === 'HIGH' && (
+                                        <div className="mt-4 p-3 bg-red-50 dark:bg-red-500/15 rounded-lg flex items-center space-x-2">
+                                            <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                            <span className="text-sm font-medium text-red-900 dark:text-red-300">
+                                                High risk! Increase your pace to meet the target.
                                             </span>
                                         </div>
                                     )}
@@ -244,7 +436,115 @@ const Goals = () => {
                         })}
                     </div>
                 </Section>
-            ) : (
+            ) : null}
+
+            {/* Completed Goals */}
+            {completedGoals.length > 0 && (
+                <Section title="Completed Goals" description="Goals you've successfully achieved">
+                    <div className="space-y-4">
+                        {completedGoals.map((goal) => {
+                            const goalAnalytics = getAnalytics(goal.id);
+                            const progress = goalAnalytics ? goalAnalytics.progress : 100;
+
+                            return (
+                                <Card key={goal.id} className="p-6 opacity-75">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex-1">
+                                            <div className="flex items-center space-x-3 mb-2">
+                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] line-through">
+                                                    {goal.skillName}
+                                                </h3>
+                                                <Badge variant="success" size="sm">
+                                                    COMPLETED
+                                                </Badge>
+                                            </div>
+
+                                            <div className="flex items-center space-x-6 text-sm">
+                                                <div className="flex items-center text-gray-700 dark:text-[#a6adc8]">
+                                                    <Calendar className="w-4 h-4 mr-1.5 text-gray-400 dark:text-[#6c7086]" />
+                                                    <span className="text-gray-500 dark:text-[#7f849c]">Target: {goal.targetDate}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center space-x-2 ml-4">
+                                            <button
+                                                onClick={() => handleDeleteClick(goal)}
+                                                className="p-2 text-gray-400 dark:text-[#6c7086] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/15 rounded-lg transition-all"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Progress Bar */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm font-medium text-gray-600 dark:text-[#9399b2]">Progress</span>
+                                            <span className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4]">100%</span>
+                                        </div>
+                                        <ProgressBar progress={100} size="md" color="green" />
+
+                                        {/* Stats Badges */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+                                            {/* Progress Badge */}
+                                            <div className="bg-green-50 dark:bg-green-500/15 rounded-lg p-2.5 text-center">
+                                                <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Progress</p>
+                                                <p className="text-sm font-bold text-green-600 dark:text-green-400">100%</p>
+                                            </div>
+
+                                            {/* Completed Badge */}
+                                            <div className="bg-green-50 dark:bg-green-500/15 rounded-lg p-2.5 text-center">
+                                                <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Status</p>
+                                                <p className="text-sm font-bold text-green-600 dark:text-green-400">✓</p>
+                                            </div>
+
+                                            {/* Target Date Badge */}
+                                            <div className="bg-blue-50 dark:bg-blue-500/15 rounded-lg p-2.5 text-center">
+                                                <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Target</p>
+                                                <p className="text-sm font-bold text-blue-600 dark:text-blue-400 truncate">{goal.targetDate}</p>
+                                            </div>
+
+                                            {/* Risk Badge */}
+                                            {goalAnalytics && (
+                                                <div className={`rounded-lg p-2.5 text-center ${
+                                                    goalAnalytics.riskLevel === 'HIGH'
+                                                        ? 'bg-red-50 dark:bg-red-500/15'
+                                                        : goalAnalytics.riskLevel === 'MEDIUM'
+                                                            ? 'bg-yellow-50 dark:bg-yellow-500/15'
+                                                            : 'bg-green-50 dark:bg-green-500/15'
+                                                }`}>
+                                                    <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Risk</p>
+                                                    <p className={`text-sm font-bold ${
+                                                        goalAnalytics.riskLevel === 'HIGH'
+                                                            ? 'text-red-600 dark:text-red-400'
+                                                            : goalAnalytics.riskLevel === 'MEDIUM'
+                                                                ? 'text-yellow-600 dark:text-yellow-400'
+                                                                : 'text-green-600 dark:text-green-400'
+                                                    }`}>
+                                                        {goalAnalytics.riskLevel[0]}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Completion Celebration */}
+                                    <div className="mt-4 p-3 bg-green-50 dark:bg-green-500/15 rounded-lg flex items-center space-x-2">
+                                        <Target className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                        <span className="text-sm font-medium text-green-900 dark:text-green-300">
+                                            🎉 Goal completed! Amazing work!
+                                        </span>
+                                    </div>
+                                </Card>
+                            );
+                        })}
+                    </div>
+                </Section>
+            )}
+
+            {/* Empty State */}
+            {goals.length === 0 && (
                 <EmptyState
                     icon={Target}
                     title="No goals yet"
@@ -265,57 +565,102 @@ const Goals = () => {
                         <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
                             Cancel
                         </Button>
-                        <Button variant="primary" onClick={handleSubmit}>
+                        <Button 
+                            variant="primary" 
+                            onClick={handleSubmit}
+                        >
                             Create Goal
                         </Button>
                     </>
                 }
             >
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form id="goalForm" onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-[#cdd6f4] mb-2">
+                            Select Skill
+                        </label>
+                        <select
+                            className="w-full px-4 py-2 bg-white dark:bg-[#313244] border border-gray-200 dark:border-[#313244] rounded-lg text-gray-900 dark:text-[#cdd6f4] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            value={goalForm.skillId}
+                            onChange={(e) => setGoalForm({ ...goalForm, skillId: e.target.value })}
+                            required
+                        >
+                            <option value="">Select a skill to set a goal for</option>
+                            {skills.map(s => (
+                                <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     <Input
-                        label="Goal Title"
-                        type="text"
-                        placeholder="e.g., Master React Ecosystem"
-                        value={goalForm.title}
-                        onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
+                        label="Target Date"
+                        type="date"
+                        value={goalForm.targetDate}
+                        onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })}
                         required
                     />
+                </form>
+            </Modal>
 
-                    <Textarea
-                        label="Description"
-                        placeholder="Describe what you want to achieve"
-                        value={goalForm.description}
-                        onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })}
-                        rows={3}
-                    />
-
-                    <FormRow columns={2} gap={4}>
-                        <Input
-                            label="Target Hours"
-                            type="number"
-                            placeholder="100"
-                            value={goalForm.targetHours}
-                            onChange={(e) => setGoalForm({ ...goalForm, targetHours: e.target.value })}
-                            required
-                            min="1"
-                        />
-
-                        <Input
-                            label="Deadline"
-                            type="date"
-                            value={goalForm.deadline}
-                            onChange={(e) => setGoalForm({ ...goalForm, deadline: e.target.value })}
-                            required
-                        />
-                    </FormRow>
-
-                    <Select
-                        label="Priority"
-                        value={goalForm.priority}
-                        onChange={(e) => setGoalForm({ ...goalForm, priority: e.target.value })}
-                        options={['high', 'medium', 'low']}
+            {/* Edit Goal Modal */}
+            <Modal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                title="Edit Goal"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setIsEditModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            variant="primary" 
+                            onClick={handleEditSubmit}
+                        >
+                            Save Changes
+                        </Button>
+                    </>
+                }
+            >
+                <form onSubmit={handleEditSubmit} className="space-y-4">
+                    <Input
+                        label="Target Date"
+                        type="date"
+                        value={editForm.targetDate}
+                        onChange={(e) => setEditForm({ ...editForm, targetDate: e.target.value })}
+                        required
                     />
                 </form>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                isOpen={isDeleteConfirmOpen}
+                onClose={() => setIsDeleteConfirmOpen(false)}
+                title="Delete Goal"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={handleConfirmDelete}>
+                            Delete Goal
+                        </Button>
+                    </>
+                }
+            >
+                <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-2">
+                            Are you sure you want to delete this goal?
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-[#9399b2]">
+                            This action cannot be undone. The goal for <strong>{goalToDelete?.skillName}</strong> will be permanently deleted.
+                        </p>
+                    </div>
+                </div>
             </Modal>
         </div>
     );

@@ -6,7 +6,7 @@ import Badge from '../components/ui/Badge';
 import StatCard from '../components/ui/StatCard';
 import ProgressBar from '../components/ui/ProgressBar';
 import BarChartCard from '../components/ui/BarChartCard';
-import DonutChartCard from '../components/ui/DonutChartCard';
+import RadarChartCard from '../components/ui/RadarChartCard';
 import {
     Flame,
     TrendingUp,
@@ -92,27 +92,189 @@ const Analytics = () => {
 
     // Calculate velocity and completion metrics
     const calculateMetrics = () => {
-        if (!learningStats || !goals || goals.length === 0) {
+        if (!burnout || !goals || goals.length === 0) {
             return { velocity: 0, eta: null, activeGoal: null };
         }
 
-        // Calculate velocity based on weekly minutes and sessions
-        const weeklyHours = learningStats.weeklyMinutes / 60;
-        const velocity = learningStats.totalSessions > 0 ? weeklyHours : 0;
+        // Calculate velocity based on weekly minutes from burnout data
+        const weeklyMinutes = burnout.weeklyMinutes || 0;
+        const weeklyHours = (weeklyMinutes / 60).toFixed(1);
+        const velocity = parseFloat(weeklyHours);
 
-        // Get first active goal for ETA calculation
-        const activeGoal = goals.find(g => !g.completionPercentage || g.completionPercentage < 100);
+        // Get first active goal (where progress < 100) for ETA calculation
+        const activeGoal = goals.find(g => g.progress < 100);
         let eta = null;
 
-        if (activeGoal && activeGoal.requiredVelocity > 0) {
-            const remainingPercentage = 100 - (activeGoal.completionPercentage || 0);
-            eta = remainingPercentage / activeGoal.requiredVelocity;
+        if (activeGoal && activeGoal.daysLeft > 0) {
+            // ETA in weeks: if daysLeft is 21 days and velocity is 3 hours/week, eta = 21/7 = 3 weeks
+            eta = (activeGoal.daysLeft / 7).toFixed(1);
         }
 
         return { velocity, eta, activeGoal };
     };
 
-    const metrics = calculateMetrics();
+    // Generate smart insights based on multiple data points
+    const generateInsights = () => {
+        const insights = [];
+
+        // Streak & Momentum
+        if (streak.currentStreak >= 14) {
+            insights.push({
+                type: 'success',
+                icon: Flame,
+                title: 'Excellent Consistency',
+                message: `Amazing ${streak.currentStreak}-day streak! You're building powerful learning habits. Keep this momentum going!`,
+                color: 'indigo'
+            });
+        } else if (streak.currentStreak >= 7) {
+            insights.push({
+                type: 'info',
+                icon: Flame,
+                title: 'Good Progress',
+                message: `Your ${streak.currentStreak}-day streak shows solid commitment. Aim for 2 more days to reach 2 weeks!`,
+                color: 'blue'
+            });
+        } else if (streak.currentStreak > 0) {
+            insights.push({
+                type: 'warning',
+                icon: Flame,
+                title: 'Building Momentum',
+                message: `${streak.currentStreak}-day streak started! Continue logging sessions daily to establish a strong habit.`,
+                color: 'yellow'
+            });
+        } else {
+            insights.push({
+                type: 'info',
+                icon: Flame,
+                title: 'Start Your Journey',
+                message: 'Log your first learning session today to begin building momentum and tracking progress!',
+                color: 'blue'
+            });
+        }
+
+        // Completion Rate & Goal Progress
+        if (completionRate >= 75) {
+            insights.push({
+                type: 'success',
+                icon: CheckCircle,
+                title: 'Mastery Progress',
+                message: `${completionRate}% skills completed! You're on an impressive learning trajectory.`,
+                color: 'green'
+            });
+        } else if (completionRate >= 50) {
+            insights.push({
+                type: 'info',
+                icon: Target,
+                title: 'Solid Achievement',
+                message: `${completionRate}% skills completed. Keep pushing to reach expert level in your chosen fields.`,
+                color: 'blue'
+            });
+        } else if (completionRate > 0) {
+            insights.push({
+                type: 'info',
+                icon: Target,
+                title: 'Skills in Progress',
+                message: `${completionRate}% complete. Focus on reaching 50% to gain momentum and see faster progress.`,
+                color: 'yellow'
+            });
+        } else {
+            insights.push({
+                type: 'info',
+                icon: Target,
+                title: 'Start Learning',
+                message: 'Add your first skill and begin logging sessions to track your learning journey.',
+                color: 'blue'
+            });
+        }
+
+        // Learning Velocity & Pace
+        const weeklyMin = burnout?.weeklyMinutes || 0;
+        if (weeklyMin >= 300) {
+            insights.push({
+                type: 'success',
+                icon: Zap,
+                title: 'Exceptional Dedication',
+                message: `${weeklyMin} min/week is outstanding! You're investing serious time in your growth.`,
+                color: 'indigo'
+            });
+        } else if (weeklyMin >= 180) {
+            insights.push({
+                type: 'success',
+                icon: Zap,
+                title: 'Optimal Learning Pace',
+                message: `${weeklyMin} min/week is perfect for sustainable growth and skill development.`,
+                color: 'green'
+            });
+        } else if (weeklyMin >= 60) {
+            insights.push({
+                type: 'warning',
+                icon: Zap,
+                title: 'Increase Time Investment',
+                message: `Current pace: ${weeklyMin} min/week. Aiming for 180+ min/week would accelerate your progress.`,
+                color: 'yellow'
+            });
+        } else if (weeklyMin > 0) {
+            insights.push({
+                type: 'warning',
+                icon: Zap,
+                title: 'Boost Your Learning',
+                message: `Only ${weeklyMin} min logged this week. Try to dedicate 30 min daily for better results.`,
+                color: 'yellow'
+            });
+        } else {
+            insights.push({
+                type: 'info',
+                icon: Zap,
+                title: 'Start Logging Sessions',
+                message: 'Log learning sessions to establish your learning velocity and track progress over time.',
+                color: 'blue'
+            });
+        }
+
+        // Burnout Risk
+        if (burnout?.riskLevel === 'HIGH') {
+            insights.push({
+                type: 'danger',
+                icon: AlertTriangle,
+                title: 'Take a Break',
+                message: 'Your activity has dropped significantly. Rest and recharge - quality over quantity!',
+                color: 'red'
+            });
+        } else if (burnout?.riskLevel === 'MEDIUM') {
+            insights.push({
+                type: 'warning',
+                icon: AlertTriangle,
+                title: 'Balance Your Schedule',
+                message: 'Your learning pattern is inconsistent. Try scheduling regular learning sessions for sustainability.',
+                color: 'yellow'
+            });
+        } else if (burnout?.riskLevel === 'LOW') {
+            insights.push({
+                type: 'success',
+                icon: Award,
+                title: 'Healthy Balance',
+                message: 'Your learning habits are sustainable and healthy. Keep this excellent balance!',
+                color: 'green'
+            });
+        }
+
+        // Goal Progress Insight
+        if (goals && goals.length > 0) {
+            const activeGoals = goals.filter(g => g.progress < 100);
+            if (activeGoals.length > 0) {
+                const avgCompletion = Math.round(activeGoals.reduce((sum, g) => sum + (g.progress || 0), 0) / activeGoals.length);
+                insights.push({
+                    type: 'info',
+                    icon: Target,
+                    title: `Active Goals: ${activeGoals.length}`,
+                    message: `Average progress: ${avgCompletion}%. ${avgCompletion > 50 ? 'You\'re over halfway there!' : 'Keep pushing toward your targets!'}`,
+                    color: 'blue'
+                });
+            }
+        }
+
+        return insights;
+    };
 
     // Calculate burnout consistency score and other metrics
     const calculateBurnoutMetrics = () => {
@@ -149,11 +311,13 @@ const Analytics = () => {
         return { consistency, intensity, recovery, health };
     };
 
-    const burnoutMetrics = calculateBurnoutMetrics();
-
     if (!streak || !burnout || !learningStats) {
         return <div className="p-8 text-gray-500 dark:text-[#7f849c]">Loading analytics...</div>;
     }
+
+    const metrics = calculateMetrics();
+    const burnoutMetrics = calculateBurnoutMetrics();
+    const insights = generateInsights();
 
     return (
         <div className="space-y-6">
@@ -175,17 +339,17 @@ const Analytics = () => {
                 />
                 <StatCard
                     title="Learning Velocity"
-                    value={`${metrics.velocity.toFixed(1)}h/week`}
+                    value={`${metrics.velocity}h/week`}
                     icon={TrendingUp}
                     color="green"
-                    subtitle={`${learningStats.weeklyMinutes} min this week`}
+                    subtitle={`${burnout.weeklyMinutes || 0} min this week`}
                 />
                 <StatCard
                     title="Est. Completion"
-                    value={metrics.eta ? `${Math.round(metrics.eta)}h` : "—"}
+                    value={metrics.eta ? `${Math.round(metrics.eta * 7)} days` : "—"}
                     icon={Target}
                     color="indigo"
-                    subtitle={metrics.activeGoal ? metrics.activeGoal.goalName : "No active goals"}
+                    subtitle={metrics.activeGoal ? `${metrics.activeGoal.skillName} - ${metrics.activeGoal.progress}% done` : "No active goals"}
                 />
                 <StatCard
                     title="Burnout Risk"
@@ -336,14 +500,16 @@ const Analytics = () => {
                     color="indigo"
                 />
 
-                <DonutChartCard
+                <RadarChartCard
                     title="Category Distribution"
                     description="Time spent by category"
-                    data={categoryStats.length > 0 ? categoryStats.map(cat => ({
-                        label: cat.categoryName,
-                        value: cat.totalMinutes / 60
-                    })) : [
-                        { label: 'No categories', value: 0 }
+                    data={categoryStats && categoryStats.length > 0 && categoryStats.some(cat => cat.totalMinutes > 0) ? categoryStats
+                        .filter(cat => cat.totalMinutes > 0)
+                        .map(cat => ({
+                            label: cat.categoryName || cat.name || 'Uncategorized',
+                            value: Number(((cat.totalMinutes || 0) / 60).toFixed(2))
+                        })) : [
+                        { label: 'No data', value: 0 }
                     ]}
                 />
             </div>
@@ -400,71 +566,33 @@ const Analytics = () => {
             <Section title="Insights & Recommendations">
                 <Card className="p-6">
                     <div className="space-y-4">
-                        {/* Streak Insight */}
-                        <div className="flex items-start space-x-4 p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
-                            <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Flame className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-semibold text-indigo-900 dark:text-indigo-300 mb-1">
-                                    {streak.currentStreak > 0 ? 'Strong Momentum' : 'Start Your Journey'}
-                                </h4>
-                                <p className="text-sm text-indigo-700 dark:text-indigo-400">
-                                    {streak.currentStreak > 0 
-                                        ? `You're on a ${streak.currentStreak}-day streak! This consistent practice is building great habits.`
-                                        : 'Start logging learning sessions to build momentum and establish great learning habits.'}
-                                </p>
-                            </div>
-                        </div>
+                        {insights.map((insight, index) => {
+                            const colorMap = {
+                                indigo: { bg: 'bg-indigo-50 dark:bg-indigo-500/10', icon: 'bg-indigo-100 dark:bg-indigo-500/15', text: 'text-indigo-900 dark:text-indigo-300', subtext: 'text-indigo-700 dark:text-indigo-400' },
+                                blue: { bg: 'bg-blue-50 dark:bg-blue-500/10', icon: 'bg-blue-100 dark:bg-blue-500/15', text: 'text-blue-900 dark:text-blue-300', subtext: 'text-blue-700 dark:text-blue-400' },
+                                green: { bg: 'bg-green-50 dark:bg-green-500/10', icon: 'bg-green-100 dark:bg-green-500/15', text: 'text-green-900 dark:text-green-300', subtext: 'text-green-700 dark:text-green-400' },
+                                yellow: { bg: 'bg-yellow-50 dark:bg-yellow-500/10', icon: 'bg-yellow-100 dark:bg-yellow-500/15', text: 'text-yellow-900 dark:text-yellow-300', subtext: 'text-yellow-700 dark:text-yellow-400' },
+                                red: { bg: 'bg-red-50 dark:bg-red-500/10', icon: 'bg-red-100 dark:bg-red-500/15', text: 'text-red-900 dark:text-red-300', subtext: 'text-red-700 dark:text-red-400' }
+                            };
+                            const colors = colorMap[insight.color] || colorMap.blue;
+                            const IconComponent = insight.icon;
 
-                        {/* Completion & Goals Insight */}
-                        <div className="flex items-start space-x-4 p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl">
-                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
-                                    {completionRate >= 50 ? 'Great Progress' : 'Keep Learning'}
-                                </h4>
-                                <p className="text-sm text-blue-700 dark:text-blue-400">
-                                    {completionRate >= 50 
-                                        ? `You've completed ${completionRate}% of your skills. You're making excellent progress!`
-                                        : 'You have several skills in progress. Focus on completing one skill at a time for better results.'}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Velocity & Pace Insight */}
-                        <div className="flex items-start space-x-4 p-4 bg-yellow-50 dark:bg-yellow-500/10 rounded-xl">
-                            <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-semibold text-yellow-900 dark:text-yellow-300 mb-1">Learning Velocity</h4>
-                                <p className="text-sm text-yellow-700 dark:text-yellow-400">
-                                    {learningStats.weeklyMinutes >= 180
-                                        ? `You're investing ${learningStats.weeklyMinutes} minutes per week - excellent commitment!`
-                                        : learningStats.weeklyMinutes > 0
-                                        ? `Current pace: ${learningStats.weeklyMinutes} min/week. Consider increasing to 180+ min/week for optimal progress.`
-                                        : 'Start logging sessions to establish a learning routine.'}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Burnout Risk Recommendation */}
-                        {burnout.riskLevel === 'HIGH' && (
-                            <div className="flex items-start space-x-4 p-4 bg-red-50 dark:bg-red-500/10 rounded-xl">
-                                <div className="w-10 h-10 bg-red-100 dark:bg-red-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                            return (
+                                <div key={index} className={`flex items-start space-x-4 p-4 ${colors.bg} rounded-xl`}>
+                                    <div className={`w-10 h-10 ${colors.icon} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                                        <IconComponent className={`w-5 h-5 ${insight.color === 'indigo' ? 'text-indigo-600 dark:text-indigo-400' : insight.color === 'green' ? 'text-green-600 dark:text-green-400' : insight.color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' : insight.color === 'red' ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className={`text-sm font-semibold ${colors.text} mb-1`}>
+                                            {insight.title}
+                                        </h4>
+                                        <p className={`text-sm ${colors.subtext}`}>
+                                            {insight.message}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <h4 className="text-sm font-semibold text-red-900 dark:text-red-300 mb-1">Take a Break</h4>
-                                    <p className="text-sm text-red-700 dark:text-red-400">
-                                        Your learning activity has dropped significantly. Take some time to rest and recharge before resuming.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+                            );
+                        })}
                     </div>
                 </Card>
             </Section>

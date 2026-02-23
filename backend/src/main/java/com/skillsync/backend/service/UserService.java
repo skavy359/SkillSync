@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -35,6 +37,7 @@ import com.skillsync.backend.dto.audit.AuditLogResponse;
 import com.skillsync.backend.dto.goal.CreateGoalRequest;
 import com.skillsync.backend.dto.goal.GoalAnalyticsResponse;
 import com.skillsync.backend.dto.goal.GoalResponse;
+import com.skillsync.backend.dto.goal.UpdateGoalRequest;
 import com.skillsync.backend.dto.recommendation.RecommendationHistoryResponse;
 import com.skillsync.backend.dto.recommendation.SkillRecommendationResponse;
 import com.skillsync.backend.dto.recommendation.UserRecommendationResponse;
@@ -63,6 +66,7 @@ import com.skillsync.backend.exception.user.UserNotFoundException;
 import com.skillsync.backend.model.AuditLog;
 import com.skillsync.backend.model.LearningGoal;
 import com.skillsync.backend.model.LearningSession;
+import com.skillsync.backend.model.Notification;
 import com.skillsync.backend.model.RecommendationHistory;
 import com.skillsync.backend.model.Role;
 import com.skillsync.backend.model.Skill;
@@ -73,6 +77,7 @@ import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.AuditLogRepository;
 import com.skillsync.backend.repository.LearningGoalRepository;
 import com.skillsync.backend.repository.LearningSessionRepository;
+import com.skillsync.backend.repository.NotificationRepository;
 import com.skillsync.backend.repository.RecommendationHistoryRepository;
 import com.skillsync.backend.repository.SkillCategoryRepository;
 import com.skillsync.backend.repository.SkillRepository;
@@ -93,6 +98,7 @@ public class UserService {
     private final RecommendationHistoryRepository recommendationHistoryRepository;
     private final AuditService auditService;
     private final AuditLogRepository auditLogRepository;
+    private final NotificationRepository notificationRepository;
 
     public UserService(
             UserRepository userRepository,
@@ -105,7 +111,8 @@ public class UserService {
             NotificationService notificationService,
             RecommendationHistoryRepository recommendationHistoryRepository,
             AuditService auditService,
-            AuditLogRepository auditLogRepository
+            AuditLogRepository auditLogRepository,
+            NotificationRepository notificationRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -118,6 +125,7 @@ public class UserService {
         this.recommendationHistoryRepository = recommendationHistoryRepository;
         this.auditService = auditService;
         this.auditLogRepository = auditLogRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     public UserResponse registerUser(RegisterRequest request) {
@@ -454,12 +462,20 @@ public class UserService {
             userPage = userRepository.findAll(pageable);
         }
 
-        return userPage.map(user -> new AdminUserResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getRole().name()
-        ));
+        return userPage.map(user -> {
+            long skillCount = skillRepository.countByUser(user);
+            long sessionCount = learningSessionRepository.countBySkill_User(user);
+            
+            return new AdminUserResponse(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getRole() != null ? user.getRole().name() : "USER",
+                    (int) skillCount,
+                    (int) sessionCount,
+                    user.getCreatedAt()
+            );
+        });
     }
 
     public List<SkillResponse> getSkillsOfUserForAdmin(Long userId) {
@@ -1012,6 +1028,14 @@ public class UserService {
                 .findByIdAndUser(categoryId, user)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
+        // Remove category reference from all skills in this category
+        List<Skill> skillsInCategory = skillRepository.findAllByCategory(category);
+        for (Skill skill : skillsInCategory) {
+            skill.setCategory(null);
+        }
+        skillRepository.saveAll(skillsInCategory);
+
+        // Now delete the category
         skillCategoryRepository.delete(category);
     }
 
@@ -1134,6 +1158,60 @@ public class UserService {
         );
 
         return mapToGoalResponse(saved);
+    }
+
+    public GoalResponse updateGoal(Long goalId, UpdateGoalRequest request) {
+
+        String email = getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(null));
+
+        LearningGoal goal = learningGoalRepository.findById(goalId)
+                .orElseThrow(() -> new RuntimeException("Goal not found"));
+
+        // Verify the goal belongs to the current user
+        if (!goal.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized to update this goal");
+        }
+
+        goal.setTargetDate(request.getTargetDate());
+
+        LearningGoal updated = learningGoalRepository.save(goal);
+
+        auditService.log(
+                user,
+                "UPDATE",
+                "GOAL",
+                goal.getId()
+        );
+
+        return mapToGoalResponse(updated);
+    }
+
+    public void deleteGoal(Long goalId) {
+
+        String email = getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(null));
+
+        LearningGoal goal = learningGoalRepository.findById(goalId)
+                .orElseThrow(() -> new RuntimeException("Goal not found"));
+
+        // Verify the goal belongs to the current user
+        if (!goal.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized to delete this goal");
+        }
+
+        learningGoalRepository.deleteById(goalId);
+
+        auditService.log(
+                user,
+                "DELETE",
+                "GOAL",
+                goalId
+        );
     }
 
     public List<GoalAnalyticsResponse> getGoalAnalytics() {
@@ -1607,6 +1685,17 @@ public class UserService {
     }
 
     public void adminDeleteCategory(Long categoryId) {
+        SkillCategory category = skillCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        // Remove category reference from all skills in this category
+        List<Skill> skillsInCategory = skillRepository.findAllByCategory(category);
+        for (Skill skill : skillsInCategory) {
+            skill.setCategory(null);
+        }
+        skillRepository.saveAll(skillsInCategory);
+
+        // Now delete the category
         skillCategoryRepository.deleteById(categoryId);
     }
 
@@ -1898,11 +1987,104 @@ public class UserService {
     }
 
     private AdminUserResponse mapToAdminUserResponse(User user) {
+        long skillCount = skillRepository.countByUser(user);
+        long sessionCount = learningSessionRepository.countBySkill_User(user);
+        
         return new AdminUserResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole().name()
+                user.getRole() != null ? user.getRole().name() : "USER",
+                (int) skillCount,
+                (int) sessionCount,
+                user.getCreatedAt()
         );
+    }
+
+    public void toggleAccountStatus(Long userId, Boolean isActive) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setIsActive(isActive);
+        userRepository.save(user);
+    }
+
+    public void resetUserPassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(newPassword));
+        user.setLastPasswordChangeAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    public List<UserResponse> getInactiveUsers(int days) {
+        LocalDate cutoffDate = LocalDate.now().minusDays(days);
+        return userRepository.findAll().stream()
+                .filter(user -> {
+                    List<LearningSession> userSessions = learningSessionRepository.findAll().stream()
+                            .filter(s -> s.getSkill().getUser().equals(user))
+                            .collect(Collectors.toList());
+                    return userSessions.isEmpty() || userSessions.stream()
+                            .allMatch(session -> session.getSessionDate().isBefore(cutoffDate));
+                })
+                .map(user -> new UserResponse(user.getId(), user.getName(), user.getEmail()))
+                .collect(Collectors.toList());
+    }
+
+    public Map<String, Object> getUserActivityReport(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<LearningGoal> goals = learningGoalRepository.findByUser(user);
+        long skillCount = skillRepository.countByUser(user);
+        long sessionCount = learningSessionRepository.countBySkill_User(user);
+
+        Map<String, Object> report = new HashMap<>();
+        report.put("userId", user.getId());
+        report.put("userName", user.getName());
+        report.put("email", user.getEmail());
+        report.put("totalSkills", skillCount);
+        report.put("totalSessions", sessionCount);
+        report.put("totalGoals", goals.size());
+        report.put("createdAt", user.getCreatedAt());
+        report.put("lastPasswordChange", user.getLastPasswordChangeAt());
+        report.put("isActive", user.getIsActive());
+
+        return report;
+    }
+
+    private UserResponse mapUserToResponse(User user) {
+        return new UserResponse(user.getId(), user.getName(), user.getEmail());
+    }
+
+    public void broadcastNotification(String title, String message, List<Long> userIds) {
+        List<User> users;
+        if (userIds == null || userIds.isEmpty()) {
+            users = userRepository.findAll();
+        } else {
+            users = userRepository.findAllById(userIds);
+        }
+
+        for (User user : users) {
+            Notification notification = new Notification(title, message, user);
+            notificationRepository.save(notification);
+        }
+    }
+
+    public List<AdminUserResponse> searchUsersByEmail(String email) {
+        return userRepository.findByEmailContainingIgnoreCase(email).stream()
+                .map(user -> {
+                    long skillCount = skillRepository.countByUser(user);
+                    long sessionCount = learningSessionRepository.countBySkill_User(user);
+                    return new AdminUserResponse(
+                            user.getId(),
+                            user.getName(),
+                            user.getEmail(),
+                            user.getRole() != null ? user.getRole().name() : "USER",
+                            (int) skillCount,
+                            (int) sessionCount,
+                            user.getCreatedAt()
+                    );
+                })
+                .collect(Collectors.toList());
     }
 }

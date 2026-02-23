@@ -3,11 +3,16 @@ package com.skillsync.backend.controller;
 import com.skillsync.backend.dto.*;
 import com.skillsync.backend.dto.stats.AdminStatsResponse;
 import com.skillsync.backend.model.Role;
+import com.skillsync.backend.service.AuditService;
+import com.skillsync.backend.service.SystemSettingsService;
+import com.skillsync.backend.service.AnalyticsService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +23,20 @@ import com.skillsync.backend.service.UserService;
 public class AdminController {
 
     private final UserService userService;
-    public AdminController(UserService userService) {
+    private final AuditService auditService;
+    private final SystemSettingsService systemSettingsService;
+    private final AnalyticsService analyticsService;
+
+    public AdminController(
+            UserService userService,
+            AuditService auditService,
+            SystemSettingsService systemSettingsService,
+            AnalyticsService analyticsService
+    ) {
         this.userService = userService;
+        this.auditService = auditService;
+        this.systemSettingsService = systemSettingsService;
+        this.analyticsService = analyticsService;
     }
 
     @GetMapping("/dashboard")
@@ -169,6 +186,178 @@ public class AdminController {
 
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "User role updated", null)
+        );
+    }
+
+    // ==================== Account Status Management ====================
+
+    @PutMapping("/users/{userId}/account-status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> toggleAccountStatus(
+            @PathVariable Long userId,
+            @RequestBody AccountStatusRequest request) {
+
+        userService.toggleAccountStatus(userId, request.getIsActive());
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        request.getIsActive() ? "Account activated" : "Account deactivated",
+                        null
+                )
+        );
+    }
+
+    @PutMapping("/users/{userId}/password-reset")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> resetUserPassword(
+            @PathVariable Long userId,
+            @RequestBody PasswordResetRequest request) {
+
+        userService.resetUserPassword(request.getUserId(), request.getNewPassword());
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Password reset successfully", null)
+        );
+    }
+
+    @GetMapping("/users/inactive")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getInactiveUsers(
+            @RequestParam(defaultValue = "30") int days) {
+
+        List<UserResponse> inactiveUsers = userService.getInactiveUsers(days);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Inactive users fetched", inactiveUsers)
+        );
+    }
+
+    // ==================== Audit Logging ====================
+
+    @GetMapping("/audit-logs")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getAuditLogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        Page<AuditLogResponse> logs = auditService.getAllAuditLogs(page, size);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Audit logs fetched", logs)
+        );
+    }
+
+    @GetMapping("/audit-logs/action/{action}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<AuditLogResponse>>> getAuditLogsByAction(
+            @PathVariable String action) {
+
+        List<AuditLogResponse> logs = auditService.getAuditLogsByAction(action);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Audit logs fetched by action", logs)
+        );
+    }
+
+    @GetMapping("/audit-logs/entity/{entityType}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<AuditLogResponse>>> getAuditLogsByEntityType(
+            @PathVariable String entityType) {
+
+        List<AuditLogResponse> logs = auditService.getAuditLogsByEntityType(entityType);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Audit logs fetched by entity type", logs)
+        );
+    }
+
+    // ==================== System Settings ====================
+
+    @GetMapping("/settings")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<SystemSettingsResponse>> getSystemSettings() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "System settings fetched",
+                        systemSettingsService.getSettings()
+                )
+        );
+    }
+
+    @PutMapping("/settings")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<SystemSettingsResponse>> updateSystemSettings(
+            @RequestBody SystemSettingsResponse request) {
+
+        SystemSettingsResponse updated = systemSettingsService.updateSettings(request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "System settings updated", updated)
+        );
+    }
+
+    // ==================== Analytics & Engagement ====================
+
+    @GetMapping("/analytics/engagement")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<EngagementMetricsResponse>> getEngagementMetrics() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Engagement metrics fetched",
+                        analyticsService.getEngagementMetrics()
+                )
+        );
+    }
+
+    @GetMapping("/users/{userId}/activity-report")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getUserActivityReport(
+            @PathVariable Long userId) {
+
+        Map<String, Object> report = userService.getUserActivityReport(userId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "User activity report fetched", report)
+        );
+    }
+
+    // ==================== Notifications ====================
+
+    @PostMapping("/notifications/broadcast")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> broadcastNotification(
+            @RequestBody BroadcastNotificationRequest request) {
+
+        userService.broadcastNotification(
+                request.getTitle(),
+                request.getMessage(),
+                request.getTargetUserIds()
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Notification sent to " + 
+                        (request.getTargetUserIds() == null ? "all users" : request.getTargetUserIds().size() + " users"),
+                        null
+                )
+        );
+    }
+
+    // ==================== User Search ====================
+
+    @GetMapping("/users/search/email")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<AdminUserResponse>>> searchUsersByEmail(
+            @RequestParam String email) {
+
+        List<AdminUserResponse> users = userService.searchUsersByEmail(email);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Users found", users)
         );
     }
 

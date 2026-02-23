@@ -9,14 +9,14 @@ const DonutChartCard = ({
   className = ''
 }) => {
   const colors = [
-    'stroke-indigo-500 fill-indigo-500',
-    'stroke-blue-500 fill-blue-500',
-    'stroke-purple-500 fill-purple-500',
-    'stroke-green-500 fill-green-500',
-    'stroke-yellow-500 fill-yellow-500',
-    'stroke-red-500 fill-red-500',
-    'stroke-pink-500 fill-pink-500',
-    'stroke-orange-500 fill-orange-500',
+    { stroke: 'stroke-indigo-500 fill-indigo-500', bg: 'bg-indigo-500' },
+    { stroke: 'stroke-blue-500 fill-blue-500', bg: 'bg-blue-500' },
+    { stroke: 'stroke-purple-500 fill-purple-500', bg: 'bg-purple-500' },
+    { stroke: 'stroke-green-500 fill-green-500', bg: 'bg-green-500' },
+    { stroke: 'stroke-yellow-500 fill-yellow-500', bg: 'bg-yellow-500' },
+    { stroke: 'stroke-red-500 fill-red-500', bg: 'bg-red-500' },
+    { stroke: 'stroke-pink-500 fill-pink-500', bg: 'bg-pink-500' },
+    { stroke: 'stroke-orange-500 fill-orange-500', bg: 'bg-orange-500' },
   ];
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
@@ -25,17 +25,18 @@ const DonutChartCard = ({
 
   const segments = data.map((item, index) => {
     const percentage = (item.value / total) * 100;
-    const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
+    const arcLength = (percentage / 100) * circumference;
     
-    const rotation = -90 + data.slice(0, index).reduce((sum, prev) => {
-      return sum + (prev.value / total) * 360;
+    // Calculate the offset - where this segment starts on the circle
+    const offset = data.slice(0, index).reduce((sum, prev) => {
+      return sum + (prev.value / total) * circumference;
     }, 0);
 
     return {
       ...item,
       percentage: percentage.toFixed(1),
-      strokeDasharray,
-      rotation,
+      arcLength,
+      offset,
       color: colors[index % colors.length]
     };
   });
@@ -55,7 +56,7 @@ const DonutChartCard = ({
       {data.length > 0 ? (
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
-            <svg viewBox="0 0 100 100" className="transform -rotate-90">
+            <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)', transformOrigin: 'center' }}>
               <circle
                 cx="50"
                 cy="50"
@@ -72,14 +73,11 @@ const DonutChartCard = ({
                   cy="50"
                   r={radius}
                   fill="none"
-                  className={segment.color}
+                  className={segment.color.stroke}
                   strokeWidth="12"
-                  strokeDasharray={segment.strokeDasharray}
+                  strokeDasharray={`${segment.arcLength} ${circumference}`}
+                  strokeDashoffset={-segment.offset}
                   strokeLinecap="round"
-                  style={{
-                    transform: `rotate(${segment.rotation}deg)`,
-                    transformOrigin: '50% 50%',
-                  }}
                 />
               ))}
             </svg>
@@ -95,7 +93,7 @@ const DonutChartCard = ({
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center space-x-2 min-w-0 flex-1">
                   <div
-                    className={`w-3 h-3 rounded-full shrink-0 ${segment.color.replace('stroke-', 'bg-').split(' ')[1]}`}
+                    className={`w-3 h-3 rounded-full shrink-0 ${segment.color.bg}`}
                   />
                   <span className="text-sm text-gray-700 dark:text-[#a6adc8] truncate">
                     {segment.label}

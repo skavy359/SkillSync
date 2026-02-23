@@ -37,6 +37,15 @@ public class User {
 
     private LocalDateTime createdAt;
 
+    @Column(columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean isActive = true;
+
+    private LocalDateTime lastPasswordChangeAt;
+
+    private String passwordResetToken;
+
+    private LocalDateTime passwordResetTokenExpiresAt;
+
     // Notification Preferences
     @Column(columnDefinition = "BOOLEAN DEFAULT true")
     private Boolean notifSessionReminders = true;

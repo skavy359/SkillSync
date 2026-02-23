@@ -1,5 +1,7 @@
 package com.skillsync.backend.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +14,9 @@ public class AdminUserResponse {
     private String name;
     private String email;
     private String role;
+    private Integer totalSkills;
+    private Integer totalSessions;
+    private LocalDateTime createdAt;
 
     public AdminUserResponse() {
 

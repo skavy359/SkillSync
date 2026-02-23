@@ -22,14 +22,14 @@ import {
 
 // ─── Skeleton card ────────────────────────────────────────────────────────────
 const SkeletonStatCard = () => (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-pulse">
+    <div className="bg-white dark:bg-[#181825] rounded-2xl border border-gray-100 dark:border-[#313244] shadow-sm dark:shadow-none p-6 animate-pulse">
         <div className="flex items-start justify-between">
             <div className="space-y-3 flex-1">
-                <div className="h-3 bg-gray-100 rounded w-24" />
-                <div className="h-8 bg-gray-100 rounded w-16" />
-                <div className="h-3 bg-gray-100 rounded w-32" />
+                <div className="h-3 bg-gray-100 dark:bg-[#313244] rounded w-24" />
+                <div className="h-8 bg-gray-100 dark:bg-[#313244] rounded w-16" />
+                <div className="h-3 bg-gray-100 dark:bg-[#313244] rounded w-32" />
             </div>
-            <div className="w-12 h-12 bg-gray-100 rounded-xl" />
+            <div className="w-12 h-12 bg-gray-100 dark:bg-[#313244] rounded-xl" />
         </div>
     </div>
 );
@@ -125,15 +125,15 @@ const AdminDashboard = ({ onNavigate }) => {
               Admin Panel
             </span>
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                    <p className="text-gray-500 mt-1">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-[#cdd6f4]">Dashboard</h1>
+                    <p className="text-gray-500 dark:text-[#7f849c] mt-1">
                         Platform-wide overview and real-time metrics
                     </p>
                 </div>
 
                 <div className="flex items-center space-x-3">
                     {lastRefreshed && (
-                        <span className="text-xs text-gray-400 hidden sm:inline">
+                        <span className="text-xs text-gray-400 dark:text-[#7f849c] hidden sm:inline">
               Updated {lastRefreshed.toLocaleTimeString()}
             </span>
                     )}
@@ -150,9 +150,9 @@ const AdminDashboard = ({ onNavigate }) => {
 
             {/* ── Stats Error ────────────────────────────────────────────────── */}
             {statsError && (
-                <div className="flex items-center space-x-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                    <p className="text-sm text-red-700 flex-1">{statsError}</p>
+                <div className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                    <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" />
+                    <p className="text-sm text-red-700 dark:text-red-400 flex-1">{statsError}</p>
                     <Button variant="ghost" size="sm" onClick={loadStats}>
                         Retry
                     </Button>
@@ -205,7 +205,7 @@ const AdminDashboard = ({ onNavigate }) => {
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-2">
                             <TrendingUp className="w-5 h-5 text-indigo-500" />
-                            <h3 className="text-base font-semibold text-gray-900">
+                            <h3 className="text-base font-semibold text-gray-900 dark:text-[#cdd6f4]">
                                 Platform Activity
                             </h3>
                         </div>
@@ -216,7 +216,7 @@ const AdminDashboard = ({ onNavigate }) => {
                         {/* Active Users bar */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-gray-600">Active Users</span>
+                                <span className="text-sm text-gray-600 dark:text-[#a6adc8]">Active Users</span>
                                 <span className="text-sm font-bold text-indigo-600">{activePercent}%</span>
                             </div>
                             <div className="w-full bg-gray-100 rounded-full h-2.5">
@@ -225,7 +225,7 @@ const AdminDashboard = ({ onNavigate }) => {
                                     style={{ width: `${activePercent}%` }}
                                 />
                             </div>
-                            <p className="text-xs text-gray-400 mt-1">
+                            <p className="text-xs text-gray-400 dark:text-[#7f849c] mt-1">
                                 {stats.activeUsers} active / {stats.totalUsers} total
                             </p>
                         </div>
@@ -233,7 +233,7 @@ const AdminDashboard = ({ onNavigate }) => {
                         {/* Avg skills */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-gray-600">Avg Skills / User</span>
+                                <span className="text-sm text-gray-600 dark:text-[#a6adc8]">Avg Skills / User</span>
                                 <span className="text-sm font-bold text-blue-600">
                   {stats.totalUsers > 0
                       ? (stats.totalSkills / stats.totalUsers).toFixed(1)
@@ -253,7 +253,7 @@ const AdminDashboard = ({ onNavigate }) => {
                                     }}
                                 />
                             </div>
-                            <p className="text-xs text-gray-400 mt-1">
+                            <p className="text-xs text-gray-400 dark:text-[#7f849c] mt-1">
                                 {stats.totalSkills} skills tracked
                             </p>
                         </div>
@@ -261,7 +261,7 @@ const AdminDashboard = ({ onNavigate }) => {
                         {/* Avg sessions */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-gray-600">Avg Sessions / User</span>
+                                <span className="text-sm text-gray-600 dark:text-[#a6adc8]">Avg Sessions / User</span>
                                 <span className="text-sm font-bold text-green-600">
                   {stats.totalUsers > 0
                       ? (stats.totalSessions / stats.totalUsers).toFixed(1)
@@ -281,7 +281,7 @@ const AdminDashboard = ({ onNavigate }) => {
                                     }}
                                 />
                             </div>
-                            <p className="text-xs text-gray-400 mt-1">
+                            <p className="text-xs text-gray-400 dark:text-[#7f849c] mt-1">
                                 {stats.totalSessions} sessions logged
                             </p>
                         </div>
@@ -305,9 +305,9 @@ const AdminDashboard = ({ onNavigate }) => {
             >
                 {/* Error */}
                 {usersError && (
-                    <div className="flex items-center space-x-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-                        <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                        <p className="text-sm text-red-700 flex-1">{usersError}</p>
+                    <div className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                        <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0" />
+                        <p className="text-sm text-red-700 dark:text-red-400 flex-1">{usersError}</p>
                         <Button variant="ghost" size="sm" onClick={loadRecentUsers}>Retry</Button>
                     </div>
                 )}
@@ -338,8 +338,8 @@ const AdminDashboard = ({ onNavigate }) => {
                             <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <Users className="w-7 h-7 text-gray-300" />
                             </div>
-                            <p className="text-sm font-semibold text-gray-700">No users yet</p>
-                            <p className="text-xs text-gray-400 mt-1">Users will appear here once they register.</p>
+                            <p className="text-sm font-semibold text-gray-700 dark:text-[#cdd6f4]">No users yet</p>
+                            <p className="text-xs text-gray-400 dark:text-[#7f849c] mt-1">Users will appear here once they register.</p>
                         </div>
                     </Card>
                 )}
@@ -349,19 +349,19 @@ const AdminDashboard = ({ onNavigate }) => {
                     <Card className="overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-gray-50 border-b border-gray-200">
+                                <thead className="bg-gray-50 dark:bg-[#181825] border-b border-gray-200 dark:border-[#313244]">
                                 <tr>
                                     {['User', 'Role', 'Skills', 'Sessions', 'Joined'].map((h) => (
                                         <th
                                             key={h}
-                                            className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                                            className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-[#a6adc8] uppercase tracking-wider"
                                         >
                                             {h}
                                         </th>
                                     ))}
                                 </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 bg-white">
+                                <tbody className="divide-y divide-gray-100 dark:divide-[#313244] bg-white dark:bg-[#0f0f1b]">
                                 {recentUsers.map((user) => (
                                     <tr
                                         key={user.id}
@@ -374,10 +374,10 @@ const AdminDashboard = ({ onNavigate }) => {
                                                     {user.name?.[0]?.toUpperCase() ?? '?'}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-semibold text-gray-900 truncate">
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] truncate">
                                                         {user.name}
                                                     </p>
-                                                    <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                                                    <p className="text-xs text-gray-400 dark:text-[#7f849c] truncate">{user.email}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -389,22 +389,22 @@ const AdminDashboard = ({ onNavigate }) => {
 
                                         {/* Skills */}
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center space-x-1.5 text-sm text-gray-700">
-                                                <Layers className="w-3.5 h-3.5 text-gray-400" />
+                                            <div className="flex items-center space-x-1.5 text-sm text-gray-700 dark:text-[#cdd6f4]">
+                                                <Layers className="w-3.5 h-3.5 text-gray-400 dark:text-[#7f849c]" />
                                                 <span className="font-medium">{user.totalSkills ?? 0}</span>
                                             </div>
                                         </td>
 
                                         {/* Sessions */}
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center space-x-1.5 text-sm text-gray-700">
-                                                <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                            <div className="flex items-center space-x-1.5 text-sm text-gray-700 dark:text-[#cdd6f4]">
+                                                <Clock className="w-3.5 h-3.5 text-gray-400 dark:text-[#7f849c]" />
                                                 <span className="font-medium">{user.totalSessions ?? 0}</span>
                                             </div>
                                         </td>
 
                                         {/* Joined */}
-                                        <td className="px-6 py-4 text-sm text-gray-500">
+                                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-[#7f849c]">
                                             {formatDate(user.createdAt)}
                                         </td>
                                     </tr>

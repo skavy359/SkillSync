@@ -1,17 +1,20 @@
 package com.skillsync.backend.exception;
 
+import java.util.HashMap;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.exception.admin.AdminOperationNotAllowedException;
 import com.skillsync.backend.exception.skill.DuplicateSkillException;
 import com.skillsync.backend.exception.skill.SkillNotFoundException;
 import com.skillsync.backend.exception.skill.UnauthorizedSkillAccessException;
 import com.skillsync.backend.exception.user.UserNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import java.util.HashMap;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -120,6 +123,26 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(
                         false,
                         ex.getMessage(),
+                        null
+                ));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<String>> handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException ex) {
+
+        String message = String.format(
+                "Invalid value '%s' for parameter '%s'. Expected type: %s",
+                ex.getValue(),
+                ex.getName(),
+                ex.getRequiredType().getSimpleName()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(
+                        false,
+                        message,
                         null
                 ));
     }

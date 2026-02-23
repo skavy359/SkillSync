@@ -51,6 +51,7 @@ const SkillDetail = ({ skillId, onNavigate }) => {
     const [sessionEditLoading, setSessionEditLoading] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [validationError, setValidationError] = useState(false);
 
     useEffect(() => {
         if (!skillId) return;
@@ -74,7 +75,8 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         
         const duration = Number(sessionForm.duration);
         if (duration > 1440) {
-            alert('Session duration cannot exceed 24 hours (1440 minutes)');
+            setIsSessionModalOpen(false);
+            setValidationError(true);
             return;
         }
 
@@ -161,6 +163,13 @@ const SkillDetail = ({ skillId, onNavigate }) => {
     const handleSessionEditSubmit = async () => {
         if (!sessionEditForm.durationMinutes || !sessionEditForm.sessionDate) {
             alert('Please fill in all required fields');
+            return;
+        }
+
+        const duration = Number(sessionEditForm.durationMinutes);
+        if (duration > 1440) {
+            setIsSessionEditModalOpen(false);
+            setValidationError(true);
             return;
         }
 
@@ -699,6 +708,25 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                             This action cannot be undone.
                         </p>
                     </div>
+                </div>
+            </Modal>
+
+            {/* Validation Error Modal */}
+            <Modal
+                isOpen={validationError}
+                onClose={() => setValidationError(false)}
+                title="Duration Exceeds Limit"
+                footer={
+                    <Button variant="primary" onClick={() => setValidationError(false)}>
+                        Got it
+                    </Button>
+                }
+            >
+                <div className="flex items-start space-x-4">
+                    <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-gray-700 dark:text-[#a6adc8]">
+                        Session duration cannot exceed 24 hours (1440 minutes). Please enter a shorter duration.
+                    </p>
                 </div>
             </Modal>
         </div>

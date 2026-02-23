@@ -24,6 +24,7 @@ import com.skillsync.backend.dto.audit.AuditLogResponse;
 import com.skillsync.backend.dto.goal.CreateGoalRequest;
 import com.skillsync.backend.dto.goal.GoalAnalyticsResponse;
 import com.skillsync.backend.dto.goal.GoalResponse;
+import com.skillsync.backend.dto.goal.UpdateGoalRequest;
 import com.skillsync.backend.dto.recommendation.RecommendationHistoryResponse;
 import com.skillsync.backend.dto.recommendation.SkillRecommendationResponse;
 import com.skillsync.backend.dto.recommendation.UserRecommendationResponse;
@@ -286,6 +287,38 @@ public class UserProfileController {
                         true,
                         "Goal created",
                         goal
+                )
+        );
+    }
+
+    @PutMapping("/goals/{goalId}")
+    public ResponseEntity<ApiResponse<GoalResponse>> updateGoal(
+            @PathVariable Long goalId,
+            @RequestBody UpdateGoalRequest request) {
+
+        GoalResponse goal =
+                userService.updateGoal(goalId, request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Goal updated",
+                        goal
+                )
+        );
+    }
+
+    @DeleteMapping("/goals/{goalId}")
+    public ResponseEntity<ApiResponse<String>> deleteGoal(
+            @PathVariable Long goalId) {
+
+        userService.deleteGoal(goalId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Goal deleted",
+                        null
                 )
         );
     }
