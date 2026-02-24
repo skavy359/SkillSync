@@ -1,10 +1,10 @@
 # SkillSync - Learning Analytics Platform
 
-A modern, professional SaaS-style learning analytics platform built with React and TailwindCSS. Track your skills, log learning sessions, monitor progress, and analyze your learning patterns.
+A modern, professional SaaS-style learning analytics platform built with React and SpringBoot.
+Track your skills, log learning sessions, monitor progress, and analyze your learning patterns.
 
 ## ✨ Features
 
-### Core Features
 - 📊 **Dashboard** - Overview of learning progress with activity heatmap and quick actions
 - 💡 **Skills Management** - Track and organize learning skills with multiple levels
 - 🕐 **Sessions Tracking** - Comprehensive view of all learning sessions with search and statistics
@@ -95,37 +95,6 @@ skillsync/
 | **Settings** | Customize your experience | ⚙️ |
 | **Admin Panel** | Manage the platform | 🛡️ |
 
-## 🚀 Quick Start
-
-### What You Need
-```
-✓ Java 17+           ✓ PostgreSQL 12+
-✓ Node.js 18+        ✓ Maven 3.8+
-```
-
-### Let's Go! 🎯
-
-**Step 1: Backend (the 🧠 of the app)**
-```bash
-cd backend
-# Update database in: src/main/resources/application.properties
-mvn spring-boot:run
-# 🎉 Backend live on port 8080
-```
-
-**Step 2: Frontend (the ✨ beautiful part)**
-```bash
-cd frontend
-npm install
-npm run dev
-# ✨ Frontend live on port 5173
-```
-
-**Step 3: Open & Start Learning! 🚀**
-```
-Visit: http://localhost:5173
-```
-
 ---
 
 ## 💫 What Makes SkillSync Special?
@@ -147,16 +116,6 @@ Compete with friends, share achievements, celebrate wins together. Learning is b
 
 ### 🛡️ Admin Power
 Full platform control with user management, audit logs, and system statistics. Keep things running smoothly!
-
----
-
-## 🎨 Dark Mode & Beautiful UI  
-
-Everything's built with Catppuccin dark theme:
-- 👁️ **Easy on the eyes** - Perfect for long study sessions
-- ✨ **Modern design** - Inspired by Linear, Vercel, and Notion
-- 📱 **Mobile friendly** - Works great on any device
-- ⚡ **Smooth interactions** - Delightful animations everywhere
 
 ---
 
@@ -188,46 +147,7 @@ Everything's built with Catppuccin dark theme:
 
 ---
 
-## 📊 Dashboard Highlights
-
-- 📈 Real-time statistics dashboard
-- 🔥 Weekly activity heatmap with minute-level precision
-- 🎯 Quick-add skills and sessions
-- 📋 Recent activity overview
-- 📊 Category breakdown charts
-- 🏆 Top achievements display
-
----
-
-## 🚀 Ready to Transform Your Learning?
-
-1. **Clone the repo** 📦
-2. **Follow Quick Start** ⚡
-3. **Create your first skill** 💡
-4. **Log a learning session** 🕐
-5. **Watch your dashboard light up!** 🌟
-
-### Pro Tips 💡
-- Use categories to organize your skills
-- Log sessions consistently for better insights
-- Check analytics weekly to spot patterns
-- Share achievements with friends for motivation
-- Monitor burnout score to stay healthy
-
----
-
-## 🤝 Contributing
-
-We'd love your contributions! Feel free to:
-- Report bugs 🐛
-- Suggest features ✨
-- Submit pull requests 🚀
-- Share feedback 💬
-
----
-
 ## 📄 License
-
 This project is open source and available for personal and commercial use.
 
 ## 👨‍💻 Author
