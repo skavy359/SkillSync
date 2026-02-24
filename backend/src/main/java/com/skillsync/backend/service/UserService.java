@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.skillsync.backend.dto.AddSkillRequest;
 import com.skillsync.backend.dto.AdminUserResponse;
 import com.skillsync.backend.dto.CategoryResponse;
@@ -172,7 +170,6 @@ public class UserService {
 
         String token;
     if (request.isRememberMe()) {
-        // 5 days in milliseconds
         long rememberMeExpiration = 5L * 24 * 60 * 60 * 1000;
         token = jwtUtil.generateToken(
                 user.getId(),
@@ -210,7 +207,6 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(null));
 
-        // Set createdAt to current time if it's null (for existing users)
         if (user.getCreatedAt() == null) {
             user.setCreatedAt(LocalDateTime.now());
             userRepository.save(user);
@@ -234,8 +230,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(null));
 
         user.setName(request.getName());
-        
-        // Handle about field - set to null if empty or whitespace only
+
         if (request.getAbout() != null && !request.getAbout().trim().isEmpty()) {
             user.setAbout(request.getAbout().trim());
         } else {
@@ -286,7 +281,6 @@ public class UserService {
                 savedSkill.getId()
         );
 
-        // Check if this is the 5th skill to unlock achievement
         long totalSkills = skillRepository.countByUser(user);
         if (totalSkills == 5) {
             notificationService.createNotificationIfPreferenceEnabled(
@@ -365,15 +359,13 @@ public class UserService {
                 skill.getId()
         );
 
-        // Send notification if skill was just completed
         if (request.getProgress() == 100) {
             notificationService.createNotificationIfPreferenceEnabled(
                     user,
                     NotificationService.NotificationType.SKILL_COMPLETIONS,
                     "Congratulations! You've successfully completed the skill \"" + skill.getName() + "\". Great achievement!"
             );
-            
-            // Check if this is the first completed skill  
+
             long completedCount = skillRepository.countByUserAndStatus(user, SkillStatus.COMPLETED);
             if (completedCount == 1) {
                 notificationService.createNotificationIfPreferenceEnabled(
@@ -382,8 +374,7 @@ public class UserService {
                         "🏆 Achievement Unlocked! Completion Master - You've successfully completed your first skill!"
                 );
             }
-            
-            // Check for category milestone
+
             checkAndNotifyForCategoryMilestone(user, skill);
         }
 
@@ -401,19 +392,16 @@ public class UserService {
                 .findByIdAndUser(skillId, user)
                 .orElseThrow(() -> new SkillNotFoundException(skillId));
 
-        // First delete all learning goals referencing this skill
         List<LearningGoal> goals = learningGoalRepository.findBySkill(skill);
         if (!goals.isEmpty()) {
             learningGoalRepository.deleteAll(goals);
         }
 
-        // Then delete all learning sessions for this skill
         List<LearningSession> sessions = learningSessionRepository.findBySkill(skill);
         if (!sessions.isEmpty()) {
             learningSessionRepository.deleteAll(sessions);
         }
 
-        // Finally delete the skill itself
         skillRepository.delete(skill);
 
         auditService.log(
@@ -510,7 +498,6 @@ public class UserService {
     }
 
     private SkillResponse mapSkill(Skill skill) {
-        // Calculate total minutes from all sessions
         int totalMinutes = skill.getSessions() != null 
             ? skill.getSessions().stream()
                 .mapToInt(session -> session.getDurationMinutes())
@@ -570,10 +557,8 @@ public class UserService {
         long totalUsers = userRepository.countBy();
         long totalSkills = skillRepository.count();
 
-        // Count total sessions from all users
         long totalSessions = learningSessionRepository.count();
 
-        // Calculate active users (users who have at least one active skill)
         long activeUsers = userRepository.findAll().stream()
                 .filter(user -> skillRepository.countByUserAndStatus(user, SkillStatus.ACTIVE) > 0)
                 .count();
@@ -628,7 +613,6 @@ public class UserService {
                 session.getId()
         );
 
-        // Send notification for session logged
         notificationService.createNotificationIfPreferenceEnabled(
                 user,
                 NotificationService.NotificationType.SESSION_REMINDERS,
@@ -684,7 +668,6 @@ public class UserService {
                 .findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found"));
 
-        // Verify session belongs to the skill
         if (!session.getSkill().getId().equals(skillId)) {
             throw new RuntimeException("Session does not belong to this skill");
         }
@@ -725,7 +708,6 @@ public class UserService {
                 .findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found"));
 
-        // Verify session belongs to the skill
         if (!session.getSkill().getId().equals(skillId)) {
             throw new RuntimeException("Session does not belong to this skill");
         }
@@ -837,7 +819,6 @@ public class UserService {
             );
         }
 
-        // Check for achievement unlocks
         if (streak == 7) {
             notificationService.createNotificationIfPreferenceEnabled(
                     user,
@@ -1041,14 +1022,12 @@ public class UserService {
                 .findByIdAndUser(categoryId, user)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        // Remove category reference from all skills in this category
         List<Skill> skillsInCategory = skillRepository.findAllByCategory(category);
         for (Skill skill : skillsInCategory) {
             skill.setCategory(null);
         }
         skillRepository.saveAll(skillsInCategory);
 
-        // Now delete the category
         skillCategoryRepository.delete(category);
     }
 
@@ -1183,7 +1162,6 @@ public class UserService {
         LearningGoal goal = learningGoalRepository.findById(goalId)
                 .orElseThrow(() -> new RuntimeException("Goal not found"));
 
-        // Verify the goal belongs to the current user
         if (!goal.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Unauthorized to update this goal");
         }
@@ -1212,7 +1190,6 @@ public class UserService {
         LearningGoal goal = learningGoalRepository.findById(goalId)
                 .orElseThrow(() -> new RuntimeException("Goal not found"));
 
-        // Verify the goal belongs to the current user
         if (!goal.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Unauthorized to delete this goal");
         }
@@ -1351,14 +1328,12 @@ public class UserService {
     private void checkAndNotifyForCategoryMilestone(User user, Skill completedSkill) {
         if (completedSkill.getCategory() == null) return;
         
-        // Count completed skills in this category
         int completedInCategory = (int) skillRepository.findAllByUser(user).stream()
                 .filter(s -> s.getCategory() != null && 
                            s.getCategory().getId().equals(completedSkill.getCategory().getId()) &&
                            s.getStatus() == SkillStatus.COMPLETED)
                 .count();
         
-        // Send milestone notification at 5, 10, 15 skills
         if (completedInCategory == 5 || completedInCategory == 10 || completedInCategory == 15) {
             notificationService.createNotificationIfPreferenceEnabled(
                     user,
@@ -1393,9 +1368,6 @@ public class UserService {
         }
 
         String risk;
-        // High risk if working significantly more than average (ratio > 2.0)
-        // Medium risk if working moderately more than average (ratio > 1.25)
-        // Low risk otherwise
         if (ratio > 2.0) {
             risk = "HIGH";
         } else if (ratio > 1.25) {
@@ -1597,8 +1569,7 @@ public class UserService {
     }
 
     private SkillResponse mapSkillToResponse(Skill skill) {
-        // Calculate total minutes from all sessions
-        int totalMinutes = skill.getSessions() != null 
+        int totalMinutes = skill.getSessions() != null
             ? skill.getSessions().stream()
                 .mapToInt(session -> session.getDurationMinutes())
                 .sum()
@@ -1680,19 +1651,16 @@ public class UserService {
         Skill skill = skillRepository.findById(skillId)
                 .orElseThrow(() -> new SkillNotFoundException(skillId));
 
-        // First delete all learning goals referencing this skill
         List<LearningGoal> goals = learningGoalRepository.findBySkill(skill);
         if (!goals.isEmpty()) {
             learningGoalRepository.deleteAll(goals);
         }
 
-        // Then delete all learning sessions for this skill
         List<LearningSession> sessions = learningSessionRepository.findBySkill(skill);
         if (!sessions.isEmpty()) {
             learningSessionRepository.deleteAll(sessions);
         }
 
-        // Finally delete the skill itself
         skillRepository.deleteById(skillId);
     }
 
@@ -1717,14 +1685,12 @@ public class UserService {
         SkillCategory category = skillCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        // Remove category reference from all skills in this category
         List<Skill> skillsInCategory = skillRepository.findAllByCategory(category);
         for (Skill skill : skillsInCategory) {
             skill.setCategory(null);
         }
         skillRepository.saveAll(skillsInCategory);
 
-        // Now delete the category
         skillCategoryRepository.deleteById(categoryId);
     }
 
@@ -1817,7 +1783,6 @@ public class UserService {
         UserLearningStatsResponse learningStats = getMyLearningStats();
         UserStreakResponse streak = getMyStreak();
         
-        // Debug logging
         System.out.println("=== Achievement Calculation Debug ===");
         System.out.println("Streak: " + streak.getCurrentStreak());
         System.out.println("Total Skills: " + stats.getTotalSkills());
@@ -1828,7 +1793,6 @@ public class UserService {
         List<AchievementResponse> achievements = new java.util.ArrayList<>();
         int unlockedCount = 0;
         
-        // Fire Starter - 7-day streak
         AchievementResponse fireStarter = new AchievementResponse(
                 "fire-starter",
                 "Fire Starter",
@@ -1843,7 +1807,6 @@ public class UserService {
         achievements.add(fireStarter);
         if (fireStarter.getUnlocked()) unlockedCount++;
         
-        // Skill Collector - 5 skills
         AchievementResponse skillCollector = new AchievementResponse(
                 "skill-collector",
                 "Skill Collector",
@@ -1858,7 +1821,6 @@ public class UserService {
         achievements.add(skillCollector);
         if (skillCollector.getUnlocked()) unlockedCount++;
         
-        // Century Club - 100+ hours
         long totalHours = learningStats.getTotalMinutes() / 60;
         AchievementResponse centuryClub = new AchievementResponse(
                 "century-club",
@@ -1874,7 +1836,6 @@ public class UserService {
         achievements.add(centuryClub);
         if (centuryClub.getUnlocked()) unlockedCount++;
         
-        // Goal Getter - Create first goal
         List<LearningGoal> goals = learningGoalRepository.findByUser(user);
         AchievementResponse goalGetter = new AchievementResponse(
                 "goal-getter",
@@ -1890,7 +1851,6 @@ public class UserService {
         achievements.add(goalGetter);
         if (goalGetter.getUnlocked()) unlockedCount++;
         
-        // Completion Master - Complete first skill
         AchievementResponse completionMaster = new AchievementResponse(
                 "completion-master",
                 "Completion Master",
@@ -1905,7 +1865,6 @@ public class UserService {
         achievements.add(completionMaster);
         if (completionMaster.getUnlocked()) unlockedCount++;
         
-        // Unstoppable - 30-day streak
         AchievementResponse unstoppable = new AchievementResponse(
                 "unstoppable",
                 "Unstoppable",
@@ -1930,7 +1889,6 @@ public class UserService {
     public void deleteMyAccount() {
         User user = getCurrentUser();
         
-        // Audit log the deletion
         auditService.log(
                 user,
                 "DELETE_ACCOUNT",
@@ -1938,23 +1896,19 @@ public class UserService {
                 user.getId()
         );
         
-        // Delete user (cascade should handle related entities)
         userRepository.deleteById(user.getId());
     }
 
     public void changePassword(String oldPassword, String newPassword) {
         User user = getCurrentUser();
         
-        // Verify old password
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new RuntimeException("Current password is incorrect");
         }
         
-        // Encode and set new password
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         
-        // Audit log the password change
         auditService.log(
                 user,
                 "CHANGE_PASSWORD",
@@ -1962,8 +1916,6 @@ public class UserService {
                 user.getId()
         );
     }
-
-    // ─── Mapper Methods ──────────────────────────────────────────────────
 
     private GoalResponse mapToGoalResponse(LearningGoal goal) {
         return new GoalResponse(
@@ -1995,8 +1947,7 @@ public class UserService {
     }
 
     private SkillResponse mapToSkillResponse(Skill skill) {
-        // Calculate total minutes from all sessions
-        int totalMinutes = skill.getSessions() != null 
+        int totalMinutes = skill.getSessions() != null
             ? skill.getSessions().stream()
                 .mapToInt(session -> session.getDurationMinutes())
                 .sum()

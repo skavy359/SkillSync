@@ -1,14 +1,12 @@
 package com.skillsync.backend.exception;
 
 import java.util.HashMap;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.exception.admin.AdminOperationNotAllowedException;
 import com.skillsync.backend.exception.skill.DuplicateSkillException;

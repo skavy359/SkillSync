@@ -3,9 +3,7 @@ package com.skillsync.backend.service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
-
 import com.skillsync.backend.dto.LeaderboardEntryResponse;
 import com.skillsync.backend.dto.SharingProfileResponse;
 import com.skillsync.backend.model.LearningSession;
@@ -14,7 +12,6 @@ import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.LearningSessionRepository;
 import com.skillsync.backend.repository.SkillRepository;
 import com.skillsync.backend.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -33,7 +30,7 @@ public class LeaderboardService {
                 return new LeaderboardEntryResponse(
                     user.getId(),
                     user.getName(),
-                    0, // Will be set after sorting
+                    0,
                     (int) skillCount,
                     "Skills"
                 );
@@ -41,7 +38,6 @@ public class LeaderboardService {
             .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
             .collect(Collectors.toList());
 
-        // Set ranks
         for (int i = 0; i < entries.size(); i++) {
             entries.get(i).setRank(i + 1);
         }
@@ -58,7 +54,7 @@ public class LeaderboardService {
                 return new LeaderboardEntryResponse(
                     user.getId(),
                     user.getName(),
-                    0, // Will be set after sorting
+                    0,
                     (int) sessionCount,
                     "Sessions"
                 );
@@ -66,7 +62,6 @@ public class LeaderboardService {
             .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
             .collect(Collectors.toList());
 
-        // Set ranks
         for (int i = 0; i < entries.size(); i++) {
             entries.get(i).setRank(i + 1);
         }
@@ -80,7 +75,6 @@ public class LeaderboardService {
 
         List<Skill> userSkills = skillRepository.findByUserId(userId);
 
-        // Calculate totals
         int totalSkills = userSkills.size();
         
         long totalMinutes = userSkills.stream()
@@ -94,7 +88,6 @@ public class LeaderboardService {
 
         long totalSessions = learningSessionRepository.countBySkill_UserId(userId);
 
-        // Find most active category
         String mostActiveCategory = "N/A";
         int categoryCount = 0;
         
@@ -118,7 +111,6 @@ public class LeaderboardService {
                 .count();
         }
 
-        // Top 5 skills
         List<SharingProfileResponse.SkillSummary> topSkills = userSkills.stream()
             .map(skill -> {
                 List<LearningSession> sessions = learningSessionRepository.findBySkillId(skill.getId());

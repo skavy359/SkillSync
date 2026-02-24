@@ -1,7 +1,6 @@
 package com.skillsync.backend.controller;
 
 import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.CategoryResponse;
 import com.skillsync.backend.dto.CreateCategoryRequest;
@@ -40,7 +38,6 @@ import com.skillsync.backend.model.Notification;
 import com.skillsync.backend.model.User;
 import com.skillsync.backend.service.NotificationService;
 import com.skillsync.backend.service.UserService;
-
 import jakarta.validation.Valid;
 
 @RestController
@@ -481,10 +478,6 @@ public class UserProfileController {
                 )
         );
     }
-
-
-
-
 
     @GetMapping("/categories")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {

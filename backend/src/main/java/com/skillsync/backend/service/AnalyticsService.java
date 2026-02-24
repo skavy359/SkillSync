@@ -7,9 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
-
 import com.skillsync.backend.dto.EngagementMetricsResponse;
 import com.skillsync.backend.model.Skill;
 import com.skillsync.backend.model.User;
@@ -35,8 +33,7 @@ public class AnalyticsService {
 
     public EngagementMetricsResponse getEngagementMetrics() {
         long totalUsers = userRepository.count();
-        
-        // Active users = users with at least one session in last 30 days
+
         LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
         Set<User> activeUsers = learningSessionRepository.findAll().stream()
                 .filter(s -> s.getSessionDate().isAfter(thirtyDaysAgo) || s.getSessionDate().isEqual(thirtyDaysAgo))
@@ -45,13 +42,11 @@ public class AnalyticsService {
         long activeUsersCount = activeUsers.size();
         long inactiveUsersCount = totalUsers - activeUsersCount;
         
-        // Users with no activity at all
         Set<User> usersWithSessions = learningSessionRepository.findAll().stream()
                 .map(s -> s.getSkill().getUser())
                 .collect(Collectors.toSet());
         long usersWithoutActivity = totalUsers - usersWithSessions.size();
 
-        // Most popular skills by user count
         List<Map<String, Object>> mostPopularSkills = skillRepository.findAll().stream()
                 .collect(Collectors.groupingBy(Skill::getName, Collectors.counting()))
                 .entrySet().stream()
@@ -65,13 +60,11 @@ public class AnalyticsService {
                 .limit(10)
                 .collect(Collectors.toList());
 
-        // Average session duration (in minutes)
         double averageSessionDuration = learningSessionRepository.findAll().stream()
                 .mapToInt(session -> session.getDurationMinutes())
                 .average()
                 .orElse(0.0);
 
-        // User retention rate (users with activity in last 30 days)
         double userRetentionRate = totalUsers > 0 ? (activeUsersCount * 100.0) / totalUsers : 0;
 
         long totalSkillsLearned = skillRepository.count();
@@ -79,7 +72,6 @@ public class AnalyticsService {
         double averageSkillsPerUser = totalUsers > 0 ? totalSkillsLearned / (double) totalUsers : 0;
         double averageSessionsPerUser = totalUsers > 0 ? totalSessionsCompleted / (double) totalUsers : 0;
 
-        // Top users by skill count
         List<Map<String, Object>> topUsers = userRepository.findAll().stream()
                 .map(user -> {
                     Map<String, Object> map = new HashMap<>();
@@ -91,7 +83,6 @@ public class AnalyticsService {
                 .limit(10)
                 .collect(Collectors.toList());
 
-        // Top users by session minutes
         List<Map<String, Object>> topUsersBySessionMinutes = userRepository.findAll().stream()
                 .map(user -> {
                     int totalMinutes = learningSessionRepository.findAll().stream()

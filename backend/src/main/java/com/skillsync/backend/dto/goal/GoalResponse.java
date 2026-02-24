@@ -1,7 +1,6 @@
 package com.skillsync.backend.dto.goal;
 
 import java.time.LocalDate;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

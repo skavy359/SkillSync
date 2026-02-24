@@ -10,12 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-
 import com.skillsync.backend.service.UserService;
 
 @RestController
@@ -189,8 +185,6 @@ public class AdminController {
         );
     }
 
-    // ==================== Account Status Management ====================
-
     @PutMapping("/users/{userId}/account-status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> toggleAccountStatus(
@@ -233,8 +227,6 @@ public class AdminController {
         );
     }
 
-    // ==================== Audit Logging ====================
-
     @GetMapping("/audit-logs")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getAuditLogs(
@@ -272,8 +264,6 @@ public class AdminController {
         );
     }
 
-    // ==================== System Settings ====================
-
     @GetMapping("/settings")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<SystemSettingsResponse>> getSystemSettings() {
@@ -297,8 +287,6 @@ public class AdminController {
                 new ApiResponse<>(true, "System settings updated", updated)
         );
     }
-
-    // ==================== Analytics & Engagement ====================
 
     @GetMapping("/analytics/engagement")
     @PreAuthorize("hasRole('ADMIN')")
@@ -324,8 +312,6 @@ public class AdminController {
         );
     }
 
-    // ==================== Notifications ====================
-
     @PostMapping("/notifications/broadcast")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> broadcastNotification(
@@ -347,8 +333,6 @@ public class AdminController {
         );
     }
 
-    // ==================== User Search ====================
-
     @GetMapping("/users/search/email")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<AdminUserResponse>>> searchUsersByEmail(
@@ -360,6 +344,4 @@ public class AdminController {
                 new ApiResponse<>(true, "Users found", users)
         );
     }
-
-
 }

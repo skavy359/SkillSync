@@ -12,5 +12,5 @@ public class LeaderboardEntryResponse {
     private String userName;
     private Integer rank;
     private Integer value;
-    private String metric; // "Skills" or "Sessions"
+    private String metric;
 }

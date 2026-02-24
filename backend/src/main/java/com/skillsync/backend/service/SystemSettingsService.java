@@ -1,7 +1,6 @@
 package com.skillsync.backend.service;
 
 import org.springframework.stereotype.Service;
-
 import com.skillsync.backend.dto.SystemSettingsResponse;
 import com.skillsync.backend.model.SystemSettings;
 import com.skillsync.backend.repository.SystemSettingsRepository;

@@ -1,18 +1,15 @@
 package com.skillsync.backend.controller;
 
 import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.LeaderboardEntryResponse;
 import com.skillsync.backend.dto.SharingProfileResponse;
 import com.skillsync.backend.service.LeaderboardService;
-
 import lombok.RequiredArgsConstructor;
 
 @RestController
