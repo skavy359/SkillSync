@@ -6,7 +6,6 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import {
-    User,
     Mail,
     Calendar,
     Briefcase,
@@ -16,7 +15,6 @@ import {
     Target,
     Flame,
     Award,
-    TrendingUp,
     Check
 } from 'lucide-react';
 import { useEffect, useState } from "react";
@@ -30,8 +28,7 @@ const Profile = () => {
     const [learningStats, setLearningStats] = useState(null);
     const [streak, setStreak] = useState(null);
     const [achievements, setAchievements] = useState({ totalUnlocked: 0, totalAchievements: 0, achievements: [] });
-    
-    // Edit modal state
+
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editForm, setEditForm] = useState({
         name: '',
@@ -62,7 +59,6 @@ const Profile = () => {
             });
     }, []);
 
-    // Handle opening edit modal
     const handleOpenEditModal = () => {
         if (profile) {
             setEditForm({
@@ -79,7 +75,6 @@ const Profile = () => {
         }
     };
 
-    // Handle form changes
     const handleEditFormChange = (e) => {
         const { name, value } = e.target;
         setEditForm(prev => ({
@@ -96,13 +91,11 @@ const Profile = () => {
         }));
     };
 
-    // Handle submit
     const handleEditSubmit = async () => {
         try {
             setEditLoading(true);
             setEditError('');
 
-            // Validate passwords if changing
             if (passwordForm.newPassword || passwordForm.oldPassword) {
                 if (passwordForm.newPassword !== passwordForm.confirmPassword) {
                     setEditError('Passwords do not match');
@@ -116,27 +109,21 @@ const Profile = () => {
                     setEditError('New password must be at least 6 characters');
                     return;
                 }
-                // Change password
                 await changePassword(passwordForm.oldPassword, passwordForm.newPassword);
             }
 
-            // Update profile
             await updateMyProfile({
                 name: editForm.name,
                 about: editForm.about
             });
 
-            // Refresh profile data
             const updatedProfile = await getMyProfile();
             setProfile(updatedProfile);
 
-            // Close modal instantly
             setIsEditModalOpen(false);
-            
-            // Show success message after modal closes
+
             setTimeout(() => {
                 setShowSuccessMessage(true);
-                // Hide success message after 3 seconds
                 setTimeout(() => {
                     setShowSuccessMessage(false);
                 }, 3000);
@@ -164,9 +151,7 @@ const Profile = () => {
         return iconMap[iconName] || Lightbulb;
     };
 
-    // Calculate achievements dynamically based on real stats
     const calculateDynamicAchievements = () => {
-        // Create base achievements with calculated unlock status
         const baseAchievements = [
             {
                 id: 'fire-starter',
@@ -272,7 +257,6 @@ const Profile = () => {
             }
         ];
 
-        // Override with backend data if available
         if (achievements?.achievements && achievements.achievements.length > 0) {
             const backendMap = {};
             achievements.achievements.forEach(a => {
@@ -300,7 +284,6 @@ const Profile = () => {
                 action={false}
             />
 
-            {/* Success Notification */}
             {showSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -308,16 +291,13 @@ const Profile = () => {
                 </div>
             )}
 
-            {/* Profile Card */}
             <Card className="p-8">
                 <div className="flex items-start justify-between mb-6">
                     <div className="flex items-start space-x-6">
-                        {/* Avatar */}
                         <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold flex-shrink-0 shadow-lg">
                             {profile.name?.charAt(0)}
                         </div>
 
-                        {/* Info */}
                         <div className="flex-1">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-2">{profile.name}</h2>
                             <div className="space-y-2 mb-4">
@@ -347,7 +327,6 @@ const Profile = () => {
                     </Button>
                 </div>
 
-                {/* Bio */}
                 <div className="pt-6 border-t border-gray-100 dark:border-[#272739]">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] mb-2">About</h3>
                     <p className="text-sm text-gray-600 dark:text-[#9399b2]">
@@ -356,7 +335,6 @@ const Profile = () => {
                 </div>
             </Card>
 
-            {/* Stats Grid */}
             <Section title="Your Statistics">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <Card className="p-6">
@@ -421,7 +399,6 @@ const Profile = () => {
                 </div>
             </Section>
 
-            {/* Achievements */}
             <Section title="Achievements">
                 <Card className="p-6">
                     {dynamicAchievements && dynamicAchievements.some(a => a.unlocked) && (
@@ -467,7 +444,6 @@ const Profile = () => {
                 </Card>
             </Section>
 
-            {/* Edit Profile Modal */}
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -499,7 +475,6 @@ const Profile = () => {
                         </div>
                     )}
 
-                    {/* Profile Information */}
                     <div>
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] mb-4">Profile Information</h3>
                         <div className="space-y-4">
@@ -531,7 +506,6 @@ const Profile = () => {
                         </div>
                     </div>
 
-                    {/* Change Password */}
                     <div className="border-t border-gray-200 dark:border-[#313244] pt-6">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] mb-4">Change Password</h3>
                         <p className="text-xs text-gray-600 dark:text-[#9399b2] mb-4">Leave blank if you don't want to change your password</p>

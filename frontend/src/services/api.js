@@ -1,11 +1,3 @@
-/**
- * api.js  —  Base Axios instance
- * --------------------------------
- * Shared HTTP client used by all service files.
- * Attach your auth token interceptor here.
- *
- * Usage: import api from './api'
- */
 import axios from 'axios';
 
 const api = axios.create({
@@ -16,7 +8,6 @@ const api = axios.create({
     },
 });
 
-// ── Request interceptor — attach JWT from localStorage ──────────────────────
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -28,13 +19,11 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// ── Response interceptor — handle 401 globally ──────────────────────────────
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
             const requestUrl = error.config?.url || '';
-            // Don't redirect on auth endpoints — let the login page handle its own errors
             if (!requestUrl.includes('/auth/')) {
                 localStorage.removeItem('token');
                 window.location.href = '/login';

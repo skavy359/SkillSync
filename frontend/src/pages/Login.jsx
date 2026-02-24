@@ -6,44 +6,44 @@ import api from "../services/api.js";
 const testimonials = [
     {
         text: "SkillSync completely changed how I approach learning. I went from inconsistent to clocking 20+ hours a week without feeling burned out.",
-        name: "Sarah M.",
+        name: "Malay Shikhar Soni.",
         role: "Full-Stack Developer",
-        initials: "SM",
+        initials: "MS",
         gradient: "from-yellow-400 to-orange-500"
     },
     {
         text: "The streak tracking feature is incredibly motivating. I've maintained a 45-day learning streak and my coding skills have skyrocketed.",
-        name: "Arjun K.",
-        role: "Data Scientist",
-        initials: "AK",
+        name: "Ronit Thakur",
+        role: "Full-Stack Developer",
+        initials: "RT",
         gradient: "from-cyan-400 to-blue-500"
     },
     {
         text: "I love how SkillSync breaks down my learning into manageable sessions. The burnout risk feature saved me from overworking multiple times.",
-        name: "Emily R.",
+        name: "Saransh Sharma",
         role: "UX Designer",
-        initials: "ER",
+        initials: "SS",
         gradient: "from-pink-400 to-rose-500"
     },
     {
         text: "As a self-taught developer, SkillSync gave me the structure I was missing. The analytics helped me understand my learning patterns.",
-        name: "James L.",
+        name: "Kartavya Shrivastava",
         role: "Frontend Engineer",
-        initials: "JL",
+        initials: "KS",
         gradient: "from-green-400 to-emerald-500"
     },
     {
         text: "The recommendations engine is spot-on. It always knows exactly which skill I should focus on next to maximize my growth.",
-        name: "Priya S.",
-        role: "ML Engineer",
-        initials: "PS",
+        name: "Aditya Shukla",
+        role: "Data Scientist",
+        initials: "AS",
         gradient: "from-violet-400 to-purple-500"
     },
     {
         text: "SkillSync's category analytics helped our team track learning across different domains. It's become essential for our growth plans.",
-        name: "Michael T.",
-        role: "Engineering Manager",
-        initials: "MT",
+        name: "Rudra Sharma",
+        role: "Product Manager",
+        initials: "RS",
         gradient: "from-amber-400 to-red-500"
     }
 ];
@@ -57,7 +57,6 @@ const Login = ({ onNavigate, onLogin }) => {
     const [activeTestimonial, setActiveTestimonial] = useState(0);
     const [rememberMe, setRememberMe] = useState(false);
 
-    // Fetch platform stats on mount
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -70,7 +69,6 @@ const Login = ({ onNavigate, onLogin }) => {
         fetchStats();
     }, []);
 
-    // Auto-rotate testimonials every 4 seconds
     useEffect(() => {
         const interval = setInterval(() => {
             setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -105,10 +103,8 @@ const Login = ({ onNavigate, onLogin }) => {
             if (res.success) {
                 const { token, id, name, email, role } = res.data;
 
-                // Store token
                 localStorage.setItem('token', token);
 
-                // Pass user data (including role from backend) to App
                 onLogin && onLogin({
                     id,
                     name,
@@ -146,10 +142,8 @@ const Login = ({ onNavigate, onLogin }) => {
     return (
         <div className="min-h-screen flex bg-[#0f0f1a] dark:bg-[#0f0f1a]">
 
-            {/* ─── Left Branding Panel ───────────────────────────── */}
             <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 flex-col justify-between p-12 overflow-hidden">
 
-                {/* Decorative blobs */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="absolute -top-32 -right-32 w-96 h-96 bg-white opacity-5 rounded-full" />
                     <div className="absolute top-1/2 -left-20 w-64 h-64 bg-white opacity-5 rounded-full" />
@@ -163,7 +157,6 @@ const Login = ({ onNavigate, onLogin }) => {
                     />
                 </div>
 
-                {/* Logo */}
                 <div className="relative flex items-center space-x-3">
                     <div className="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                         <Lightbulb className="w-6 h-6 text-white" />
@@ -171,7 +164,6 @@ const Login = ({ onNavigate, onLogin }) => {
                     <span className="text-2xl font-bold text-white tracking-tight">SkillSync</span>
                 </div>
 
-                {/* Hero Content */}
                 <div className="relative space-y-8">
                     <div>
                         <h1 className="text-4xl font-bold text-white leading-tight mb-4">
@@ -183,7 +175,6 @@ const Login = ({ onNavigate, onLogin }) => {
                         </p>
                     </div>
 
-                    {/* Stats */}
                     <div className="flex items-center space-x-8">
                         {stats.map((stat, i) => (
                             <div key={i}>
@@ -193,7 +184,6 @@ const Login = ({ onNavigate, onLogin }) => {
                         ))}
                     </div>
 
-                    {/* Auto-rotating Testimonials */}
                     <div className="relative">
                         <div className="bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-2xl p-6 min-h-[160px] transition-all duration-500">
                             <Quote className="w-5 h-5 text-indigo-300 opacity-50 mb-2" />
@@ -210,7 +200,6 @@ const Login = ({ onNavigate, onLogin }) => {
                                         <div className="text-indigo-300 text-xs">{testimonials[activeTestimonial].role}</div>
                                     </div>
                                 </div>
-                                {/* Dot indicators */}
                                 <div className="flex items-center space-x-1.5">
                                     {testimonials.map((_, i) => (
                                         <button
@@ -229,15 +218,13 @@ const Login = ({ onNavigate, onLogin }) => {
                 </div>
 
                 <div className="relative text-indigo-400 text-sm">
-                    © 2025 SkillSync. Built for learners, by learners.
+                    © 2026 SkillSync. Built for learners, by learners.
                 </div>
             </div>
 
-            {/* ─── Right Form Panel ──────────────────────────────── */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
                 <div className="w-full max-w-md">
 
-                    {/* Mobile logo */}
                     <div className="flex lg:hidden items-center space-x-3 mb-10">
                         <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
                             <Lightbulb className="w-5 h-5 text-white" />
@@ -245,15 +232,12 @@ const Login = ({ onNavigate, onLogin }) => {
                         <span className="text-xl font-bold text-[#cdd6f4]">SkillSync</span>
                     </div>
 
-                    {/* Heading */}
                     <div className="mb-8">
                         <h2 className="text-3xl font-bold text-[#cdd6f4] mb-2">Welcome back</h2>
                         <p className="text-[#9399b2]">Sign in to continue your learning journey</p>
                     </div>
 
-                    {/* Email & Password Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Email */}
                         <div>
                             <label className="block text-sm font-medium text-[#a6adc8] mb-2">
                                 Email address
@@ -265,7 +249,7 @@ const Login = ({ onNavigate, onLogin }) => {
                                     setForm({ ...form, email: e.target.value });
                                     if (errors.email) setErrors({ ...errors, email: '' });
                                 }}
-                                placeholder="john@example.com"
+                                placeholder="kavy123@example.com"
                                 className={`w-full px-4 py-3 bg-[#1e1e2e] border rounded-xl text-sm text-[#cdd6f4] placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.email ? 'border-red-500 bg-red-500/10' : 'border-[#313244]'
                                     }`}
                             />
@@ -274,7 +258,6 @@ const Login = ({ onNavigate, onLogin }) => {
                             )}
                         </div>
 
-                        {/* Password */}
                         <div>
                             <label className="block text-sm font-medium text-[#a6adc8] mb-2">
                                 Password
@@ -304,7 +287,6 @@ const Login = ({ onNavigate, onLogin }) => {
                             )}
                         </div>
 
-                        {/* Remember me */}
                         <div className="flex items-center space-x-2 pt-1">
                             <input
                                 id="remember"
@@ -318,7 +300,6 @@ const Login = ({ onNavigate, onLogin }) => {
                             </label>
                         </div>
 
-                        {/* Submit */}
                         <button
                             type="submit"
                             disabled={loading}
@@ -341,7 +322,6 @@ const Login = ({ onNavigate, onLogin }) => {
                         </button>
                     </form>
 
-                    {/* Footer link */}
                     <p className="mt-8 text-center text-sm text-[#9399b2]">
                         Don't have an account?{' '}
                         <button

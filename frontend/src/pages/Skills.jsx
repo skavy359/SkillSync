@@ -6,9 +6,8 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
-import Textarea from '../components/ui/Textarea';
 import FormRow from '../components/ui/FormRow';
-import { Plus, Search, Lightbulb, Check, Tag } from 'lucide-react';
+import { Plus, Search, Check, Tag } from 'lucide-react';
 import { useEffect } from "react"
 import { addSkill, getMySkills, assignCategory } from "../services/skillService"
 import { getAllCategories } from "../services/categoryService"
@@ -67,7 +66,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
         setIsAssignLoading(true);
         try {
             await assignCategory(selectedSkillForCategory.id, assignCategoryForm.categoryId);
-            // Update the skill in the list
             setInitialSkills(prev => prev.map(s => {
                 if (s.id === selectedSkillForCategory.id) {
                     const category = categories.find(c => c.id === parseInt(assignCategoryForm.categoryId));
@@ -147,7 +145,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                 }
             />
 
-            {/* Success Notifications */}
             {showSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -161,7 +158,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                 </div>
             )}
 
-            {/* Filters and Search */}
             <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                     <Input
@@ -195,7 +191,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                 </div>
             </div>
 
-            {/* Skills Grid */}
             {filteredSkills.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredSkills.map((skill) => (
@@ -228,7 +223,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                 />
             )}
 
-            {/* Add Skill Modal */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -273,7 +267,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                 </form>
             </Modal>
 
-            {/* Assign Category Modal */}
             <Modal
                 isOpen={isAssignCategoryModalOpen}
                 onClose={() => {

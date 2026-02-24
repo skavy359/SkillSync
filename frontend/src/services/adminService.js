@@ -1,7 +1,5 @@
 import api from './api';
 
-// ==================== User Management ====================
-
 export const getAdminStats = async () => {
     const { data } = await api.get('/admin/stats');
     return data.data;
@@ -30,8 +28,6 @@ export const deleteUser = async (userId) => {
     return data;
 };
 
-// ==================== Account Status ====================
-
 export const toggleAccountStatus = async (userId, isActive) => {
     const { data } = await api.put(`/admin/users/${userId}/account-status`, { isActive });
     return data;
@@ -48,8 +44,6 @@ export const getInactiveUsers = async (days = 30) => {
     });
     return data.data;
 };
-
-// ==================== Audit Logs ====================
 
 export const getAuditLogs = async (page = 0, size = 100) => {
     const { data } = await api.get('/admin/audit-logs', {
@@ -68,8 +62,6 @@ export const getAuditLogsByEntityType = async (entityType) => {
     return Array.isArray(data) ? data : data.data || data;
 };
 
-// ==================== System Settings ====================
-
 export const getSystemSettings = async () => {
     const { data } = await api.get('/admin/settings');
     return data.data;
@@ -79,8 +71,6 @@ export const updateSystemSettings = async (settings) => {
     const { data } = await api.put('/admin/settings', settings);
     return data.data;
 };
-
-// ==================== Analytics ====================
 
 export const getEngagementMetrics = async () => {
     const { data } = await api.get('/admin/analytics/engagement');
@@ -92,14 +82,10 @@ export const getUserActivityReport = async (userId) => {
     return data.data;
 };
 
-// ==================== Notifications ====================
-
 export const broadcastNotification = async (payload) => {
     const { data } = await api.post('/admin/notifications/broadcast', payload);
     return data;
 };
-
-// ==================== Search ====================
 
 export const searchUsersByEmail = async (email) => {
     const { data } = await api.get('/admin/users/search/email', {

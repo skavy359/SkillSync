@@ -6,7 +6,6 @@ import EmptyState from '../components/ui/EmptyState';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
-import Textarea from '../components/ui/Textarea';
 import {
     FolderKanban,
     Lightbulb,
@@ -31,11 +30,9 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [showDeleteSuccessMessage, setShowDeleteSuccessMessage] = useState(onShowDeleteSuccess);
 
-    // When onShowDeleteSuccess changes, show the message and reload data
     useEffect(() => {
         if (onShowDeleteSuccess) {
             setShowDeleteSuccessMessage(true);
-            // Reload categories to remove deleted one
             const reloadCategories = async () => {
                 try {
                     const cats = await getAllCategories();
@@ -56,20 +53,16 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Fetch all categories
                 const cats = await getAllCategories();
                 const categoriesList = Array.isArray(cats) ? cats : [];
                 setCategories(categoriesList);
 
-                // Fetch all skills
                 const skillsResponse = await getMySkills({ size: 100 });
                 const skills = skillsResponse?.content || [];
 
-                // Build analytics by fetching sessions for each skill
                 const stats = {};
                 const uncategorizedSkills = [];
                 
-                // Initialize stats for all categories
                 categoriesList.forEach(cat => {
                     stats[cat.id] = {
                         skillCount: 0,
@@ -78,42 +71,34 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                     };
                 });
 
-                // Initialize stats for "Others" category
                 stats['others'] = {
                     skillCount: 0,
                     totalMinutes: 0,
                     completedSkills: 0
                 };
 
-                // Calculate stats per category
                 for (const skill of skills) {
-                    // Get category identifier - could be categoryId (number) or category (string name)
                     let catId = skill.categoryId;
                     let catName = null;
                     
                     if (!catId && skill.category) {
-                        // If category is an object with id
                         if (typeof skill.category === 'object' && skill.category.id) {
                             catId = skill.category.id;
-                        } 
-                        // If category is a string (category name), use it as key
+                        }
                         else if (typeof skill.category === 'string') {
                             catName = skill.category;
                         }
                     }
 
-                    // Determine the key to use (prefer ID, fallback to name)
                     const key = catId || catName;
                     
                     if (!key) {
-                        // Add to uncategorized skills
                         uncategorizedSkills.push(skill);
                         stats['others'].skillCount += 1;
                         if (skill.progress >= 100) {
                             stats['others'].completedSkills += 1;
                         }
 
-                        // Fetch sessions for this skill to get total minutes
                         try {
                             const sessions = await fetchSessions(skill.id);
                             const sessionArray = Array.isArray(sessions) ? sessions : [];
@@ -136,7 +121,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                             stats[key].completedSkills += 1;
                         }
 
-                        // Fetch sessions for this skill to get total minutes
                         try {
                             const sessions = await fetchSessions(skill.id);
                             const sessionArray = Array.isArray(sessions) ? sessions : [];
@@ -148,7 +132,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                     }
                 }
 
-                // Build final categories list with "Others" if needed
                 const finalCategories = categoriesList;
                 if (uncategorizedSkills.length > 0) {
                     finalCategories.push({
@@ -158,7 +141,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                     });
                 }
 
-                // Set everything at once
                 setCategories(finalCategories);
                 setCategoryStats(stats);
             } catch (err) {
@@ -189,10 +171,8 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 name: formData.name.trim()
             });
 
-            // Add new category to the list
             setCategories(prev => [...prev, newCategory]);
-            
-            // Initialize stats for new category
+
             setCategoryStats(prev => ({
                 ...prev,
                 [newCategory.id]: {
@@ -303,7 +283,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 }
             />
 
-            {/* Success Notification */}
             {showSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -311,7 +290,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 </div>
             )}
 
-            {/* Delete Success Notification */}
             {showDeleteSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -319,7 +297,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 </div>
             )}
 
-            {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -352,7 +329,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 </Card>
             </div>
 
-            {/* Categories Grid */}
             {categoriesWithStats.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {categoriesWithStats.map((category, index) => {
@@ -402,7 +378,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                                     </button>
                                 </div>
 
-                                {/* Activity Badge */}
                                 <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#272739] flex items-center justify-between">
                                     <span className="text-xs font-medium text-gray-600 dark:text-[#9399b2]">Activity</span>
                                     <Badge variant={activityBadgeVariant} size="sm">
@@ -421,7 +396,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 />
             )}
 
-            {/* Add Category Modal */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

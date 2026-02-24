@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PageHeader from '../components/ui/PageHeader';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -116,16 +115,14 @@ const SkillDetail = ({ skillId, onNavigate }) => {
 
             setSkill(updated);
             setIsProgressModalOpen(false);
-            
-            // Show success message if skill is completed
+
             if (newProgress >= 100) {
                 setSuccessMessage('🎉 Skill completed successfully! Congratulations!');
             } else {
                 setSuccessMessage('Progress updated successfully!');
             }
             setShowSuccessMessage(true);
-            
-            // Scroll to top
+
             setTimeout(() => {
                 const mainElement = document.querySelector('main');
                 if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
@@ -144,12 +141,10 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         setIsEditLoading(true);
 
         try {
-            // Update skill name
             const updated = await updateSkill(skillId, {
                 name: editForm.name
             });
 
-            // Assign category if provided
             if (editForm.categoryId) {
                 await assignCategory(skillId, editForm.categoryId);
                 updated.categoryId = editForm.categoryId;
@@ -179,14 +174,12 @@ const SkillDetail = ({ skillId, onNavigate }) => {
             setIsDeleteConfirmOpen(false);
             setSuccessMessage('Skill deleted successfully!');
             setShowSuccessMessage(true);
-            
-            // Scroll to top
+
             setTimeout(() => {
                 const mainElement = document.querySelector('main');
                 if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
             }, 0);
-            
-            // Navigate after a short delay
+
             setTimeout(() => {
                 onNavigate('skills');
             }, 1500);
@@ -197,7 +190,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         }
     };
 
-    // Handle edit session modal open
     const handleOpenSessionEditModal = (session) => {
         setSelectedSession(session);
         setSessionEditForm({
@@ -208,7 +200,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         setIsSessionEditModalOpen(true);
     };
 
-    // Handle session edit form change
     const handleSessionEditFormChange = (e) => {
         const { name, value } = e.target;
         setSessionEditForm(prev => ({
@@ -217,7 +208,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         }));
     };
 
-    // Handle session edit submit
     const handleSessionEditSubmit = async () => {
         if (!sessionEditForm.durationMinutes || !sessionEditForm.sessionDate) {
             alert('Please fill in all required fields');
@@ -240,7 +230,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 notes: sessionEditForm.notes
             });
 
-            // Update local state
             setSessions(prevSessions =>
                 prevSessions.map(s =>
                     s.id === selectedSession.id
@@ -268,20 +257,17 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         }
     };
 
-    // Handle delete session confirmation open
     const handleOpenSessionDeleteConfirm = (session) => {
         setSelectedSession(session);
         setIsSessionDeleteConfirmOpen(true);
     };
 
-    // Handle delete session confirmation
     const handleConfirmSessionDelete = async () => {
         if (!selectedSession) return;
 
         try {
             await deleteSession(skillId, selectedSession.id);
 
-            // Update local state
             setSessions(prevSessions =>
                 prevSessions.filter(s => s.id !== selectedSession.id)
             );
@@ -321,14 +307,12 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         return 'Good start! Keep improving!';
     };
 
-
     if (!skill) {
         return <div className="p-8 text-gray-500 dark:text-[#7f849c]">Loading skill...</div>;
     }
 
     return (
         <div className="space-y-6">
-            {/* Success Notification */}
             {showSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -336,7 +320,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </div>
             )}
 
-            {/* Back Button */}
             <Button
                 variant="ghost"
                 icon={ArrowLeft}
@@ -345,7 +328,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 Back to Skills
             </Button>
 
-            {/* Header Card */}
             <Card className="p-8">
                 <div className="flex items-start justify-between mb-6">
                     <div className="flex-1">
@@ -397,7 +379,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                     </div>
                 </div>
 
-                {/* Progress Section */}
                 <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-500/15 dark:to-blue-500/10 rounded-2xl p-6">
                     <div className="flex items-start justify-between mb-4">
                         <div>
@@ -421,7 +402,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </div>
             </Card>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -460,7 +440,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </Card>
             </div>
 
-            {/* Sessions List */}
             <Section
                 title="Learning Sessions"
                 description="Track your practice sessions and progress"
@@ -532,7 +511,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 )}
             </Section>
 
-            {/* Add Session Modal */}
             <Modal
                 isOpen={isSessionModalOpen}
                 onClose={() => setIsSessionModalOpen(false)}
@@ -581,7 +559,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </form>
             </Modal>
 
-            {/* Update Progress Modal */}
             <Modal
                 isOpen={isProgressModalOpen}
                 onClose={() => setIsProgressModalOpen(false)}
@@ -625,7 +602,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </form>
             </Modal>
 
-            {/* Edit Skill Modal */}
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -663,7 +639,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </form>
             </Modal>
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 isOpen={isDeleteConfirmOpen}
                 onClose={() => setIsDeleteConfirmOpen(false)}
@@ -697,7 +672,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </div>
             </Modal>
 
-            {/* Edit Session Modal */}
             <Modal
                 isOpen={isSessionEditModalOpen}
                 onClose={() => setIsSessionEditModalOpen(false)}
@@ -752,7 +726,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </form>
             </Modal>
 
-            {/* Delete Session Confirmation Modal */}
             <Modal
                 isOpen={isSessionDeleteConfirmOpen}
                 onClose={() => setIsSessionDeleteConfirmOpen(false)}
@@ -783,7 +756,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </div>
             </Modal>
 
-            {/* Validation Error Modal */}
             <Modal
                 isOpen={validationError}
                 onClose={() => setValidationError(false)}

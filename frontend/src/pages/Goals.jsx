@@ -6,16 +6,12 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
-import Textarea from '../components/ui/Textarea';
-import Select from '../components/ui/Select';
-import FormRow from '../components/ui/FormRow';
 import ProgressBar from '../components/ui/ProgressBar';
 import EmptyState from '../components/ui/EmptyState';
 import {
     Target,
     Plus,
     Calendar,
-    Clock,
     TrendingUp,
     Flag,
     Edit,
@@ -54,16 +50,13 @@ const Goals = () => {
     const loadData = async () => {
         try {
             setLoading(true);
-            // Fetch skills
             const skillsData = await getMySkills({ size: 100 });
             const skillsList = skillsData?.content || [];
             setSkills(skillsList);
 
-            // Fetch goals
             const goalsData = await getMyGoals();
             setGoals(Array.isArray(goalsData) ? goalsData : []);
 
-            // Fetch analytics
             const analyticsData = await getGoalAnalytics();
             setAnalytics(Array.isArray(analyticsData) ? analyticsData : []);
         } catch (err) {
@@ -123,7 +116,6 @@ const Goals = () => {
                 setShowSuccessMessage(false);
             }, 3000);
 
-            // Refresh analytics
             const analyticsData = await getGoalAnalytics();
             setAnalytics(Array.isArray(analyticsData) ? analyticsData : []);
         } catch (err) {
@@ -177,7 +169,6 @@ const Goals = () => {
                 setShowSuccessMessage(false);
             }, 3000);
 
-            // Refresh analytics
             const analyticsData = await getGoalAnalytics();
             setAnalytics(Array.isArray(analyticsData) ? analyticsData : []);
         } catch (err) {
@@ -248,7 +239,6 @@ const Goals = () => {
                 onAction={() => setIsModalOpen(true)}
             />
 
-            {/* Success Message */}
             {showSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -256,7 +246,6 @@ const Goals = () => {
                 </div>
             )}
 
-            {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -289,7 +278,6 @@ const Goals = () => {
                 </Card>
             </div>
 
-            {/* Active Goals */}
             {activeGoals.length > 0 ? (
                 <Section title="Active Goals" description="Goals currently in progress">
                     <div className="space-y-4">
@@ -355,7 +343,6 @@ const Goals = () => {
                                         </div>
                                     </div>
 
-                                    {/* Progress Bar */}
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium text-gray-600 dark:text-[#9399b2]">Progress</span>
@@ -367,15 +354,12 @@ const Goals = () => {
                                             color={progress >= 75 ? 'green' : progress >= 50 ? 'indigo' : 'yellow'}
                                         />
 
-                                        {/* Stats Badges */}
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
-                                            {/* Progress Badge */}
                                             <div className="bg-indigo-50 dark:bg-indigo-500/15 rounded-lg p-2.5 text-center">
                                                 <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Progress</p>
                                                 <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{progress}%</p>
                                             </div>
 
-                                            {/* Days Badge */}
                                             <div className={`rounded-lg p-2.5 text-center ${
                                                 daysLeft > 0
                                                     ? 'bg-green-50 dark:bg-green-500/15'
@@ -391,7 +375,6 @@ const Goals = () => {
                                                 </p>
                                             </div>
 
-                                            {/* Velocity Badge */}
                                             {goalAnalytics && (
                                                 <>
                                                     <div className="bg-blue-50 dark:bg-blue-500/15 rounded-lg p-2.5 text-center">
@@ -401,7 +384,6 @@ const Goals = () => {
                                                         </p>
                                                     </div>
 
-                                                    {/* Risk Badge */}
                                                     <div className={`rounded-lg p-2.5 text-center ${
                                                         goalAnalytics.riskLevel === 'HIGH'
                                                             ? 'bg-red-50 dark:bg-red-500/15'
@@ -425,7 +407,6 @@ const Goals = () => {
                                         </div>
                                     </div>
 
-                                    {/* Milestone Indicator */}
                                     {progress >= 50 && progress < 100 && (
                                         <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-500/15 rounded-lg flex items-center space-x-2">
                                             <Flag className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
@@ -450,7 +431,6 @@ const Goals = () => {
                 </Section>
             ) : null}
 
-            {/* Completed Goals */}
             {completedGoals.length > 0 && (
                 <Section title="Completed Goals" description="Goals you've successfully achieved">
                     <div className="space-y-4">
@@ -489,7 +469,6 @@ const Goals = () => {
                                         </div>
                                     </div>
 
-                                    {/* Progress Bar */}
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium text-gray-600 dark:text-[#9399b2]">Progress</span>
@@ -497,27 +476,22 @@ const Goals = () => {
                                         </div>
                                         <ProgressBar progress={100} size="md" color="green" />
 
-                                        {/* Stats Badges */}
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
-                                            {/* Progress Badge */}
                                             <div className="bg-green-50 dark:bg-green-500/15 rounded-lg p-2.5 text-center">
                                                 <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Progress</p>
                                                 <p className="text-sm font-bold text-green-600 dark:text-green-400">100%</p>
                                             </div>
 
-                                            {/* Completed Badge */}
                                             <div className="bg-green-50 dark:bg-green-500/15 rounded-lg p-2.5 text-center">
                                                 <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Status</p>
                                                 <p className="text-sm font-bold text-green-600 dark:text-green-400">✓</p>
                                             </div>
 
-                                            {/* Target Date Badge */}
                                             <div className="bg-blue-50 dark:bg-blue-500/15 rounded-lg p-2.5 text-center">
                                                 <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium">Target</p>
                                                 <p className="text-sm font-bold text-blue-600 dark:text-blue-400 truncate">{goal.targetDate}</p>
                                             </div>
 
-                                            {/* Risk Badge */}
                                             {goalAnalytics && (
                                                 <div className={`rounded-lg p-2.5 text-center ${
                                                     goalAnalytics.riskLevel === 'HIGH'
@@ -541,7 +515,6 @@ const Goals = () => {
                                         </div>
                                     </div>
 
-                                    {/* Completion Celebration */}
                                     <div className="mt-4 p-3 bg-green-50 dark:bg-green-500/15 rounded-lg flex items-center space-x-2">
                                         <Target className="w-4 h-4 text-green-600 dark:text-green-400" />
                                         <span className="text-sm font-medium text-green-900 dark:text-green-300">
@@ -555,7 +528,6 @@ const Goals = () => {
                 </Section>
             )}
 
-            {/* Empty State */}
             {goals.length === 0 && (
                 <EmptyState
                     icon={Target}
@@ -567,7 +539,6 @@ const Goals = () => {
                 />
             )}
 
-            {/* Add Goal Modal */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -614,7 +585,6 @@ const Goals = () => {
                 </form>
             </Modal>
 
-            {/* Edit Goal Modal */}
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -644,7 +614,6 @@ const Goals = () => {
                 </form>
             </Modal>
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 isOpen={isDeleteConfirmOpen}
                 onClose={() => setIsDeleteConfirmOpen(false)}

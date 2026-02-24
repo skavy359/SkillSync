@@ -17,7 +17,6 @@ const Register = ({ onNavigate, onLogin }) => {
     const [platformStats, setPlatformStats] = useState(null);
     const [modalOpen, setModalOpen] = useState(null); // 'terms' | 'privacy' | null
 
-    // Fetch platform stats on mount
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -30,7 +29,6 @@ const Register = ({ onNavigate, onLogin }) => {
         fetchStats();
     }, []);
 
-    // Password strength — checks 5 criteria
     const getPasswordStrength = (password) => {
         if (!password) return { score: 0, label: '', color: '', max: 5 };
         let score = 0;
@@ -55,18 +53,15 @@ const Register = ({ onNavigate, onLogin }) => {
     const validate = () => {
         const newErrors = {};
 
-        // Name: letters and spaces only
         if (!form.name.trim()) newErrors.name = 'Full name is required';
         else if (!/^[A-Za-z\s]+$/.test(form.name.trim()))
             newErrors.name = 'Name must contain only letters and spaces';
         else if (form.name.trim().length < 2)
             newErrors.name = 'Name must be at least 2 characters';
 
-        // Email
         if (!form.email) newErrors.email = 'Email is required';
         else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Enter a valid email';
 
-        // Password: min 8, uppercase, lowercase, number, symbol
         if (!form.password) {
             newErrors.password = 'Password is required';
         } else {
@@ -80,11 +75,9 @@ const Register = ({ onNavigate, onLogin }) => {
                 newErrors.password = `Password must contain ${missing.join(', ')}`;
         }
 
-        // Confirm password
         if (!form.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
         else if (form.password !== form.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
 
-        // Terms
         if (!agreed) newErrors.agreed = 'You must accept the terms to continue';
 
         return newErrors;
@@ -105,14 +98,12 @@ const Register = ({ onNavigate, onLogin }) => {
             const res = await registerUser(form.name, form.email, form.password);
 
             if (res.success) {
-                // Auto-login after successful registration
                 const loginRes = await loginUser(form.email, form.password);
                 if (loginRes.success) {
                     const { token, id, name, email, role } = loginRes.data;
                     localStorage.setItem('token', token);
                     onLogin && onLogin({ id, name, email, role });
                 } else {
-                    // Fallback: go to login page if auto-login fails
                     onNavigate && onNavigate('login');
                 }
             } else {
@@ -137,10 +128,8 @@ const Register = ({ onNavigate, onLogin }) => {
         <>
             <div className="min-h-screen flex bg-[#0f0f1a] dark:bg-[#0f0f1a]">
 
-                {/* ─── Left Branding Panel ───────────────────────────── */}
                 <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 flex-col justify-between p-12 overflow-hidden">
 
-                    {/* Decorative blobs */}
                     <div className="absolute inset-0 overflow-hidden pointer-events-none">
                         <div className="absolute -top-32 -right-32 w-96 h-96 bg-white opacity-5 rounded-full" />
                         <div className="absolute top-1/3 -left-16 w-56 h-56 bg-white opacity-5 rounded-full" />
@@ -154,7 +143,6 @@ const Register = ({ onNavigate, onLogin }) => {
                         />
                     </div>
 
-                    {/* Logo */}
                     <div className="relative flex items-center space-x-3">
                         <div className="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                             <Lightbulb className="w-6 h-6 text-white" />
@@ -162,7 +150,6 @@ const Register = ({ onNavigate, onLogin }) => {
                         <span className="text-2xl font-bold text-white tracking-tight">SkillSync</span>
                     </div>
 
-                    {/* Hero Content */}
                     <div className="relative space-y-8">
                         <div>
                             <div className="inline-flex items-center space-x-2 bg-white bg-opacity-15 rounded-full px-4 py-1.5 mb-4">
@@ -178,7 +165,6 @@ const Register = ({ onNavigate, onLogin }) => {
                             </p>
                         </div>
 
-                        {/* Perks List */}
                         <div className="space-y-3">
                             {perks.map((perk, i) => (
                                 <div key={i} className="flex items-center space-x-3">
@@ -190,7 +176,6 @@ const Register = ({ onNavigate, onLogin }) => {
                             ))}
                         </div>
 
-                        {/* Social Proof */}
                         <div className="bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-2xl p-5">
                             <div className="flex items-center space-x-3 mb-3">
                                 {['AK', 'JL', 'MR', 'SP'].map((avatar, i) => (
@@ -215,15 +200,13 @@ const Register = ({ onNavigate, onLogin }) => {
                     </div>
 
                     <div className="relative text-indigo-400 text-sm">
-                        © 2025 SkillSync. Built for learners, by learners.
+                        © 2026 SkillSync. Built for learners, by learners.
                     </div>
                 </div>
 
-                {/* ─── Right Form Panel ──────────────────────────────── */}
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
                     <div className="w-full max-w-md">
 
-                        {/* Mobile logo */}
                         <div className="flex lg:hidden items-center space-x-3 mb-10">
                             <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
                                 <Lightbulb className="w-5 h-5 text-white" />
@@ -231,16 +214,13 @@ const Register = ({ onNavigate, onLogin }) => {
                             <span className="text-xl font-bold text-[#cdd6f4]">SkillSync</span>
                         </div>
 
-                        {/* Heading */}
                         <div className="mb-8">
                             <h2 className="text-3xl font-bold text-[#cdd6f4] mb-2">Create your account</h2>
                             <p className="text-[#9399b2]">Free to start. No credit card required.</p>
                         </div>
 
-                        {/* Form */}
                         <form onSubmit={handleSubmit} className="space-y-4">
 
-                            {/* Full Name */}
                             <div>
                                 <label className="block text-sm font-medium text-[#a6adc8] mb-2">
                                     Full name
@@ -252,7 +232,7 @@ const Register = ({ onNavigate, onLogin }) => {
                                         setForm({ ...form, name: e.target.value });
                                         if (errors.name) setErrors({ ...errors, name: '' });
                                     }}
-                                    placeholder="John Doe"
+                                    placeholder="Kavy Sharma"
                                     className={`w-full px-4 py-3 bg-[#1e1e2e] border rounded-xl text-sm text-[#cdd6f4] placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.name ? 'border-red-500 bg-red-500/10' : 'border-[#313244]'
                                         }`}
                                 />
@@ -261,7 +241,6 @@ const Register = ({ onNavigate, onLogin }) => {
                                 )}
                             </div>
 
-                            {/* Email */}
                             <div>
                                 <label className="block text-sm font-medium text-[#a6adc8] mb-2">
                                     Email address
@@ -273,7 +252,7 @@ const Register = ({ onNavigate, onLogin }) => {
                                         setForm({ ...form, email: e.target.value });
                                         if (errors.email) setErrors({ ...errors, email: '' });
                                     }}
-                                    placeholder="john@example.com"
+                                    placeholder="kavy123@example.com"
                                     className={`w-full px-4 py-3 bg-[#1e1e2e] border rounded-xl text-sm text-[#cdd6f4] placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.email ? 'border-red-500 bg-red-500/10' : 'border-[#313244]'
                                         }`}
                                 />
@@ -282,7 +261,6 @@ const Register = ({ onNavigate, onLogin }) => {
                                 )}
                             </div>
 
-                            {/* Password */}
                             <div>
                                 <label className="block text-sm font-medium text-[#a6adc8] mb-2">
                                     Password
@@ -311,7 +289,6 @@ const Register = ({ onNavigate, onLogin }) => {
                                     <p className="mt-1.5 text-xs text-red-400">{errors.password}</p>
                                 )}
 
-                                {/* Password Strength Meter */}
                                 {form.password && (
                                     <div className="mt-2">
                                         <div className="flex space-x-1 mb-1">
@@ -336,7 +313,6 @@ const Register = ({ onNavigate, onLogin }) => {
                                 )}
                             </div>
 
-                            {/* Confirm Password */}
                             <div>
                                 <label className="block text-sm font-medium text-[#a6adc8] mb-2">
                                     Confirm password
@@ -362,7 +338,6 @@ const Register = ({ onNavigate, onLogin }) => {
                                     >
                                         {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
-                                    {/* Checkmark when matching */}
                                     {form.confirmPassword && form.confirmPassword === form.password && (
                                         <div className="absolute right-10 top-1/2 -translate-y-1/2">
                                             <Check className="w-4 h-4 text-green-500" />
@@ -374,7 +349,6 @@ const Register = ({ onNavigate, onLogin }) => {
                                 )}
                             </div>
 
-                            {/* Terms */}
                             <div className="pt-1">
                                 <div className="flex items-start space-x-3">
                                     <input
@@ -403,7 +377,6 @@ const Register = ({ onNavigate, onLogin }) => {
                                 )}
                             </div>
 
-                            {/* Submit */}
                             <button
                                 type="submit"
                                 disabled={loading}
@@ -426,7 +399,6 @@ const Register = ({ onNavigate, onLogin }) => {
                             </button>
                         </form>
 
-                        {/* Footer link */}
                         <p className="mt-8 text-center text-sm text-[#9399b2]">
                             Already have an account?{' '}
                             <button
@@ -442,18 +414,14 @@ const Register = ({ onNavigate, onLogin }) => {
 
             </div>
 
-            {/* Modal Overlay */}
             {
                 modalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        {/* Backdrop */}
                         <div
                             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                             onClick={() => setModalOpen(null)}
                         />
-                        {/* Modal */}
                         <div className="relative bg-[#1e1e2e] rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
-                            {/* Header */}
                             <div className="flex items-center justify-between px-6 py-4 border-b border-[#313244]">
                                 <h3 className="text-lg font-bold text-[#cdd6f4]">
                                     {modalOpen === 'terms' ? 'Terms of Service' : 'Privacy Policy'}
@@ -465,7 +433,6 @@ const Register = ({ onNavigate, onLogin }) => {
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            {/* Content */}
                             <div className="px-6 py-5 overflow-y-auto text-sm text-[#a6adc8] leading-relaxed space-y-4">
                                 {modalOpen === 'terms' ? (
                                     <>
@@ -503,7 +470,6 @@ const Register = ({ onNavigate, onLogin }) => {
                                     </>
                                 )}
                             </div>
-                            {/* Footer */}
                             <div className="px-6 py-4 border-t border-[#313244] bg-[#0f0f1a]">
                                 <button
                                     onClick={() => setModalOpen(null)}

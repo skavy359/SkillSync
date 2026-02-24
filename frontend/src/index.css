@@ -1,9 +1,7 @@
 @import "tailwindcss";
 
-/* Tell Tailwind v4 that dark: should use the .dark class on <html> */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Smooth theme transitions ─────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -12,7 +10,6 @@
     transition-timing-function: ease;
 }
 
-/* ── Dark mode root ───────────────────────────────────────────────────── */
 html.dark {
     color-scheme: dark;
 }
@@ -22,7 +19,6 @@ html.dark body {
     color: #cdd6f4;
 }
 
-/* ── Form elements ────────────────────────────────────────────────────── */
 html.dark input,
 html.dark textarea,
 html.dark select {
@@ -43,7 +39,6 @@ html.dark select:focus {
     outline-color: #6366f1;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────────────────── */
 html.dark ::-webkit-scrollbar {
     width: 8px;
 }

@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Download, Share2, Clock, Brain, Target, Zap, TrendingUp, Award, Flame, BookOpen } from 'lucide-react';
+import { Download, Clock, Brain, Zap, Flame } from 'lucide-react';
 import Button from '../components/ui/Button';
 import leaderboardService from '../services/leaderboardService';
 import { getMyProfile } from '../services/profileService';
 import html2pdf from 'html2pdf.js';
 
-// Animated Counter Component
 const AnimatedCounter = ({ value, duration = 1000 }) => {
   const [count, setCount] = useState(0);
 
@@ -41,12 +40,11 @@ const SharingCard = ({ profile }) => {
     return `${hours}h ${mins}m`;
   };
 
-  // Calculate additional stats
   const avgSessionDuration = profile.totalSessions > 0 
     ? Math.round(profile.totalMinutesStudied / profile.totalSessions) 
     : 0;
   
-  const estimatedBooks = Math.round(profile.totalMinutesStudied / 600); // Assume 10h per book
+  const estimatedBooks = Math.round(profile.totalMinutesStudied / 600);
   const powerLevel = Math.min(100, Math.round((profile.totalSkills * 10 + profile.totalSessions * 5 + profile.totalMinutesStudied / 10) / ((profile.totalSkills + 1) * 10 + (profile.totalSessions + 1) * 5)));
 
   const downloadAsImage = async () => {
@@ -75,7 +73,6 @@ const SharingCard = ({ profile }) => {
 
   return (
     <div className="space-y-6">
-      {/* Main Sharing Card */}
       <div
         ref={cardRef}
         className="w-full max-w-2xl mx-auto relative overflow-hidden rounded-3xl p-8 border-2 border-[#89b4fa]/30"
@@ -85,7 +82,6 @@ const SharingCard = ({ profile }) => {
           boxShadow: '0 0 30px rgba(137, 180, 250, 0.1), inset 0 0 30px rgba(137, 180, 250, 0.05)',
         }}
       >
-        {/* Animated background grid */}
         <div className="absolute inset-0 opacity-5 pointer-events-none">
           <div className="grid grid-cols-4 grid-rows-8 h-full w-full border border-[#89b4fa]">
             {Array.from({ length: 32 }).map((_, i) => (
@@ -94,11 +90,9 @@ const SharingCard = ({ profile }) => {
           </div>
         </div>
 
-        {/* Glow effect */}
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#89b4fa]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 h-full flex flex-col">
-          {/* Header */}
           <div className="text-center mb-4">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#89b4fa] via-[#a6adc8] to-[#f38ba8] flex items-center justify-center text-white font-bold text-4xl mx-auto mb-3 shadow-lg shadow-[#89b4fa]/50">
               {profile.userName[0].toUpperCase()}
@@ -110,7 +104,6 @@ const SharingCard = ({ profile }) => {
             </div>
           </div>
 
-          {/* Power Level Bar */}
           <div className="mb-4 px-2">
             <div className="flex items-center justify-between mb-1">
               <p className="text-xs font-bold text-[#89b4fa] uppercase tracking-widest">Power Level</p>
@@ -124,7 +117,6 @@ const SharingCard = ({ profile }) => {
             </div>
           </div>
 
-          {/* Main Stats Grid */}
           <div className="grid grid-cols-3 gap-2 mb-4">
             {[
               { label: 'Skills', value: profile.totalSkills, icon: Brain, bgColor: 'bg-[#89b4fa]', borderColor: 'border-[#89b4fa]' },
@@ -159,7 +151,6 @@ const SharingCard = ({ profile }) => {
             })}
           </div>
 
-          {/* Secondary Stats */}
           <div className="grid grid-cols-2 gap-2 mb-4">
             <div className="rounded-lg p-2.5 bg-[#1f1f2e]/80 border border-[#45475a] text-center">
               <p className="text-xs text-[#7f849c] mb-0.5">AVG/SESSION</p>
@@ -171,13 +162,11 @@ const SharingCard = ({ profile }) => {
             </div>
           </div>
 
-          {/* Specialization */}
           <div className="mb-3 p-3 rounded-lg bg-gradient-to-r from-[#89b4fa]/5 to-[#f38ba8]/5 border border-[#45475a]">
             <p className="text-xs font-semibold text-[#a6adc8] uppercase tracking-widest mb-1">★ PRIMARY SPECIALIZATION</p>
             <p className="text-lg font-black text-[#89b4fa] uppercase tracking-wider">{profile.mostActiveCategory}</p>
           </div>
 
-          {/* Top Skills */}
           <div className="flex-1 flex flex-col min-h-0">
             <p className="text-xs font-black text-[#a6adc8] mb-2 uppercase tracking-widest">⚡ TOP ACHIEVEMENTS</p>
             <div className="space-y-1.5 overflow-y-auto">
@@ -193,14 +182,12 @@ const SharingCard = ({ profile }) => {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="mt-3 pt-3 border-t border-[#45475a]/50 text-center">
             <p className="text-xs text-[#6c7086] font-mono tracking-wider">⟨ SKILLSYNC ACHIEVEMENT CARD ⟩</p>
           </div>
         </div>
       </div>
 
-      {/* Download Buttons */}
       <div className="flex gap-3 justify-center max-w-2xl mx-auto">
         <Button 
           onClick={downloadAsImage}
@@ -228,7 +215,6 @@ const SkillSharing = () => {
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    // Get current user's profile first
     getMyProfile()
       .then((myProfile) => {
         setUserId(myProfile.id);

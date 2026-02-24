@@ -11,7 +11,6 @@ import {
     TrendingUp,
     Target,
     AlertTriangle,
-    Calendar,
     Clock,
     Award,
     Zap,
@@ -34,7 +33,6 @@ const Analytics = () => {
     const [completionRate, setCompletionRate] = useState(0);
 
     useEffect(() => {
-        // Fetch all analytics data
         getMyStreak()
             .then(setStreak)
             .catch(() => setStreak({ currentStreak: 0, longestStreak: 0 }));
@@ -76,8 +74,7 @@ const Analytics = () => {
                 }
             })
             .catch(() => setCategoryStats([]));
-        
-        // Get skills to calculate completion rate
+
         getMySkills({ size: 100 })
             .then(data => {
                 if (data?.content && data.content.length > 0) {
@@ -89,34 +86,28 @@ const Analytics = () => {
             .catch(() => setCompletionRate(0));
     }, []);
 
-    // Calculate velocity and completion metrics
     const calculateMetrics = () => {
         if (!burnout || !goals || goals.length === 0) {
             return { velocity: 0, eta: null, activeGoal: null };
         }
 
-        // Calculate velocity based on weekly minutes from burnout data
         const weeklyMinutes = burnout.weeklyMinutes || 0;
         const weeklyHours = (weeklyMinutes / 60).toFixed(1);
         const velocity = parseFloat(weeklyHours);
 
-        // Get first active goal (where progress < 100) for ETA calculation
         const activeGoal = goals.find(g => g.progress < 100);
         let eta = null;
 
         if (activeGoal && activeGoal.daysLeft > 0) {
-            // ETA in weeks: if daysLeft is 21 days and velocity is 3 hours/week, eta = 21/7 = 3 weeks
             eta = (activeGoal.daysLeft / 7).toFixed(1);
         }
 
         return { velocity, eta, activeGoal };
     };
 
-    // Generate smart insights based on multiple data points
     const generateInsights = () => {
         const insights = [];
 
-        // Streak & Momentum
         if (streak.currentStreak >= 14) {
             insights.push({
                 type: 'success',
@@ -151,7 +142,6 @@ const Analytics = () => {
             });
         }
 
-        // Completion Rate & Goal Progress
         if (completionRate >= 75) {
             insights.push({
                 type: 'success',
@@ -186,7 +176,6 @@ const Analytics = () => {
             });
         }
 
-        // Learning Velocity & Pace
         const weeklyMin = burnout?.weeklyMinutes || 0;
         if (weeklyMin >= 300) {
             insights.push({
@@ -230,7 +219,6 @@ const Analytics = () => {
             });
         }
 
-        // Burnout Risk
         if (burnout?.riskLevel === 'HIGH') {
             insights.push({
                 type: 'danger',
@@ -257,7 +245,6 @@ const Analytics = () => {
             });
         }
 
-        // Goal Progress Insight
         if (goals && goals.length > 0) {
             const activeGoals = goals.filter(g => g.progress < 100);
             if (activeGoals.length > 0) {
@@ -275,16 +262,13 @@ const Analytics = () => {
         return insights;
     };
 
-    // Calculate burnout consistency score and other metrics
     const calculateBurnoutMetrics = () => {
         if (!burnout || !learningStats) {
             return { consistency: 0, intensity: 0, recovery: 0, health: 'GOOD' };
         }
 
-        // Consistency: based on weekly vs monthly average (higher ratio = more consistent)
         const consistency = Math.min(100, Math.round(burnout.ratio * 100));
 
-        // Intensity: based on weekly minutes (safe range is 180-420 min/week, or 3-7 hours)
         const safeMin = 180, safeMax = 420;
         let intensity;
         if (burnout.weeklyMinutes < safeMin) {
@@ -296,7 +280,6 @@ const Analytics = () => {
         }
         intensity = Math.max(0, Math.min(100, intensity));
 
-        // Recovery: based on having variety in sessions (if avg session < 90 min and streak is reasonable = good recovery)
         const avgSessionMin = learningStats.avgMinutesPerSkill || 0;
         let recovery = 75;
         if (avgSessionMin < 120 && streak?.currentStreak <= 14) {
@@ -326,7 +309,6 @@ const Analytics = () => {
                 action={false}
             />
 
-            {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     title="Current Streak"
@@ -359,7 +341,6 @@ const Analytics = () => {
                 />
             </div>
 
-            {/* Burnout Analysis */}
             <Section
                 title="Burnout Analysis"
                 description="Your learning pace and sustainability metrics"
@@ -484,7 +465,6 @@ const Analytics = () => {
                 </Card>
             </Section>
 
-            {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <BarChartCard
                     title="Top Skills by Time"
@@ -515,7 +495,6 @@ const Analytics = () => {
                 />
             </div>
 
-            {/* Learning Stats */}
             <Section title="Learning Statistics">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Card className="p-6">
@@ -563,7 +542,6 @@ const Analytics = () => {
                 </div>
             </Section>
 
-            {/* Insights & Recommendations */}
             <Section title="Insights & Recommendations">
                 <Card className="p-6">
                     <div className="space-y-4">

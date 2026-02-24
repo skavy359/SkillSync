@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
+import SplashScreen from './components/SplashScreen';
 import Dashboard from './pages/Dashboard';
 import Skills from './pages/Skills';
 import SkillDetail from './pages/SkillDetail';
@@ -27,6 +28,7 @@ import AdminNotifications from './pages/AdminNotifications';
 import { getMyProfile } from './services/profileService';
 
 function App() {
+    const [showSplash, setShowSplash] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [authPage, setAuthPage] = useState('login');
     const [currentUser, setCurrentUser] = useState(null);
@@ -36,7 +38,6 @@ function App() {
     const [adminPage, setAdminPage] = useState('admin');
     const [showCategoryDeleteSuccess, setShowCategoryDeleteSuccess] = useState(false);
 
-    // Apply saved theme on app mount
     useEffect(() => {
         const saved = localStorage.getItem('theme') || 'system';
         const applyTheme = (isDark) => {
@@ -55,7 +56,6 @@ function App() {
         const token = localStorage.getItem('token');
         if (token) {
             setIsAuthenticated(true);
-            // Fetch user profile so Topbar has name/email
             getMyProfile()
                 .then((profile) => {
                     setCurrentUser({
@@ -64,20 +64,27 @@ function App() {
                         email: profile.email,
                         role: profile.role,
                     });
+                    if (profile.role === 'ADMIN') {
+                        setAdminPage('admin');
+                    } else {
+                        setCurrentPage('dashboard');
+                    }
                 })
                 .catch(() => {
-                    // Token invalid — force logout
                     localStorage.removeItem('token');
                     setIsAuthenticated(false);
                 });
         }
     }, []);
 
+    const handleSplashComplete = () => {
+        setShowSplash(false);
+    };
+
     const handleLogin = (userData) => {
         setIsAuthenticated(true);
         setCurrentUser(userData);
 
-        // Route based on role
         if (userData?.role === 'ADMIN') {
             setAdminPage('admin');
         } else {
@@ -96,7 +103,10 @@ function App() {
         setAdminPage(page);
     };
 
-    // ── Not authenticated → show Login / Register ──────────────────────────
+    if (showSplash) {
+        return <SplashScreen onComplete={handleSplashComplete} isAuthenticated={isAuthenticated} />;
+    }
+
     if (!isAuthenticated) {
         if (authPage === 'register') {
             return (
@@ -114,7 +124,6 @@ function App() {
         );
     }
 
-    // ── Admin panel (safe null check with optional chaining) ──────────────
     if (currentUser?.role === 'ADMIN' && adminPage.startsWith('admin')) {
         const renderAdminPage = () => {
             switch (adminPage) {
@@ -148,7 +157,6 @@ function App() {
         );
     }
 
-    // ── Regular user app ──────────────────────────────────────────────────
     const renderUserPage = () => {
         switch (currentPage) {
             case 'dashboard':

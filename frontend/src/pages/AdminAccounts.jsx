@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Unlock, RotateCw, Search, AlertCircle, Check } from 'lucide-react';
+import { Unlock, RotateCw, Search, AlertCircle, Check } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import Table from '../components/ui/Table';
 import TableRow from '../components/ui/TableRow';
@@ -98,7 +98,6 @@ const AdminAccounts = () => {
           </div>
         )}
 
-        {/* Search */}
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-3 w-5 h-5 text-[#7f849c]" />
@@ -112,7 +111,6 @@ const AdminAccounts = () => {
           </div>
         </div>
 
-        {/* Users Table */}
         <div className="bg-[#313244] rounded-lg overflow-hidden">
           {loading ? (
             <div className="p-8 text-center text-[#7f849c]">Loading users...</div>
@@ -166,7 +164,6 @@ const AdminAccounts = () => {
           )}
         </div>
 
-        {/* Password Reset Modal */}
         <Modal
           isOpen={resetModal.open}
           onClose={() => setResetModal({ open: false, userId: null, password: '' })}

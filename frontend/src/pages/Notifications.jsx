@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react';
+import { Bell, Check, CheckCheck } from 'lucide-react';
 import { getMyNotifications, markNotificationRead, markAllNotificationsRead } from '../services/profileService';
 
 const Notifications = () => {
@@ -15,7 +15,6 @@ const Notifications = () => {
             .finally(() => setLoading(false));
     }, []);
 
-    // Filter notifications to show only last 24 hours
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const recentNotifications = notifications.filter(n => {
@@ -65,7 +64,6 @@ const Notifications = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Notifications</h1>
@@ -84,7 +82,6 @@ const Notifications = () => {
                 )}
             </div>
 
-            {/* Notifications List */}
             {recentNotifications.length > 0 ? (
                 <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden divide-y divide-gray-100 dark:divide-[#272739]">
                     {recentNotifications.map((notif, idx) => (
@@ -92,7 +89,6 @@ const Notifications = () => {
                             key={notif.id || idx}
                             className={`flex items-start space-x-4 px-5 py-4 transition-colors ${!notif.read ? 'bg-indigo-50/40 dark:bg-indigo-500/10' : 'hover:bg-gray-50 dark:hover:bg-[#272739]'}`}
                         >
-                            {/* Indicator */}
                             <div className="pt-1">
                                 {!notif.read ? (
                                     <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full" />
@@ -101,7 +97,6 @@ const Notifications = () => {
                                 )}
                             </div>
 
-                            {/* Content */}
                             <div className="flex-1 min-w-0">
                                 <p className={`text-sm ${!notif.read ? 'font-semibold text-gray-900 dark:text-[#cdd6f4]' : 'text-gray-700 dark:text-[#a6adc8]'}`}>
                                     {notif.message || 'Notification'}
@@ -118,7 +113,6 @@ const Notifications = () => {
                                 </div>
                             </div>
 
-                            {/* Actions */}
                             {!notif.read && (
                                 <button
                                     onClick={() => handleMarkRead(notif)}

@@ -39,7 +39,6 @@ const Sessions = ({ onNavigate }) => {
     const [validationError, setValidationError] = useState(false);
 
     useEffect(() => {
-        // Fetch all skills
         getMySkills({ size: 100 })
             .then(data => {
                 const skillList = data?.content || [];
@@ -47,7 +46,6 @@ const Sessions = ({ onNavigate }) => {
                 return skillList;
             })
             .then(skillList => {
-                // Fetch all sessions from all skills
                 return Promise.all(
                     skillList.map(skill =>
                         fetchSessions(skill.id).then(sessions =>
@@ -70,7 +68,6 @@ const Sessions = ({ onNavigate }) => {
             .finally(() => setLoading(false));
     }, []);
 
-    // Handle search
     useEffect(() => {
         const filtered = allSessions.filter(session =>
             session.skillName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -79,7 +76,6 @@ const Sessions = ({ onNavigate }) => {
         setFilteredSessions(filtered);
     }, [searchTerm, allSessions]);
 
-    // Format duration display
     const formatDuration = (minutes) => {
         if (!minutes) return '0m';
         const hours = Math.floor(minutes / 60);
@@ -89,7 +85,6 @@ const Sessions = ({ onNavigate }) => {
         return `${hours}h ${mins}m`;
     };
 
-    // Format date
     const formatDate = (dateStr) => {
         const date = new Date(dateStr);
         return date.toLocaleDateString('en-US', {
@@ -100,7 +95,6 @@ const Sessions = ({ onNavigate }) => {
         });
     };
 
-    // Handle edit modal open
     const handleOpenEditModal = (session) => {
         setSelectedSession(session);
         setEditForm({
@@ -112,7 +106,6 @@ const Sessions = ({ onNavigate }) => {
         setIsEditModalOpen(true);
     };
 
-    // Handle edit form change
     const handleEditFormChange = (e) => {
         const { name, value } = e.target;
         setEditForm(prev => ({
@@ -121,7 +114,6 @@ const Sessions = ({ onNavigate }) => {
         }));
     };
 
-    // Handle edit submit
     const handleEditSubmit = async () => {
         try {
             setEditLoading(true);
@@ -141,7 +133,6 @@ const Sessions = ({ onNavigate }) => {
                 notes: editForm.notes
             });
 
-            // Update local state
             setAllSessions(prevSessions =>
                 prevSessions.map(s =>
                     s.id === selectedSession.id
@@ -169,20 +160,17 @@ const Sessions = ({ onNavigate }) => {
         }
     };
 
-    // Handle delete confirmation open
     const handleOpenDeleteConfirm = (session) => {
         setSessionToDelete(session);
         setIsDeleteConfirmOpen(true);
     };
 
-    // Handle delete confirmation
     const handleConfirmDelete = async () => {
         if (!sessionToDelete) return;
 
         try {
             await deleteSession(sessionToDelete.skillId, sessionToDelete.id);
 
-            // Update local state
             setAllSessions(prevSessions =>
                 prevSessions.filter(s => s.id !== sessionToDelete.id)
             );
@@ -200,7 +188,6 @@ const Sessions = ({ onNavigate }) => {
         }
     };
 
-    // Handle log session
     const handleLogSession = async (e) => {
         if (e && e.preventDefault) e.preventDefault();
         if (!logForm.skillId || !logForm.durationMinutes) {
@@ -223,7 +210,6 @@ const Sessions = ({ onNavigate }) => {
                 sessionDate: logForm.sessionDate
             });
 
-            // Reset and reload
             setShowLogModal(false);
             setLogForm({
                 skillId: '',
@@ -232,7 +218,6 @@ const Sessions = ({ onNavigate }) => {
                 sessionDate: new Date().toISOString().split('T')[0]
             });
 
-            // Reload sessions from all skills
             const refreshedSessions = await Promise.all(
                 skills.map(skill =>
                     fetchSessions(skill.id).then(sessions =>
@@ -282,7 +267,6 @@ const Sessions = ({ onNavigate }) => {
                 }
             />
 
-            {/* Success Notification */}
             {showSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -290,7 +274,6 @@ const Sessions = ({ onNavigate }) => {
                 </div>
             )}
 
-            {/* Search */}
             <div>
                 <Input
                     type="text"
@@ -301,7 +284,6 @@ const Sessions = ({ onNavigate }) => {
                 />
             </div>
 
-            {/* Sessions List */}
             <Section
                 title={`All Sessions (${filteredSessions.length})`}
                 description="Complete history of your learning sessions"
@@ -314,7 +296,6 @@ const Sessions = ({ onNavigate }) => {
                                 className="p-4 hover:shadow-md transition-shadow"
                             >
                                 <div className="flex items-start justify-between gap-4">
-                                    {/* Session Info */}
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center space-x-2 mb-2">
                                             <h3 className="font-semibold text-gray-900 dark:text-[#cdd6f4]">
@@ -325,14 +306,12 @@ const Sessions = ({ onNavigate }) => {
                                             </span>
                                         </div>
 
-                                        {/* Notes */}
                                         {session.notes && (
                                             <p className="text-sm text-gray-600 dark:text-[#9399b2] mb-2">
                                                 {session.notes}
                                             </p>
                                         )}
 
-                                        {/* Date and Time */}
                                         <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-[#7f849c]">
                                             <div className="flex items-center gap-1">
                                                 <Calendar className="w-3 h-3" />
@@ -341,7 +320,6 @@ const Sessions = ({ onNavigate }) => {
                                         </div>
                                     </div>
 
-                                    {/* Actions */}
                                     <div className="flex items-center gap-2">
                                         <Button
                                             variant="ghost"
@@ -383,7 +361,6 @@ const Sessions = ({ onNavigate }) => {
                 )}
             </Section>
 
-            {/* Sessions Stats */}
             {allSessions.length > 0 && (
                 <Section title="Session Statistics">
                     <Card className="p-6">
@@ -411,7 +388,6 @@ const Sessions = ({ onNavigate }) => {
                 </Section>
             )}
 
-            {/* Delete Confirm Modal */}
             <Modal
                 isOpen={isDeleteConfirmOpen}
                 onClose={() => setIsDeleteConfirmOpen(false)}
@@ -442,7 +418,6 @@ const Sessions = ({ onNavigate }) => {
                 </div>
             </Modal>
 
-            {/* Validation Error Modal */}
             <Modal
                 isOpen={validationError}
                 onClose={() => setValidationError(false)}
@@ -461,7 +436,6 @@ const Sessions = ({ onNavigate }) => {
                 </div>
             </Modal>
 
-            {/* Log Session Modal */}
             <Modal
                 isOpen={showLogModal}
                 onClose={() => setShowLogModal(false)}
@@ -522,7 +496,6 @@ const Sessions = ({ onNavigate }) => {
                 </form>
             </Modal>
 
-            {/* Edit Session Modal */}
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}

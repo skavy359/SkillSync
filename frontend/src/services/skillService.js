@@ -2,8 +2,7 @@ import api from './api';
 
 export const getMySkills = async (params = {}) => {
     const { page = 0, size = 10, status = '', level = '', search = '' } = params;
-    
-    // Build query parameters - only include non-empty values
+
     const queryParams = { page, size };
     if (status && status.trim()) queryParams.status = status;
     if (level && level.trim()) queryParams.level = level;
@@ -12,7 +11,7 @@ export const getMySkills = async (params = {}) => {
     const { data } = await api.get('/skills', {
         params: queryParams,
     });
-    return data.data; // Page<SkillResponse>
+    return data.data;
 };
 
 export const addSkill = async (skillData) => {

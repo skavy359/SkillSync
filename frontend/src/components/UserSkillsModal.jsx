@@ -5,8 +5,6 @@ import ProgressBar from '../components/ui/ProgressBar';
 import { getUserSkills } from '../services/adminService';
 import { BookOpen, Loader2, AlertCircle, Layers } from 'lucide-react';
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const LEVEL_VARIANT = {
     Beginner:     'success',
     Intermediate: 'warning',
@@ -32,14 +30,11 @@ const PROGRESS_COLOR = (p) => {
     return 'yellow';
 };
 
-// ─── Component ───────────────────────────────────────────────────────────────
-
 const UserSkillsModal = ({ isOpen, onClose, user }) => {
     const [skills, setSkills]   = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError]     = useState(null);
 
-    // Fetch every time the modal opens for a (different) user
     useEffect(() => {
         if (!isOpen || !user?.id) return;
 
@@ -69,13 +64,11 @@ const UserSkillsModal = ({ isOpen, onClose, user }) => {
         return () => { cancelled = true; };
     }, [isOpen, user?.id]);
 
-    // ── Derived stats ────────────────────────────────────────────────────────
     const completedCount = skills.filter(s => s.status === 'completed').length;
     const avgProgress    = skills.length
         ? Math.round(skills.reduce((s, sk) => s + (sk.progress ?? 0), 0) / skills.length)
         : 0;
 
-    // ── Render ───────────────────────────────────────────────────────────────
     return (
         <Modal
             isOpen={isOpen}
@@ -90,7 +83,6 @@ const UserSkillsModal = ({ isOpen, onClose, user }) => {
             }
             size="lg"
         >
-            {/* ── Mini stats bar ────────────────────────────────────────────── */}
             {!loading && !error && skills.length > 0 && (
                 <div className="flex items-center space-x-6 mb-5 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
                     <div className="text-center">
@@ -110,7 +102,6 @@ const UserSkillsModal = ({ isOpen, onClose, user }) => {
                 </div>
             )}
 
-            {/* ── Loading ───────────────────────────────────────────────────── */}
             {loading && (
                 <div className="flex flex-col items-center justify-center py-16 space-y-3">
                     <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
@@ -118,7 +109,6 @@ const UserSkillsModal = ({ isOpen, onClose, user }) => {
                 </div>
             )}
 
-            {/* ── Error ─────────────────────────────────────────────────────── */}
             {!loading && error && (
                 <div className="flex flex-col items-center justify-center py-12 space-y-3">
                     <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
@@ -128,7 +118,6 @@ const UserSkillsModal = ({ isOpen, onClose, user }) => {
                 </div>
             )}
 
-            {/* ── Empty ─────────────────────────────────────────────────────── */}
             {!loading && !error && skills.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 space-y-3">
                     <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center">
@@ -139,7 +128,6 @@ const UserSkillsModal = ({ isOpen, onClose, user }) => {
                 </div>
             )}
 
-            {/* ── Skill list ────────────────────────────────────────────────── */}
             {!loading && !error && skills.length > 0 && (
                 <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                     {skills.map((skill) => (
@@ -147,7 +135,6 @@ const UserSkillsModal = ({ isOpen, onClose, user }) => {
                             key={skill.id}
                             className="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition-all"
                         >
-                            {/* Top row */}
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex-1 min-w-0">
                                     <h4 className="text-sm font-semibold text-gray-900 truncate">
@@ -171,7 +158,6 @@ const UserSkillsModal = ({ isOpen, onClose, user }) => {
                                 </div>
                             </div>
 
-                            {/* Progress */}
                             <div className="space-y-1">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs text-gray-500">Progress</span>

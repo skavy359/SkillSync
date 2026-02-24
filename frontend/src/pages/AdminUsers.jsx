@@ -3,7 +3,6 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
-import Section from '../components/ui/Section';
 import {
     getUsers,
     updateUserRole,
@@ -24,14 +23,9 @@ import {
     Filter,
     Clock,
     Layers,
-    MoreHorizontal,
-    X,
-    Mail,
     CalendarDays,
     Check,
 } from 'lucide-react';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatDate = (iso) => {
     if (!iso) return '—';
@@ -54,7 +48,6 @@ const RoleBadge = ({ role }) => (
     </Badge>
 );
 
-// Debounce helper
 function useDebounce(value, delay = 400) {
     const [debounced, setDebounced] = useState(value);
     useEffect(() => {
@@ -64,52 +57,41 @@ function useDebounce(value, delay = 400) {
     return debounced;
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 const AdminUsers = () => {
-    // ── List state ──────────────────────────────────────────────────────────
     const [users, setUsers]             = useState([]);
     const [totalElements, setTotalElements] = useState(0);
     const [totalPages, setTotalPages]   = useState(0);
     const [page, setPage]               = useState(0);
     const PAGE_SIZE = 10;
 
-    // ── Filter state ────────────────────────────────────────────────────────
     const [search, setSearch]     = useState('');
     const [roleFilter, setRoleFilter] = useState('');
     const debouncedSearch = useDebounce(search, 400);
 
-    // ── Loading / error ─────────────────────────────────────────────────────
     const [loading, setLoading]   = useState(true);
     const [error, setError]       = useState(null);
 
-    // ── User detail modal ───────────────────────────────────────────────────
     const [detailModal, setDetailModal] = useState({ open: false, user: null });
     const [userSkills, setUserSkills] = useState([]);
     const [skillsLoading, setSkillsLoading] = useState(false);
     const [skillsError, setSkillsError] = useState(null);
 
-    // ── Delete modal ────────────────────────────────────────────────────────
     const [deleteModal, setDeleteModal] = useState({ open: false, user: null });
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError]     = useState(null);
 
-    // ── Role change state ───────────────────────────────────────────────────
     const [roleChanging, setRoleChanging] = useState({});
     const [roleError, setRoleError]       = useState(null);
 
-    // ── Success message ─────────────────────────────────────────────────────
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    // Show success message helper
     const showSuccess = (message) => {
         setSuccessMessage(message);
         setShowSuccessMessage(true);
         setTimeout(() => setShowSuccessMessage(false), 4000);
     };
 
-    // Load user skills for detail modal
     const openUserDetail = useCallback(async (user) => {
         setDetailModal({ open: true, user });
         setSkillsLoading(true);
@@ -127,7 +109,6 @@ const AdminUsers = () => {
         }
     }, []);
 
-    // ── Fetch ────────────────────────────────────────────────────────────────
     const fetchUsers = useCallback(async (opts = {}) => {
         setLoading(true);
         setError(null);
@@ -138,7 +119,6 @@ const AdminUsers = () => {
                 role: opts.roleFilter ?? roleFilter,
                 search: opts.search ?? debouncedSearch,
             });
-            // Sort users: admins first, then users
             const sortedUsers = (result?.content ?? []).sort((a, b) => {
                 if (a.role === 'ADMIN' && b.role !== 'ADMIN') return -1;
                 if (a.role !== 'ADMIN' && b.role === 'ADMIN') return 1;
@@ -154,53 +134,43 @@ const AdminUsers = () => {
         }
     }, [page, roleFilter, debouncedSearch]);
 
-    // Refetch when page, role filter, or debounced search changes
     useEffect(() => {
         fetchUsers({ page, roleFilter, search: debouncedSearch });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, roleFilter, debouncedSearch]);
 
-    // Reset to page 0 when filters change
     useEffect(() => {
         setPage(0);
     }, [debouncedSearch, roleFilter]);
 
-    // ── Role change handler ──────────────────────────────────────────────────
     const handleRoleChange = async (user, newRole) => {
         if (newRole === user.role) return;
         setRoleChanging((prev) => ({ ...prev, [user.id]: true }));
         setRoleError(null);
         try {
             await updateUserRole(user.id, newRole);
-            // Optimistic update in list
             const updatedUsers = users.map((u) => (u.id === user.id ? { ...u, role: newRole } : u));
-            // Re-sort after update
             const sortedUsers = updatedUsers.sort((a, b) => {
                 if (a.role === 'ADMIN' && b.role !== 'ADMIN') return -1;
                 if (a.role !== 'ADMIN' && b.role === 'ADMIN') return 1;
                 return 0;
             });
             setUsers(sortedUsers);
-            // Update detail modal if open and refetch skills
             if (detailModal.user?.id === user.id) {
                 const updatedUser = { ...detailModal.user, role: newRole };
                 setDetailModal((prev) => ({
                     ...prev,
                     user: updatedUser
                 }));
-                // Refetch skills to show fresh data
                 setSkillsLoading(true);
                 try {
                     const skills = await getUserSkills(user.id);
                     setUserSkills(skills ?? []);
                 } catch {
-                    // Skills fetch error - not critical
                 } finally {
                     setSkillsLoading(false);
                 }
             }
             showSuccess(`${user.name} role changed to ${newRole}`);
-            // Close modal after role change
             setTimeout(() => {
                 setDetailModal({ open: false, user: null });
             }, 500);
@@ -213,14 +183,12 @@ const AdminUsers = () => {
         }
     };
 
-    // ── Delete handler ───────────────────────────────────────────────────────
     const handleDeleteConfirm = async () => {
         if (!deleteModal.user) return;
         setDeleteLoading(true);
         setDeleteError(null);
         try {
             await deleteUser(deleteModal.user.id);
-            // Remove from list immediately
             setUsers((prev) => prev.filter((u) => u.id !== deleteModal.user.id));
             setTotalElements((prev) => Math.max(0, prev - 1));
             setDeleteModal({ open: false, user: null });
@@ -235,15 +203,12 @@ const AdminUsers = () => {
         }
     };
 
-    // ── Pagination helpers ───────────────────────────────────────────────────
     const from = totalElements === 0 ? 0 : page * PAGE_SIZE + 1;
     const to   = Math.min((page + 1) * PAGE_SIZE, totalElements);
 
-    // ── Render ───────────────────────────────────────────────────────────────
     return (
         <div className="space-y-6">
 
-            {/* ── Success Message ────────────────────────────────────────────── */}
             {showSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -251,7 +216,6 @@ const AdminUsers = () => {
                 </div>
             )}
 
-            {/* ── Header ──────────────────────────────────────────────────── */}
             <div className="flex items-start justify-between">
                 <div>
                     <div className="flex items-center space-x-2 mb-1">
@@ -277,7 +241,6 @@ const AdminUsers = () => {
                 </Button>
             </div>
 
-            {/* ── Role error toast ─────────────────────────────────────────── */}
             {roleError && (
                 <div className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
                     <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0" />
@@ -291,10 +254,8 @@ const AdminUsers = () => {
                 </div>
             )}
 
-            {/* ── Search + Filter bar ──────────────────────────────────────── */}
             <Card className="p-4">
                 <div className="flex flex-col sm:flex-row gap-3">
-                    {/* Search */}
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                         <input
@@ -306,7 +267,6 @@ const AdminUsers = () => {
                         />
                     </div>
 
-                    {/* Role filter */}
                     <div className="relative">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                         <select
@@ -322,7 +282,6 @@ const AdminUsers = () => {
                 </div>
             </Card>
 
-            {/* ── Fetch Error ──────────────────────────────────────────────── */}
             {error && (
                 <div className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
                     <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" />
@@ -333,11 +292,9 @@ const AdminUsers = () => {
                 </div>
             )}
 
-            {/* ── Table ────────────────────────────────────────────────────── */}
             <Card className="overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        {/* Head */}
                         <thead className="bg-gray-50 dark:bg-[#181825] border-b border-gray-200 dark:border-[#313244]">
                         <tr>
                             {['User', 'Joined', 'Skills', 'Sessions', 'Actions'].map(
@@ -355,9 +312,7 @@ const AdminUsers = () => {
                         </tr>
                         </thead>
 
-                        {/* Body */}
                         <tbody className="divide-y divide-gray-100 dark:divide-[#313244] bg-white dark:bg-[#0f0f1b]">
-                        {/* Loading skeleton */}
                         {loading &&
                             Array.from({ length: PAGE_SIZE }).map((_, i) => (
                                 <tr key={i} className="animate-pulse">
@@ -383,7 +338,6 @@ const AdminUsers = () => {
                                 </tr>
                             ))}
 
-                        {/* Empty state */}
                         {!loading && !error && users.length === 0 && (
                             <tr>
                                 <td colSpan={5} className="px-6 py-16">
@@ -402,7 +356,6 @@ const AdminUsers = () => {
                             </tr>
                         )}
 
-                        {/* Data rows */}
                         {!loading &&
                             users.map((user) => (
                                 <tr
@@ -410,7 +363,6 @@ const AdminUsers = () => {
                                     onClick={() => openUserDetail(user)}
                                     className="hover:bg-gray-50 dark:hover:bg-[#181825] transition-colors cursor-pointer"
                                 >
-                                    {/* User */}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center space-x-3">
                                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
@@ -430,12 +382,10 @@ const AdminUsers = () => {
                                         </div>
                                     </td>
 
-                                    {/* Joined */}
                                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-[#7f849c] whitespace-nowrap">
                                         {formatDate(user.createdAt)}
                                     </td>
 
-                                    {/* Skills */}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center space-x-1.5 text-sm text-gray-700 dark:text-[#cdd6f4]">
                                             <Layers className="w-3.5 h-3.5 text-gray-400 dark:text-[#7f849c]" />
@@ -443,7 +393,6 @@ const AdminUsers = () => {
                                         </div>
                                     </td>
 
-                                    {/* Sessions */}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center space-x-1.5 text-sm text-gray-700 dark:text-[#cdd6f4]">
                                             <Clock className="w-3.5 h-3.5 text-gray-400 dark:text-[#7f849c]" />
@@ -451,7 +400,6 @@ const AdminUsers = () => {
                                         </div>
                                     </td>
 
-                                    {/* Actions */}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end">
                                             <button
@@ -472,7 +420,6 @@ const AdminUsers = () => {
                     </table>
                 </div>
 
-                {/* ── Pagination footer ─────────────────────────────────────── */}
                 {!loading && !error && totalElements > 0 && (
                     <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-[#313244] bg-gray-50 dark:bg-[#181825]">
                         <p className="text-sm text-gray-500 dark:text-[#7f849c]">
@@ -489,7 +436,6 @@ const AdminUsers = () => {
                                 <ChevronLeft className="w-4 h-4" />
                             </button>
 
-                            {/* Page numbers — show at most 5 around current */}
                             {Array.from({ length: totalPages }, (_, i) => i)
                                 .filter((i) => Math.abs(i - page) <= 2)
                                 .map((i) => (
@@ -518,7 +464,6 @@ const AdminUsers = () => {
                 )}
             </Card>
 
-            {/* ── User Detail Modal ──────────────────────────────────────────── */}
             <Modal
                 isOpen={detailModal.open}
                 onClose={() => setDetailModal({ open: false, user: null })}
@@ -549,15 +494,12 @@ const AdminUsers = () => {
                 }
             >
                 <div className="space-y-8">
-                    {/* User Info Card */}
                     <div className="p-5 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                            {/* User Email */}
                             <div>
                                 <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium uppercase tracking-wider">Email</p>
                                 <p className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4] mt-1 break-all">{detailModal.user?.email}</p>
                             </div>
-                            {/* Joined Date */}
                             <div>
                                 <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium uppercase tracking-wider">Joined</p>
                                 <div className="flex items-center space-x-1.5 mt-1">
@@ -567,7 +509,6 @@ const AdminUsers = () => {
                                     </p>
                                 </div>
                             </div>
-                            {/* Total Skills */}
                             <div>
                                 <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium uppercase tracking-wider">Skills</p>
                                 <div className="flex items-center space-x-1.5 mt-1">
@@ -575,7 +516,6 @@ const AdminUsers = () => {
                                     <p className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4]">{detailModal.user?.totalSkills ?? 0}</p>
                                 </div>
                             </div>
-                            {/* Total Sessions */}
                             <div>
                                 <p className="text-xs text-gray-600 dark:text-[#a6adc8] font-medium uppercase tracking-wider">Sessions</p>
                                 <div className="flex items-center space-x-1.5 mt-1">
@@ -586,7 +526,6 @@ const AdminUsers = () => {
                         </div>
                     </div>
 
-                    {/* Role Management */}
                     <div className="p-5 bg-gray-50 dark:bg-[#181825] rounded-xl border border-gray-200 dark:border-[#313244]">
                         <div className="flex items-center justify-between">
                             <div>
@@ -610,21 +549,18 @@ const AdminUsers = () => {
                         </div>
                     </div>
 
-                    {/* Skills Section */}
                     <div>
                         <div className="flex items-center space-x-2 mb-3">
                             <BookOpen className="w-5 h-5 text-indigo-500" />
                             <h3 className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4]">Skills ({userSkills.length})</h3>
                         </div>
 
-                        {/* Loading */}
                         {skillsLoading && (
                             <div className="flex items-center justify-center py-12">
                                 <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
                             </div>
                         )}
 
-                        {/* Error */}
                         {!skillsLoading && skillsError && (
                             <div className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                                 <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" />
@@ -632,7 +568,6 @@ const AdminUsers = () => {
                             </div>
                         )}
 
-                        {/* Empty State */}
                         {!skillsLoading && !skillsError && userSkills.length === 0 && (
                             <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <Layers className="w-8 h-8 text-gray-300 mb-2" />
@@ -640,7 +575,6 @@ const AdminUsers = () => {
                             </div>
                         )}
 
-                        {/* Skills List */}
                         {!skillsLoading && !skillsError && userSkills.length > 0 && (
                             <div className="space-y-2 max-h-[300px] overflow-y-auto">
                                 {userSkills.map((skill) => (
@@ -665,7 +599,6 @@ const AdminUsers = () => {
                 </div>
             </Modal>
 
-            {/* ── Delete Confirmation Modal ────────────────────────────────── */}
             <Modal
                 isOpen={deleteModal.open}
                 onClose={() => {
@@ -706,14 +639,12 @@ const AdminUsers = () => {
                 }
             >
                 <div className="space-y-4">
-                    {/* Warning icon */}
                     <div className="flex justify-center">
                         <div className="w-14 h-14 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center">
                             <Trash2 className="w-7 h-7 text-red-500 dark:text-red-400" />
                         </div>
                     </div>
 
-                    {/* Message */}
                     <div className="text-center">
                         <p className="text-sm text-gray-700 dark:text-[#cdd6f4]">
                             Are you sure you want to permanently delete{' '}
@@ -727,7 +658,6 @@ const AdminUsers = () => {
                         </p>
                     </div>
 
-                    {/* Inline error */}
                     {deleteError && (
                         <div className="flex items-center space-x-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                             <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0" />

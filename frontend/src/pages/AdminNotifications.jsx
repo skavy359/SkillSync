@@ -73,7 +73,6 @@ const AdminNotifications = () => {
         )}
 
         <div className="space-y-6">
-          {/* Notification Content */}
           <Card>
             <div className="p-6">
               <h3 className="text-lg font-semibold text-[#cdd6f4] mb-4 flex items-center gap-2">
@@ -109,7 +108,6 @@ const AdminNotifications = () => {
             </div>
           </Card>
 
-          {/* Preview */}
           <Card>
             <div className="p-6">
               <h3 className="text-lg font-semibold text-[#cdd6f4] mb-4">Preview</h3>
@@ -122,7 +120,6 @@ const AdminNotifications = () => {
             </div>
           </Card>
 
-          {/* Send Button */}
           <div className="flex justify-end">
             <Button
               onClick={handleSend}
@@ -134,7 +131,6 @@ const AdminNotifications = () => {
             </Button>
           </div>
 
-          {/* Usage Tips */}
           <Card>
             <div className="p-6 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
               <h4 className="font-semibold text-blue-900 dark:text-blue-400 mb-2">Tips</h4>

@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import PageHeader from '../components/ui/PageHeader';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
-import Badge from '../components/ui/Badge';
-import ProgressBar from '../components/ui/ProgressBar';
 import SkillCard from '../components/SkillCard';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -37,7 +34,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Handle "Others" category (virtual category for uncategorized skills)
                 if (categoryId === 'others') {
                     setCategory({
                         id: 'others',
@@ -46,7 +42,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                     });
                 }
 
-                // Fetch all categories to find the one with matching ID
                 const cats = await getAllCategories();
                 const found = (Array.isArray(cats) ? cats : []).find(
                     c => c.id === categoryId || c.name === categoryId
@@ -56,22 +51,18 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                     setCategory(found);
                 }
 
-                // Fetch all user skills and filter by category
                 const skillsResponse = await getMySkills({ size: 100 });
                 const allSkills = skillsResponse?.content || [];
-                
-                // Filter skills that match this category
+
                 let categorySkills;
                 
                 if (categoryId === 'others') {
-                    // For "Others" category, get skills WITHOUT any category
                     categorySkills = allSkills.filter(skill => {
                         const skillCatId = skill.categoryId;
                         const skillCat = skill.category;
                         return !skillCatId && !skillCat;
                     });
                 } else {
-                    // For normal categories, filter by ID or name match
                     categorySkills = allSkills.filter(skill => {
                         const skillCatId = skill.categoryId;
                         const skillCatName = typeof skill.category === 'string' ? skill.category : null;
@@ -83,7 +74,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                     });
                 }
 
-                // Enhance skills with session data
                 const enhancedSkills = await Promise.all(
                     categorySkills.map(async (skill) => {
                         try {
@@ -182,7 +172,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
 
     return (
         <div className="space-y-6">
-            {/* Back Button */}
             <button
                 onClick={() => onNavigate('categories')}
                 className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
@@ -191,7 +180,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 Back to Categories
             </button>
 
-            {/* Success Notification */}
             {showSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -199,7 +187,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 </div>
             )}
 
-            {/* Header Card */}
             <Card className="p-8">
                 <div className="flex items-start justify-between mb-6">
                     <div className="flex-1">
@@ -254,7 +241,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 </div>
             </Card>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -297,7 +283,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 </Card>
             </div>
 
-            {/* Skills in this Category */}
             <Section
                 title="Skills in this Category"
                 description={`${stats.totalSkills} skill${stats.totalSkills !== 1 ? 's' : ''} in ${category.name}`}
@@ -323,7 +308,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 )}
             </Section>
 
-            {/* Edit Category Modal */}
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -351,7 +335,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 </form>
             </Modal>
 
-            {/* Delete Category Confirmation Modal */}
             <Modal
                 isOpen={isDeleteConfirmOpen}
                 onClose={() => setIsDeleteConfirmOpen(false)}

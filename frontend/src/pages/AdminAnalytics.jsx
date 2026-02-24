@@ -52,7 +52,6 @@ const AdminAnalytics = () => {
 
         {metrics && (
           <div className="space-y-6">
-            {/* User Metrics Section */}
             <div>
               <h2 className="text-2xl font-bold text-[#cdd6f4] mb-4 flex items-center gap-2">
                 <Users className="w-6 h-6 text-blue-400" />
@@ -107,7 +106,6 @@ const AdminAnalytics = () => {
               </div>
             </div>
 
-            {/* Learning Metrics Section */}
             <div>
               <h2 className="text-2xl font-bold text-[#cdd6f4] mb-4 flex items-center gap-2">
                 <Award className="w-6 h-6 text-cyan-400" />
@@ -162,7 +160,6 @@ const AdminAnalytics = () => {
               </div>
             </div>
 
-            {/* Session Duration */}
             <Card>
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-[#cdd6f4] mb-4 flex items-center gap-2">
@@ -178,7 +175,6 @@ const AdminAnalytics = () => {
               </div>
             </Card>
 
-            {/* Most Popular Skills */}
             <div>
               <h2 className="text-2xl font-bold text-[#cdd6f4] mb-4 flex items-center gap-2">
                 <Flame className="w-6 h-6 text-orange-400" />
@@ -217,7 +213,6 @@ const AdminAnalytics = () => {
               </div>
             </div>
 
-            {/* Top Users by Skills */}
             <div>
               <h2 className="text-2xl font-bold text-[#cdd6f4] mb-4 flex items-center gap-2">
                 <Crown className="w-6 h-6 text-yellow-400" />
@@ -243,7 +238,6 @@ const AdminAnalytics = () => {
               </div>
             </div>
 
-            {/* Top Users by Session Minutes */}
             <div>
               <h2 className="text-2xl font-bold text-[#cdd6f4] mb-4 flex items-center gap-2">
                 <Activity className="w-6 h-6 text-green-400" />

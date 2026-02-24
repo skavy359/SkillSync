@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Trophy, Flame, Medal } from 'lucide-react';
+import { Trophy, Flame } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
-import Card from '../components/ui/Card';
 import leaderboardService from '../services/leaderboardService';
 import { getMyProfile } from '../services/profileService';
 
@@ -20,8 +19,7 @@ const Leaderboard = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Get current user's ID
+
       const profile = await getMyProfile();
       setCurrentUserId(profile.id);
       
@@ -59,11 +57,9 @@ const Leaderboard = () => {
     const currentUserEntry = data.find(entry => entry.userId === currentUserId);
     
     if (!currentUserEntry) return data;
-    
-    // Remove current user from list
+
     const otherEntries = data.filter(entry => entry.userId !== currentUserId);
     
-    // Return current user at top, followed by others
     return [currentUserEntry, ...otherEntries];
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Search, Download, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import Button from '../components/ui/Button';
 import adminService from '../services/adminService';
@@ -93,7 +93,6 @@ const AdminAuditLogs = () => {
 
   const hasActiveFilters = filterAction || filterEntity;
 
-  // Get unique actions and entities from ALL logs (not just current page)
   const [allAuditLogs, setAllAuditLogs] = useState([]);
   
   const getUniqueActionsAndEntities = useCallback(async () => {
@@ -119,7 +118,6 @@ const AdminAuditLogs = () => {
   return (
     <div className="flex-1 overflow-auto bg-[#1e1e2e]">
       <div className="p-8">
-        {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
             <PageHeader title="Audit Logs" description="View all system activity and changes" />
@@ -130,7 +128,6 @@ const AdminAuditLogs = () => {
           </Button>
         </div>
 
-        {/* Filters Card */}
         <div className="bg-[#313244] rounded-lg p-6 mb-6 border border-[#6c7086]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-[#cdd6f4]">Filters</h3>
@@ -184,7 +181,6 @@ const AdminAuditLogs = () => {
           </div>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg mb-6 flex items-center gap-3">
             <div className="w-1 h-8 bg-red-500 rounded-full"></div>
@@ -192,7 +188,6 @@ const AdminAuditLogs = () => {
           </div>
         )}
 
-        {/* Audit Logs List */}
         <div className="space-y-3">
           {loading && (
             <div className="p-12 text-center">
@@ -219,13 +214,11 @@ const AdminAuditLogs = () => {
                   className="bg-[#1f1f2e] p-4 rounded-lg border border-[#45475a] hover:border-[#89b4fa] hover:bg-[#252535] transition-all group"
                 >
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    {/* User */}
                     <div>
                       <p className="text-xs font-semibold text-[#a6adc8] mb-1.5 uppercase tracking-wide">User</p>
                       <p className="text-sm font-medium text-[#cdd6f4] group-hover:text-[#89b4fa] transition-colors">{log.userName}</p>
                     </div>
 
-                    {/* Action */}
                     <div>
                       <p className="text-xs font-semibold text-[#a6adc8] mb-1.5 uppercase tracking-wide">Action</p>
                       <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-medium ${getActionColor(log.action)}`}>
@@ -233,19 +226,16 @@ const AdminAuditLogs = () => {
                       </span>
                     </div>
 
-                    {/* Entity Type */}
                     <div>
                       <p className="text-xs font-semibold text-[#a6adc8] mb-1.5 uppercase tracking-wide">Entity</p>
                       <p className="text-sm text-[#cdd6f4]">{log.entityType}</p>
                     </div>
 
-                    {/* Entity ID */}
                     <div>
                       <p className="text-xs font-semibold text-[#a6adc8] mb-1.5 uppercase tracking-wide">ID</p>
                       <p className="text-sm font-mono text-[#7f849c]">#{log.entityId}</p>
                     </div>
 
-                    {/* Date */}
                     <div>
                       <p className="text-xs font-semibold text-[#a6adc8] mb-1.5 uppercase tracking-wide">Date</p>
                       <p className="text-sm text-[#7f849c]">{new Date(log.createdAt).toLocaleString()}</p>
@@ -254,7 +244,6 @@ const AdminAuditLogs = () => {
                 </div>
               ))}
 
-              {/* Pagination */}
               {totalPages > 1 && !filterAction && !filterEntity && (
                 <div className="flex justify-between items-center p-4 bg-[#313244] rounded-lg border border-[#6c7086] mt-6">
                   <span className="text-sm text-[#7f849c]">

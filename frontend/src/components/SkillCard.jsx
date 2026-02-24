@@ -19,7 +19,6 @@ const SkillCard = ({
         paused: 'default',
     };
 
-    // Calculate hours from minutes
     const totalHours = Math.round(skill.totalMinutes / 60);
 
     return (

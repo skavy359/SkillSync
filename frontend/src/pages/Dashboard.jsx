@@ -10,7 +10,6 @@ import ActivityHeatmap from '../components/ui/ActivityHeatmap';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
-import Textarea from '../components/ui/Textarea';
 import FormRow from '../components/ui/FormRow';
 import {
     Lightbulb,
@@ -18,7 +17,6 @@ import {
     Flame,
     Clock,
     TrendingUp,
-    Plus,
     ArrowRight,
     Calendar,
     BookOpen,
@@ -29,8 +27,7 @@ import {
 import { useEffect, useState } from "react";
 import {
     fetchDashboardStats,
-    fetchBurnout,
-    fetchRecentSkills,
+    fetchBurnout
 } from "../services/dashboardService";
 import { getMyStats, getMyStreak, getWeeklyStats } from "../services/profileService";
 import { getMySkills, addSkill } from "../services/skillService";
@@ -50,7 +47,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     const [recentSessions, setRecentSessions] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Log Session Modal state
     const [showLogModal, setShowLogModal] = useState(false);
     const [allSkills, setAllSkills] = useState([]);
     const [logForm, setLogForm] = useState({
@@ -61,7 +57,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     });
     const [logSubmitting, setLogSubmitting] = useState(false);
 
-    // Add Skill Modal state
     const [showAddSkillModal, setShowAddSkillModal] = useState(false);
     const [dashboardCategories, setDashboardCategories] = useState([]);
     const [addSkillForm, setAddSkillForm] = useState({
@@ -70,7 +65,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         categoryId: '',
     });
 
-    // Create Goal Modal state
     const [showCreateGoalModal, setShowCreateGoalModal] = useState(false);
     const [goalForm, setGoalForm] = useState({
         skillId: '',
@@ -83,7 +77,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     const [showLogSessionSuccess, setShowLogSessionSuccess] = useState(false);
     const [showCreateGoalSuccess, setShowCreateGoalSuccess] = useState(false);
 
-    // Helper: fetch recent sessions from all user skills
     const loadRecentSessions = async (skillList) => {
         try {
             const { fetchSessions } = await import('../services/sessionService');
@@ -105,14 +98,12 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         } catch { }
     };
 
-    // Helper: Get latest 4 skills by most recent session
     const getLatestSkillsBySession = async () => {
         try {
             const { fetchSessions } = await import('../services/sessionService');
             const skillsData = await getMySkills({ size: 100 });
             const skillList = skillsData?.content || [];
 
-            // Get sessions for each skill and find most recent session date
             const skillsWithLatestSession = await Promise.all(
                 skillList.map(async (skill) => {
                     try {
@@ -120,7 +111,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                         const sessionArray = Array.isArray(sessions) ? sessions : [];
                         
                         if (sessionArray.length > 0) {
-                            // Find most recent session date
                             const latestSession = sessionArray.reduce((latest, session) => {
                                 const sessionDate = new Date(session.sessionDate);
                                 return sessionDate > new Date(latest.sessionDate) ? session : latest;
@@ -143,11 +133,10 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 })
             );
 
-            // Sort by most recent session date (descending) and take top 4
             const sortedSkills = skillsWithLatestSession
                 .sort((a, b) => b.lastSessionDate - a.lastSessionDate)
                 .slice(0, 4)
-                .map(({ lastSessionDate, ...skill }) => skill); // Remove the helper field
+                .map(({ lastSessionDate, ...skill }) => skill);
 
             return sortedSkills;
         } catch (err) {
@@ -156,12 +145,10 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         }
     };
 
-    // Helper: build heatmap data from sessions
     const buildWeeklyHeatmap = async (skillList) => {
         try {
             const { fetchSessions } = await import('../services/sessionService');
-            
-            // Init 7 days
+
             const today = new Date();
             const days = {};
             for (let i = 6; i >= 0; i--) {
@@ -175,7 +162,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 };
             }
 
-            // Fetch and aggregate sessions
             const allSessions = await Promise.all(
                 skillList.slice(0, 15).map(async (skill) => {
                     try {
@@ -185,15 +171,13 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 })
             );
 
-            // Aggregate by date
             allSessions.flat().forEach(session => {
                 if (session.sessionDate && days[session.sessionDate]) {
                     days[session.sessionDate].minutes += session.durationMinutes || 0;
                 }
             });
 
-            // Convert to array, sorted by date
-            const heatmapData = Object.values(days).sort((a, b) => 
+            const heatmapData = Object.values(days).sort((a, b) =>
                 new Date(a.date) - new Date(b.date)
             );
             setWeeklyActivity(heatmapData);
@@ -217,18 +201,14 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             setBurnout(burnoutData);
             setWeeklyStats(weekly);
 
-            // Recent skills sorted by most recent session
             setRecentSkills(latestSkills);
 
-            // Fetch recent sessions from all skills
             loadRecentSessions(latestSkills.length > 0 ? latestSkills : []);
 
-            // Build weekly heatmap from sessions
             buildWeeklyHeatmap(latestSkills.length > 0 ? latestSkills : []);
         }).finally(() => setLoading(false));
     }, []);
 
-    // Load skills list when log modal opens
     useEffect(() => {
         if (showLogModal && allSkills.length === 0) {
             getMySkills({ size: 50 }).then(data => {
@@ -237,7 +217,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         }
     }, [showLogModal]);
 
-    // Load categories when add skill modal opens
     useEffect(() => {
         if (showAddSkillModal && dashboardCategories.length === 0) {
             getAllCategories().then(data => {
@@ -246,7 +225,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         }
     }, [showAddSkillModal]);
 
-    // Load skills when create goal modal opens
     useEffect(() => {
         if (showCreateGoalModal && allSkills.length === 0) {
             getMySkills({ size: 50 }).then(data => {
@@ -283,10 +261,8 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             setTimeout(() => {
                 setShowLogSessionSuccess(false);
             }, 3000);
-            // Refresh data
             fetchDashboardStats().then(setLearningStats).catch(() => { });
             getWeeklyStats().then(setWeeklyStats).catch(() => { });
-            // Refresh recent sessions and heatmap
             const skillList = allSkills.length > 0 ? allSkills : recentSkills;
             loadRecentSessions(skillList);
             buildWeeklyHeatmap(skillList);
@@ -322,12 +298,10 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             setTimeout(() => {
                 setShowAddSkillSuccess(false);
             }, 3000);
-            
-            // Refresh data
+
             fetchDashboardStats().then(setLearningStats).catch(() => { });
             getMyStats().then(setUserStats).catch(() => { });
             
-            // Refresh recent skills sorted by latest session
             getLatestSkillsBySession().then(latestSkills => {
                 setRecentSkills(latestSkills);
                 loadRecentSessions(latestSkills);
@@ -383,7 +357,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         return <div className="p-8 text-gray-500">Loading dashboard...</div>;
     }
 
-    // Computed values with safe fallbacks
     const totalSkills = userStats?.totalSkills ?? learningStats?.totalSkills ?? 0;
     const activeSkills = userStats?.activeSkills ?? 0;
     const completedSkills = userStats?.completedSkills ?? 0;
@@ -398,7 +371,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     const completionRate = userStats?.completionRate ?? 0;
     const riskLevel = burnout?.riskLevel ?? 'LOW';
 
-    // Dynamic streak message
     const getStreakMessage = () => {
         if (currentStreak >= longestStreak && currentStreak > 0) return 'New personal best! 🔥';
         if (currentStreak >= 7) return 'Incredible consistency!';
@@ -407,14 +379,12 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         return 'Start a new streak today!';
     };
 
-    // Dynamic streak trend
     const getStreakTrend = () => {
         if (currentStreak >= longestStreak && currentStreak > 0) return 'up';
         if (currentStreak >= 3) return 'up';
         return 'neutral';
     };
 
-    // Dynamic weekly message
     const getWeeklyMessage = () => {
         const hours = Math.round(weeklyMinutes / 60 * 10) / 10;
         if (weeklyMinutes === 0) return 'No sessions yet this week';
@@ -423,7 +393,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         return `${hours}h logged this week`;
     };
 
-    // Dynamic burnout card content
     const getBurnoutContent = () => {
         const level = riskLevel.toLowerCase();
         if (level === 'high') return {
@@ -448,7 +417,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
 
     const burnoutContent = getBurnoutContent();
 
-    // Consistency label
     const getConsistency = () => {
         if (activeDays >= 6) return 'Excellent';
         if (activeDays >= 4) return 'Strong';
@@ -464,7 +432,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 action={false}
             />
 
-            {/* Success Notifications */}
             {showAddSkillSuccess && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
@@ -484,7 +451,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </div>
             )}
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     title="Total Skills"
@@ -519,7 +485,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 />
             </div>
 
-            {/* Burnout / Progress Card */}
             <Card className={`p-6 bg-gradient-to-br ${burnoutContent.gradient} ${burnoutContent.border}`}>
                 <div className="flex items-start space-x-4">
                     <div className="w-12 h-12 bg-white/60 dark:bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -551,16 +516,13 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </div>
             </Card>
 
-            {/* Activity Heatmap */}
             <ActivityHeatmap
                 title="Weekly Activity"
                 description="Your learning activity this week"
                 data={weeklyActivity}
             />
 
-            {/* Two Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Recent Skills */}
                 <Section
                     title="Recent Skills"
                     action={
@@ -615,7 +577,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                     </Card>
                 </Section>
 
-                {/* Recent Sessions */}
                 <Section
                     title="Recent Sessions"
                     action={
@@ -661,7 +622,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </Section>
             </div>
 
-            {/* Quick Actions */}
             <Section title="Quick Actions">
                 <Card className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -696,7 +656,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </Card>
             </Section>
 
-            {/* Log Session Modal */}
             <Modal
                 isOpen={showLogModal}
                 onClose={() => setShowLogModal(false)}
@@ -753,7 +712,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </form>
             </Modal>
 
-            {/* Validation Error Modal */}
             <Modal
                 isOpen={validationError}
                 onClose={() => setValidationError(false)}
@@ -772,7 +730,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </div>
             </Modal>
 
-            {/* Add Skill Modal */}
             <Modal
                 isOpen={showAddSkillModal}
                 onClose={() => setShowAddSkillModal(false)}
@@ -817,7 +774,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </form>
             </Modal>
 
-            {/* Create Goal Modal */}
             <Modal
                 isOpen={showCreateGoalModal}
                 onClose={() => setShowCreateGoalModal(false)}

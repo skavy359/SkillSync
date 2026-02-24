@@ -13,7 +13,6 @@ import {
     Bell,
 } from 'lucide-react';
 
-// ─── Nav items ────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
     {
         id: 'admin',
@@ -42,11 +41,9 @@ const NAV_ITEMS = [
     },
 ];
 
-// ─── Sidebar ─────────────────────────────────────────────────────────────────
 const AdminSidebar = ({ currentPage, onNavigate, onLogout, mobileOpen, onMobileClose }) => {
     return (
         <>
-            {/* Mobile backdrop */}
             {mobileOpen && (
                 <div
                     className="fixed inset-0 z-20 bg-black bg-opacity-40 lg:hidden"
@@ -62,7 +59,6 @@ const AdminSidebar = ({ currentPage, onNavigate, onLogout, mobileOpen, onMobileC
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
             >
-                {/* Logo */}
                 <div className="flex items-center justify-between px-5 py-5 border-b border-gray-200 dark:border-[#313244]">
                     <div className="flex items-center space-x-2.5">
                         <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -86,7 +82,6 @@ const AdminSidebar = ({ currentPage, onNavigate, onLogout, mobileOpen, onMobileC
                     </button>
                 </div>
 
-                {/* Nav */}
                 <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                     {NAV_ITEMS.map((item) => {
                         const Icon = item.icon;
@@ -114,7 +109,6 @@ const AdminSidebar = ({ currentPage, onNavigate, onLogout, mobileOpen, onMobileC
                     })}
                 </nav>
 
-                {/* Bottom — logout */}
                 <div className="px-3 pb-4 border-t border-gray-200 dark:border-[#313244] pt-4">
                     <button
                         onClick={onLogout}
@@ -129,7 +123,6 @@ const AdminSidebar = ({ currentPage, onNavigate, onLogout, mobileOpen, onMobileC
     );
 };
 
-// ─── Topbar ───────────────────────────────────────────────────────────────────
 const AdminTopbar = ({ onMobileMenuOpen, adminName, onLogout }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const displayName = adminName || 'Admin';
@@ -142,7 +135,6 @@ const AdminTopbar = ({ onMobileMenuOpen, adminName, onLogout }) => {
 
     return (
         <header className="h-14 bg-white dark:bg-[#1e1e2e] border-b border-gray-200 dark:border-[#313244] flex items-center justify-between px-5 flex-shrink-0">
-            {/* Mobile menu button */}
             <button
                 onClick={onMobileMenuOpen}
                 className="lg:hidden p-2 text-gray-500 dark:text-[#7f849c] hover:text-gray-700 dark:hover:text-[#cdd6f4] hover:bg-gray-100 dark:hover:bg-[#313244] rounded-lg transition-colors"
@@ -150,13 +142,11 @@ const AdminTopbar = ({ onMobileMenuOpen, adminName, onLogout }) => {
                 <Menu className="w-5 h-5" />
             </button>
 
-            {/* Admin badge */}
             <div className="hidden lg:flex items-center space-x-2">
                 <ShieldCheck className="w-4 h-4 text-indigo-500" />
                 <span className="text-sm font-semibold text-gray-700 dark:text-[#cdd6f4]">Admin Panel</span>
             </div>
 
-            {/* User dropdown */}
             <div className="relative ml-auto">
                 <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -205,7 +195,6 @@ const AdminTopbar = ({ onMobileMenuOpen, adminName, onLogout }) => {
     );
 };
 
-// ─── Layout wrapper ───────────────────────────────────────────────────────────
 const AdminLayout = ({ children, currentPage, onNavigate, onLogout, adminName }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
 

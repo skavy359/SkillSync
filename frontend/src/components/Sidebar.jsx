@@ -95,7 +95,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
                                     {Math.round(todayMinutes / 60)}
                                 </p>
                                 <p className="text-xs text-gray-600 dark:text-[#9399b2] font-medium">
-                                    hours logged
+                                    Hours logged
                                 </p>
                             </div>
                         </div>

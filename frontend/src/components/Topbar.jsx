@@ -37,16 +37,14 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
         const timer = setTimeout(async () => {
             try {
                 const query = searchQuery.trim().toLowerCase();
-                
-                // Search skills
+
                 const skillsResult = await getMySkills({ search: searchQuery.trim(), size: 5 }).catch(() => ({ content: [] }));
                 const skills = (skillsResult?.content || []).map(skill => ({
                     ...skill,
                     type: 'skill',
                     icon: 'Lightbulb'
                 }));
-                
-                // Search categories
+
                 const categoriesResult = await getAllCategories().catch(() => []);
                 const categories = (Array.isArray(categoriesResult) ? categoriesResult : []).filter(cat => 
                     cat.name.toLowerCase().includes(query)
@@ -55,11 +53,9 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                     type: 'category',
                     icon: 'BookOpen'
                 }));
-                
-                // Search goals
+
                 const goalsResult = await getMyGoals().catch(() => []);
                 const goals = (Array.isArray(goalsResult) ? goalsResult : []).filter(goal => {
-                    // Try to match goal by skill name if available
                     return (goal.skillName && goal.skillName.toLowerCase().includes(query)) ||
                            (goal.targetDate && goal.targetDate.toLowerCase().includes(query));
                 }).slice(0, 3).map(goal => ({
@@ -67,8 +63,7 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                     type: 'goal',
                     icon: 'Target'
                 }));
-                
-                // Combine results with skills first, then categories, then goals (max 8 total)
+
                 const combined = [...skills, ...categories, ...goals].slice(0, 8);
                 setSearchResults(combined);
             } catch {
@@ -283,10 +278,8 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                     )}
                 </div>
 
-                {/* Divider */}
                 <div className="w-px h-8 bg-gray-200 dark:bg-[#313244]" />
 
-                {/* User Profile Dropdown */}
                 <div className="relative">
                     <button
                         onClick={() => { setDropdownOpen(!dropdownOpen); setNotifOpen(false); }}
@@ -302,19 +295,16 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                         <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-[#6c7086] transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
-                    {/* Dropdown Menu */}
                     {dropdownOpen && (
                         <>
                             <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
 
                             <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-[#1e1e2e] border border-gray-200 dark:border-[#313244] rounded-xl shadow-lg z-20 overflow-hidden">
-                                {/* User Info */}
                                 <div className="px-4 py-3 border-b border-gray-100 dark:border-[#272739]">
                                     <p className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4]">{userName}</p>
                                     <p className="text-xs text-gray-500 dark:text-[#7f849c] mt-0.5">{userEmail}</p>
                                 </div>
 
-                                {/* Menu Items */}
                                 <div className="p-1.5">
                                     <button
                                         onClick={() => { setDropdownOpen(false); onNavigate && onNavigate('profile'); }}
@@ -332,7 +322,6 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                                     </button>
                                 </div>
 
-                                {/* Logout */}
                                 <div className="p-1.5 border-t border-gray-100 dark:border-[#272739]">
                                     <button
                                         onClick={() => {

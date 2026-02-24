@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import PageHeader from '../components/ui/PageHeader';
 import StatCard from '../components/ui/StatCard';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
@@ -11,16 +10,13 @@ import {
     Layers,
     CalendarCheck,
     Activity,
-    Loader2,
     AlertCircle,
     RefreshCw,
-    UserCircle,
     Clock,
     ShieldCheck,
     TrendingUp,
 } from 'lucide-react';
 
-// ─── Skeleton card ────────────────────────────────────────────────────────────
 const SkeletonStatCard = () => (
     <div className="bg-white dark:bg-[#181825] rounded-2xl border border-gray-100 dark:border-[#313244] shadow-sm dark:shadow-none p-6 animate-pulse">
         <div className="flex items-start justify-between">
@@ -34,7 +30,6 @@ const SkeletonStatCard = () => (
     </div>
 );
 
-// ─── Role badge helper ────────────────────────────────────────────────────────
 const RoleBadge = ({ role }) => (
     <Badge variant={role === 'ADMIN' ? 'purple' : 'primary'} size="sm">
         {role === 'ADMIN' ? (
@@ -47,7 +42,6 @@ const RoleBadge = ({ role }) => (
     </Badge>
 );
 
-// ─── Format date ─────────────────────────────────────────────────────────────
 const formatDate = (iso) => {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('en-US', {
@@ -57,7 +51,6 @@ const formatDate = (iso) => {
     });
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 const AdminDashboard = ({ onNavigate }) => {
     const [stats, setStats]           = useState(null);
     const [recentUsers, setRecentUsers] = useState([]);
@@ -108,7 +101,6 @@ const AdminDashboard = ({ onNavigate }) => {
         loadRecentUsers();
     };
 
-    // Active user percentage (guard against zero)
     const activePercent =
         stats && stats.totalUsers > 0
             ? Math.round((stats.activeUsers / stats.totalUsers) * 100)
@@ -116,7 +108,6 @@ const AdminDashboard = ({ onNavigate }) => {
 
     return (
         <div className="space-y-6">
-            {/* ── Header ─────────────────────────────────────────────────────── */}
             <div className="flex items-start justify-between">
                 <div>
                     <div className="flex items-center space-x-2 mb-1">
@@ -148,7 +139,6 @@ const AdminDashboard = ({ onNavigate }) => {
                 </div>
             </div>
 
-            {/* ── Stats Error ────────────────────────────────────────────────── */}
             {statsError && (
                 <div className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
                     <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" />
@@ -159,7 +149,6 @@ const AdminDashboard = ({ onNavigate }) => {
                 </div>
             )}
 
-            {/* ── Stat Cards ─────────────────────────────────────────────────── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
                 {statsLoading ? (
                     Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)
@@ -199,7 +188,6 @@ const AdminDashboard = ({ onNavigate }) => {
                 )}
             </div>
 
-            {/* ── Active Users Progress Visual ───────────────────────────────── */}
             {!statsLoading && stats && (
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -213,7 +201,6 @@ const AdminDashboard = ({ onNavigate }) => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Active Users bar */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm text-gray-600 dark:text-[#a6adc8]">Active Users</span>
@@ -230,7 +217,6 @@ const AdminDashboard = ({ onNavigate }) => {
                             </p>
                         </div>
 
-                        {/* Avg skills */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm text-gray-600 dark:text-[#a6adc8]">Avg Skills / User</span>
@@ -258,7 +244,6 @@ const AdminDashboard = ({ onNavigate }) => {
                             </p>
                         </div>
 
-                        {/* Avg sessions */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm text-gray-600 dark:text-[#a6adc8]">Avg Sessions / User</span>
@@ -289,7 +274,6 @@ const AdminDashboard = ({ onNavigate }) => {
                 </Card>
             )}
 
-            {/* ── Recent Users ───────────────────────────────────────────────── */}
             <Section
                 title="Recent Users"
                 description="Latest accounts created on the platform"
@@ -303,7 +287,6 @@ const AdminDashboard = ({ onNavigate }) => {
                     </Button>
                 }
             >
-                {/* Error */}
                 {usersError && (
                     <div className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
                         <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0" />
@@ -312,7 +295,6 @@ const AdminDashboard = ({ onNavigate }) => {
                     </div>
                 )}
 
-                {/* Loading skeleton */}
                 {usersLoading && !usersError && (
                     <Card className="overflow-hidden">
                         <div className="divide-y divide-gray-100">
@@ -331,7 +313,6 @@ const AdminDashboard = ({ onNavigate }) => {
                     </Card>
                 )}
 
-                {/* Empty */}
                 {!usersLoading && !usersError && recentUsers.length === 0 && (
                     <Card className="p-12">
                         <div className="text-center">
@@ -344,7 +325,6 @@ const AdminDashboard = ({ onNavigate }) => {
                     </Card>
                 )}
 
-                {/* Data table */}
                 {!usersLoading && !usersError && recentUsers.length > 0 && (
                     <Card className="overflow-hidden">
                         <div className="overflow-x-auto">
@@ -368,7 +348,6 @@ const AdminDashboard = ({ onNavigate }) => {
                                         onClick={() => onNavigate && onNavigate('admin/users')}
                                         className="hover:bg-gray-100 dark:hover:bg-[#1a1a27] transition-colors cursor-pointer"
                                     >
-                                        {/* User cell */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-3">
                                                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
@@ -383,12 +362,10 @@ const AdminDashboard = ({ onNavigate }) => {
                                             </div>
                                         </td>
 
-                                        {/* Role */}
                                         <td className="px-6 py-4">
                                             <RoleBadge role={user.role} />
                                         </td>
 
-                                        {/* Skills */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-1.5 text-sm text-gray-700 dark:text-[#cdd6f4]">
                                                 <Layers className="w-3.5 h-3.5 text-gray-400 dark:text-[#7f849c]" />
@@ -396,7 +373,6 @@ const AdminDashboard = ({ onNavigate }) => {
                                             </div>
                                         </td>
 
-                                        {/* Sessions */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-1.5 text-sm text-gray-700 dark:text-[#cdd6f4]">
                                                 <Clock className="w-3.5 h-3.5 text-gray-400 dark:text-[#7f849c]" />
@@ -404,7 +380,6 @@ const AdminDashboard = ({ onNavigate }) => {
                                             </div>
                                         </td>
 
-                                        {/* Joined */}
                                         <td className="px-6 py-4 text-sm text-gray-500 dark:text-[#7f849c]">
                                             {formatDate(user.createdAt)}
                                         </td>

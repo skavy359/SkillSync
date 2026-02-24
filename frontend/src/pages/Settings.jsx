@@ -20,7 +20,6 @@ const Settings = () => {
         achievementNotifications: true,
     });
 
-    // Load preferences from backend on mount
     useEffect(() => {
         const loadPreferences = async () => {
             try {
@@ -37,7 +36,6 @@ const Settings = () => {
                     achievementNotifications: prefs.achievementNotifications ?? true,
                 });
             } catch (error) {
-                // Fallback to localStorage if API fails
                 const stored = localStorage.getItem('notifPrefs');
                 if (stored) {
                     setNotifPrefs(JSON.parse(stored));
@@ -53,16 +51,13 @@ const Settings = () => {
     const toggleNotif = async (key) => {
         const updated = { ...notifPrefs, [key]: !notifPrefs[key] };
         setNotifPrefs(updated);
-        
-        // Save to localStorage as cache
+
         localStorage.setItem('notifPrefs', JSON.stringify(updated));
-        
-        // Save to backend
+
         try {
             await notificationPreferenceService.updatePreferences(updated);
         } catch (error) {
             console.error('Failed to update preferences:', error);
-            // Show error feedback if needed
         }
     };
 
@@ -75,7 +70,6 @@ const Settings = () => {
         setDeleting(true);
         try {
             await deleteMyAccount();
-            // Clear token and redirect to login
             localStorage.removeItem('token');
             window.location.href = '/login';
         } catch (error) {
@@ -99,13 +93,11 @@ const Settings = () => {
 
     return (
         <div className="space-y-8">
-            {/* Page Header */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Settings</h1>
                 <p className="text-gray-500 dark:text-[#7f849c] mt-1">Manage your preferences and account settings.</p>
             </div>
 
-            {/* Notifications Preferences */}
             <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 dark:border-[#272739]">
                     <h2 className="text-base font-semibold text-gray-900 dark:text-[#cdd6f4]">Notifications</h2>
@@ -137,7 +129,6 @@ const Settings = () => {
                 </div>
             </div>
 
-            {/* Danger Zone - Delete Account */}
             <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-red-200 dark:border-red-500/20 overflow-hidden">
                 <div className="px-6 py-4 border-b border-red-100 dark:border-red-500/10 bg-red-50 dark:bg-red-500/5">
                     <h2 className="text-base font-semibold text-red-900 dark:text-red-400 flex items-center">
@@ -159,7 +150,6 @@ const Settings = () => {
                 </div>
             </div>
 
-            {/* Delete Account Confirmation Modal */}
             {deleteModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div
@@ -228,7 +218,6 @@ const Settings = () => {
                 </div>
             )}
 
-            {/* Legal */}
             <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 dark:border-[#272739]">
                     <h2 className="text-base font-semibold text-gray-900 dark:text-[#cdd6f4]">Legal</h2>
@@ -258,7 +247,6 @@ const Settings = () => {
                 </div>
             </div>
 
-            {/* About */}
             <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 dark:border-[#272739]">
                     <h2 className="text-base font-semibold text-gray-900 dark:text-[#cdd6f4]">About</h2>
@@ -284,7 +272,6 @@ const Settings = () => {
                 </div>
             </div>
 
-            {/* Terms / Privacy Modal */}
             {modalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div
