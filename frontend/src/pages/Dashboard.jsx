@@ -457,7 +457,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                     value={totalSkills}
                     icon={Lightbulb}
                     color="indigo"
-                    subtitle={`${activeSkills} active • ${completedSkills} completed`}
+                    subtitle={`${activeSkills} Active • ${completedSkills} Completed`}
                 />
                 <StatCard
                     title="Active Skills"
@@ -466,7 +466,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                     color="blue"
                     subtitle={recentSkills.length > 0
                         ? recentSkills.slice(0, 2).map(s => s.name).join(', ')
-                        : 'No active skills yet'}
+                        : 'No Active skills yet'}
                 />
                 <StatCard
                     title="Current Streak"

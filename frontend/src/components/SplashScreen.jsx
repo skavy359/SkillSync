@@ -48,7 +48,7 @@ const SplashScreen = ({ onComplete, isAuthenticated }) => {
                 </h1>
 
                 <p className="text-lg sm:text-xl text-indigo-200 mb-12 max-w-md font-light">
-                    Master your skills, track your progress, achieve your goals
+                    Master your skills <br/>Track your progress<br/>Achieve your goals
                 </p>
 
                 <div className="grid grid-cols-3 gap-4 mb-12">
