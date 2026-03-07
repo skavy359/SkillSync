@@ -15,6 +15,8 @@ public class SkillResponse {
     private String status;
     private int totalMinutes;
     private String category;
+    private Long categoryId;
+    private Double estimatedHours;
 
     public SkillResponse(Long id, String name, String level, int progress, String status, int totalMinutes) {
         this.id = id;
@@ -24,6 +26,13 @@ public class SkillResponse {
         this.status = status;
         this.totalMinutes = totalMinutes;
         this.category = null;
+        this.categoryId = null;
+        this.estimatedHours = null;
+    }
+
+    public SkillResponse(Long id, String name, String level, int progress, String status, int totalMinutes, String category) {
+        this(id, name, level, progress, status, totalMinutes);
+        this.category = category;
     }
 
     public SkillResponse() {
