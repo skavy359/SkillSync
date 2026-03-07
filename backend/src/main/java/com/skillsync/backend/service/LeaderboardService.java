@@ -3,15 +3,19 @@ package com.skillsync.backend.service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
+
 import com.skillsync.backend.dto.LeaderboardEntryResponse;
 import com.skillsync.backend.dto.SharingProfileResponse;
 import com.skillsync.backend.model.LearningSession;
+import com.skillsync.backend.model.Role;
 import com.skillsync.backend.model.Skill;
 import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.LearningSessionRepository;
 import com.skillsync.backend.repository.SkillRepository;
 import com.skillsync.backend.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,7 +26,9 @@ public class LeaderboardService {
     private final LearningSessionRepository learningSessionRepository;
 
     public List<LeaderboardEntryResponse> getSkillsLeaderboard() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findAll().stream()
+            .filter(user -> !user.getRole().equals(Role.ADMIN))
+            .toList();
         
         List<LeaderboardEntryResponse> entries = users.stream()
             .map(user -> {
@@ -46,7 +52,9 @@ public class LeaderboardService {
     }
 
     public List<LeaderboardEntryResponse> getSessionsLeaderboard() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findAll().stream()
+            .filter(user -> !user.getRole().equals(Role.ADMIN))
+            .toList();
         
         List<LeaderboardEntryResponse> entries = users.stream()
             .map(user -> {
