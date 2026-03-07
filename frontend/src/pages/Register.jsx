@@ -121,7 +121,6 @@ const Register = ({ onNavigate, onLogin }) => {
         'Track unlimited skills and sessions',
         'Smart burnout detection & alerts',
         'Analytics and learning velocity',
-        'Free forever — no credit card needed',
     ];
 
     return (
@@ -152,10 +151,6 @@ const Register = ({ onNavigate, onLogin }) => {
 
                     <div className="relative space-y-8">
                         <div>
-                            <div className="inline-flex items-center space-x-2 bg-white bg-opacity-15 rounded-full px-4 py-1.5 mb-4">
-                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                                <span className="text-white text-sm font-medium">Free forever plan available</span>
-                            </div>
                             <h1 className="text-4xl font-bold text-white leading-tight mb-4">
                                 Start your learning<br />
                                 <span className="text-indigo-200">journey today.</span>
@@ -178,7 +173,7 @@ const Register = ({ onNavigate, onLogin }) => {
 
                         <div className="bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-2xl p-5">
                             <div className="flex items-center space-x-3 mb-3">
-                                {['AK', 'JL', 'MR', 'SP'].map((avatar, i) => (
+                                {['KS', 'KD', 'RT', 'MS'].map((avatar, i) => (
                                     <div
                                         key={i}
                                         className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold -ml-2 first:ml-0 border-2 border-indigo-700"
@@ -216,7 +211,6 @@ const Register = ({ onNavigate, onLogin }) => {
 
                         <div className="mb-8">
                             <h2 className="text-3xl font-bold text-[#cdd6f4] mb-2">Create your account</h2>
-                            <p className="text-[#9399b2]">Free to start. No credit card required.</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
