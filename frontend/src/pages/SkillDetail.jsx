@@ -22,13 +22,12 @@ import {
     Check
 } from 'lucide-react';
 import { useEffect } from "react";
-import { getMySkills, addSession, getSessions, updateSkillProgress, deleteSkill, updateSkill, assignCategory } from "../services/skillService";
+import { getMySkills, addSession, getSessions, deleteSkill, updateSkill, assignCategory, removeCategory } from "../services/skillService";
 import { updateSession, deleteSession } from "../services/sessionService";
 import { getAllCategories } from "../services/categoryService";
 
 const SkillDetail = ({ skillId, onNavigate }) => {
     const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
-    const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [isDeleteLoading, setIsDeleteLoading] = useState(false);
@@ -40,7 +39,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         date: new Date().toISOString().split('T')[0],
         notes: ''
     });
-    const [progressForm, setProgressForm] = useState({ progress: 0 });
 
     const [skill, setSkill] = useState(null);
     const [sessions, setSessions] = useState([]);
@@ -93,48 +91,33 @@ const SkillDetail = ({ skillId, onNavigate }) => {
 
             setSessions(prev => [newSession, ...prev]);
 
+            // Refetch skill to update progress instantly
+            getMySkills({ size: 100 }).then(data => {
+                const skills = data?.content || [];
+                const found = skills.find(s => String(s.id) === String(skillId));
+                if (found) {
+                    setSkill(found);
+                }
+            }).catch(() => { });
+
             setIsSessionModalOpen(false);
             setSessionForm({
                 duration: '',
                 date: new Date().toISOString().split('T')[0],
                 notes: ''
             });
+            
+            setSuccessMessage('Session logged successfully! Progress updated.');
+            setShowSuccessMessage(true);
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 3000);
         } catch (err) {
             console.error("Add session failed", err);
         }
     };
 
-    const handleUpdateProgress = async (e) => {
-        e.preventDefault();
 
-        try {
-            const newProgress = Number(progressForm.progress);
-            const updated = await updateSkillProgress(skillId, {
-                progress: newProgress
-            });
-
-            setSkill(updated);
-            setIsProgressModalOpen(false);
-
-            if (newProgress >= 100) {
-                setSuccessMessage('🎉 Skill completed successfully! Congratulations!');
-            } else {
-                setSuccessMessage('Progress updated successfully!');
-            }
-            setShowSuccessMessage(true);
-
-            setTimeout(() => {
-                const mainElement = document.querySelector('main');
-                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 0);
-            
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 3000);
-        } catch (err) {
-            console.error("Update progress failed", err);
-        }
-    };
 
     const handleEditSkill = async (e) => {
         e.preventDefault();
@@ -150,7 +133,15 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 updated.categoryId = editForm.categoryId;
                 setSuccessMessage('Skill updated and category assigned successfully!');
             } else {
-                setSuccessMessage('Skill updated successfully!');
+                // Empty categoryId means "Others" - no category assigned
+                if (skill.categoryId) {
+                    // User is removing the category
+                    updated.categoryId = null;
+                    updated.category = null;
+                    setSuccessMessage('Skill updated and category removed!');
+                } else {
+                    setSuccessMessage('Skill updated successfully!');
+                }
             }
 
             setSkill(updated);
@@ -391,14 +382,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                         </div>
                     </div>
                     <ProgressBar progress={skill.progress} size="lg" />
-                    <Button 
-                        variant="secondary" 
-                        size="sm" 
-                        className="mt-4"
-                        onClick={() => setIsProgressModalOpen(true)}
-                    >
-                        Update Progress
-                    </Button>
                 </div>
             </Card>
 
@@ -559,48 +542,7 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </form>
             </Modal>
 
-            <Modal
-                isOpen={isProgressModalOpen}
-                onClose={() => setIsProgressModalOpen(false)}
-                title="Update Skill Progress"
-                footer={
-                    <>
-                        <Button variant="secondary" onClick={() => setIsProgressModalOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button variant="primary" onClick={(e) => {
-                            e.preventDefault();
-                            handleUpdateProgress(e);
-                        }}>
-                            Update Progress
-                        </Button>
-                    </>
-                }
-            >
-                <form id="updateProgressForm" onSubmit={handleUpdateProgress} className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-[#a6adc8]">
-                            Progress: {progressForm.progress}%
-                        </label>
-                        <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={progressForm.progress}
-                            onChange={(e) => setProgressForm({ progress: Number(e.target.value) })}
-                            className="w-full h-2 bg-gray-200 dark:bg-[#313244] rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-400"
-                        />
-                    </div>
-                    <Input
-                        label="Or enter percentage"
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={progressForm.progress}
-                        onChange={(e) => setProgressForm({ progress: Math.min(100, Math.max(0, Number(e.target.value))) })}
-                    />
-                </form>
-            </Modal>
+
 
             <Modal
                 isOpen={isEditModalOpen}
@@ -611,6 +553,32 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                         <Button variant="secondary" onClick={() => setIsEditModalOpen(false)} disabled={isEditLoading}>
                             Cancel
                         </Button>
+                        {skill?.categoryId && (
+                            <Button 
+                                variant="danger" 
+                                onClick={async () => {
+                                    setIsEditLoading(true);
+                                    try {
+                                        await removeCategory(skillId);
+                                        setSkill({ ...skill, categoryId: null, category: null });
+                                        setEditForm({ name: skill.name, categoryId: '' });
+                                        setIsEditModalOpen(false);
+                                        setSuccessMessage('Category removed successfully!');
+                                        setShowSuccessMessage(true);
+                                        setTimeout(() => setShowSuccessMessage(false), 3000);
+                                    } catch (err) {
+                                        console.error('Failed to remove category', err);
+                                        alert('Failed to remove category. Please try again.');
+                                    } finally {
+                                        setIsEditLoading(false);
+                                    }
+                                }}
+                                disabled={isEditLoading}
+                                size="sm"
+                            >
+                                Remove Category
+                            </Button>
+                        )}
                         <Button variant="primary" onClick={(e) => {
                             e.preventDefault();
                             handleEditSkill(e);
@@ -634,7 +602,7 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                         value={editForm.categoryId}
                         onChange={(e) => setEditForm({ ...editForm, categoryId: e.target.value })}
                         options={editCategories.map(cat => ({ value: cat.id, label: cat.name }))}
-                        placeholder="Select a category"
+                        placeholder="Select a category or leave empty"
                     />
                 </form>
             </Modal>
