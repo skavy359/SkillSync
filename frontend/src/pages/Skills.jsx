@@ -6,10 +6,9 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
-import FormRow from '../components/ui/FormRow';
-import { Plus, Search, Check, Tag } from 'lucide-react';
+import { Plus, Search, Check, Tag, Map } from 'lucide-react';
 import { useEffect } from "react"
-import { addSkill, getMySkills, assignCategory } from "../services/skillService"
+import { addSkill, getMySkills, assignCategory, removeCategory } from "../services/skillService"
 import { getAllCategories } from "../services/categoryService"
 
 const Skills = ({ onNavigate, onSelectSkill }) => {
@@ -20,9 +19,9 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
-        level: 'Beginner',
         categoryId: '',
-        description: ''
+        description: '',
+        estimatedHours: ''
     });
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,25 +60,39 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
     };
 
     const handleAssignCategory = async () => {
-        if (!assignCategoryForm.categoryId || !selectedSkillForCategory) return;
+        if (!selectedSkillForCategory) return;
         
         setIsAssignLoading(true);
         try {
-            await assignCategory(selectedSkillForCategory.id, assignCategoryForm.categoryId);
-            setInitialSkills(prev => prev.map(s => {
-                if (s.id === selectedSkillForCategory.id) {
-                    const category = categories.find(c => c.id === parseInt(assignCategoryForm.categoryId));
-                    return { ...s, category: category?.name, categoryId: parseInt(assignCategoryForm.categoryId) };
-                }
-                return s;
-            }));
-            setIsAssignCategoryModalOpen(false);
-            setAssignCategoryForm({ categoryId: '' });
-            setSelectedSkillForCategory(null);
-            setShowAssignSuccessMessage(true);
+            const categoryId = assignCategoryForm.categoryId;
+            if (categoryId) {
+                // Assign a category
+                await assignCategory(selectedSkillForCategory.id, categoryId);
+                setInitialSkills(prev => prev.map(s => {
+                    if (s.id === selectedSkillForCategory.id) {
+                        const category = categories.find(c => c.id === parseInt(categoryId));
+                        return { ...s, category: category?.name, categoryId: parseInt(categoryId) };
+                    }
+                    return s;
+                }));
+                setShowAssignSuccessMessage(true);
+            } else {
+                // Remove category
+                await removeCategory(selectedSkillForCategory.id);
+                setInitialSkills(prev => prev.map(s => {
+                    if (s.id === selectedSkillForCategory.id) {
+                        return { ...s, category: null, categoryId: null };
+                    }
+                    return s;
+                }));
+                setShowAssignSuccessMessage(true);
+            }
             setTimeout(() => {
                 setShowAssignSuccessMessage(false);
             }, 3000);
+            setIsAssignCategoryModalOpen(false);
+            setAssignCategoryForm({ categoryId: '' });
+            setSelectedSkillForCategory(null);
         } catch (err) {
             console.error("Assign category failed", err);
             alert('Failed to assign category. Please try again.');
@@ -99,8 +112,8 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
         try {
             const newSkill = await addSkill({
                 name: formData.name,
-                level: formData.level.toUpperCase(),
-                categoryId: formData.categoryId ? parseInt(formData.categoryId) : null
+                categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
+                estimatedHours: formData.estimatedHours ? parseFloat(formData.estimatedHours) : null
             });
 
             setInitialSkills(prev => [...prev, newSkill]);
@@ -108,9 +121,9 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
             setIsModalOpen(false);
             setFormData({
                 name: '',
-                level: 'Beginner',
                 categoryId: '',
-                description: ''
+                description: '',
+                estimatedHours: ''
             });
             setShowSuccessMessage(true);
             setTimeout(() => {
@@ -198,6 +211,25 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                             <SkillCard
                                 skill={skill}
                                 onClick={() => handleSkillClick(skill.id)}
+                                onRemoveCategory={async (skillId) => {
+                                    setIsAssignLoading(true);
+                                    try {
+                                        await removeCategory(skillId);
+                                        setInitialSkills(prev => prev.map(s => {
+                                            if (s.id === skillId) {
+                                                return { ...s, category: null, categoryId: null };
+                                            }
+                                            return s;
+                                        }));
+                                        setShowAssignSuccessMessage(true);
+                                        setTimeout(() => setShowAssignSuccessMessage(false), 3000);
+                                    } catch (err) {
+                                        console.error('Failed to remove category', err);
+                                        alert('Failed to remove category. Please try again.');
+                                    } finally {
+                                        setIsAssignLoading(false);
+                                    }
+                                }}
                             />
                             <button
                                 onClick={() => {
@@ -247,23 +279,22 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
                     />
+                    <Select
+                        label="Category (Optional)"
+                        value={formData.categoryId}
+                        onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                        options={categories.map(cat => ({ value: cat.id, label: cat.name }))}
+                        placeholder="Select a category or leave empty"
+                    />
 
-                    <FormRow columns={2} gap={4}>
-                        <Select
-                            label="Level"
-                            value={formData.level}
-                            onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                            options={['Beginner', 'Intermediate', 'Advanced']}
-                        />
-
-                        <Select
-                            label="Category"
-                            value={formData.categoryId}
-                            onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                            options={categories.map(cat => ({ value: cat.id, label: cat.name }))}
-                            placeholder="Select a category"
-                        />
-                    </FormRow>
+                    <Input
+                        label="Estimated Hours"
+                        type="number"
+                        placeholder="e.g., 50"
+                        value={formData.estimatedHours}
+                        onChange={(e) => setFormData({ ...formData, estimatedHours: e.target.value })}
+                    />
+                    <p className="text-xs text-gray-400 dark:text-[#585b70] -mt-2">Progress will auto-update based on logged session hours</p>
                 </form>
             </Modal>
 
@@ -288,10 +319,31 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                         >
                             Cancel
                         </Button>
+                        {/* {selectedSkillForCategory?.categoryId && (
+                            <Button 
+                                variant="ghost" 
+                                onClick={() => {
+                                    setInitialSkills(prev => prev.map(s => {
+                                        if (s.id === selectedSkillForCategory.id) {
+                                            return { ...s, category: null, categoryId: null };
+                                        }
+                                        return s;
+                                    }));
+                                    setIsAssignCategoryModalOpen(false);
+                                    setAssignCategoryForm({ categoryId: '' });
+                                    setSelectedSkillForCategory(null);
+                                    setShowAssignSuccessMessage(true);
+                                    setTimeout(() => setShowAssignSuccessMessage(false), 3000);
+                                }}
+                                disabled={isAssignLoading}
+                            >
+                                Remove Category
+                            </Button>
+                        )} */}
                         <Button 
                             variant="primary" 
                             onClick={handleAssignCategory}
-                            disabled={isAssignLoading || !assignCategoryForm.categoryId}
+                            disabled={isAssignLoading}
                         >
                             {isAssignLoading ? 'Assigning...' : 'Assign'}
                         </Button>
@@ -307,7 +359,7 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                         value={assignCategoryForm.categoryId}
                         onChange={(e) => setAssignCategoryForm({ categoryId: e.target.value })}
                         options={categories.map(cat => ({ value: cat.id, label: cat.name }))}
-                        placeholder="Choose a category"
+                        placeholder="Choose a category or leave empty"
                     />
                 </div>
             </Modal>
