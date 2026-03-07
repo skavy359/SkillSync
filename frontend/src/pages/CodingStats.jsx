@@ -1,14 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Code2, Github, Trophy, Star, GitFork, Settings2, Link2, Check, AlertCircle,
-  Loader2, ExternalLink, Award, TrendingUp, Users, BarChart3, X, RefreshCw,
-  Flame, Zap, Target, BookOpen, ChevronRight
+  Github, Trophy, Star, GitFork, Settings2, Link2, Check, AlertCircle,
+  Loader2, ExternalLink, Award, Users, BarChart3, X, RefreshCw,
+  Zap, Target, BookOpen
 } from 'lucide-react';
 import api from '../services/api';
 
-/* ═══════════════════════════════════════════
-   PLATFORM CONFIGS
-   ═══════════════════════════════════════════ */
 const PLATFORMS = [
   { key: 'leetcodeUsername', label: 'LeetCode', icon: '🟡', color: '#FFA116', bg: 'from-amber-500 to-orange-500', link: (u) => `https://leetcode.com/u/${u}` },
   { key: 'codeforcesUsername', label: 'Codeforces', icon: '🔵', color: '#1890FF', bg: 'from-blue-500 to-cyan-500', link: (u) => `https://codeforces.com/profile/${u}` },
@@ -16,9 +13,6 @@ const PLATFORMS = [
   { key: 'hackerrankUsername', label: 'HackerRank', icon: '💚', color: '#00EA64', bg: 'from-emerald-500 to-green-400', link: (u) => `https://www.hackerrank.com/profile/${u}` },
 ];
 
-/* ═══════════════════════════════════════════
-   API FETCHERS (Now proxied through backend)
-   ═══════════════════════════════════════════ */
 const fetchLeetCodeStats = async (username) => {
   if (!username) return null;
   try {
@@ -67,14 +61,9 @@ const fetchGitHubStats = async (username) => {
 
 const fetchHackerRankStats = async (username) => {
   if (!username) return null;
-  // HackerRank doesn't have a CORS-friendly public API
-  // We return a placeholder with the linked username
   return { platform: 'hackerrank', username, linked: true };
 };
 
-/* ═══════════════════════════════════════════
-   MINI RING CHART
-   ═══════════════════════════════════════════ */
 const RingChart = ({ value, max, color, size = 80, label }) => {
   const pct = max > 0 ? (value / max) * 100 : 0;
   const r = (size - 8) / 2;
@@ -92,9 +81,6 @@ const RingChart = ({ value, max, color, size = 80, label }) => {
   );
 };
 
-/* ═══════════════════════════════════════════
-   PROBLEM SOLVED CARD (visually appealing)
-   ═══════════════════════════════════════════ */
 const ProblemSolvedCard = ({ total, label, icon, gradient, rings }) => (
   <div className={`relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br ${gradient} text-white shadow-lg`}>
     <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/10 -mr-8 -mt-8" />
@@ -126,9 +112,6 @@ const ProblemSolvedCard = ({ total, label, icon, gradient, rings }) => (
   </div>
 );
 
-/* ═══════════════════════════════════════════
-   HEATMAP — LAST 6 MONTHS
-   ═══════════════════════════════════════════ */
 const ContributionHeatmap = ({ allStats }) => {
   const today = new Date();
   const startDate = new Date(today);
@@ -137,14 +120,12 @@ const ContributionHeatmap = ({ allStats }) => {
   const merged = {};
   allStats.forEach((stat) => {
     if (!stat) return;
-    // LeetCode uses unix timestamps
     if (stat.submissionCalendar) {
       Object.entries(stat.submissionCalendar).forEach(([ts, count]) => {
         const d = new Date(parseInt(ts) * 1000).toISOString().split('T')[0];
         merged[d] = (merged[d] || 0) + count;
       });
     }
-    // Other platforms use date strings
     if (stat.calendar) {
       Object.entries(stat.calendar).forEach(([d, count]) => {
         merged[d] = (merged[d] || 0) + count;
@@ -153,7 +134,6 @@ const ContributionHeatmap = ({ allStats }) => {
   });
 
   const maxCount = Math.max(1, ...Object.values(merged));
-  // Build grid
   const days = [];
   let cur = new Date(startDate);
   while (cur <= today) {
@@ -162,7 +142,6 @@ const ContributionHeatmap = ({ allStats }) => {
     cur.setDate(cur.getDate() + 1);
   }
 
-  // Group by weeks
   const align = new Date(startDate);
   align.setDate(align.getDate() - align.getDay());
   const weeks = [];
@@ -189,10 +168,8 @@ const ContributionHeatmap = ({ allStats }) => {
 
   const totalContributions = Object.values(merged).reduce((s, c) => s + c, 0);
 
-  // Tooltip state
   const [tooltip, setTooltip] = useState(null);
 
-  // Month labels
   const months = [];
   let lastMonth = -1;
   weeks.forEach((week, i) => {
@@ -203,7 +180,6 @@ const ContributionHeatmap = ({ allStats }) => {
     }
   });
 
-  // Calculate cell size to fill the container
   const cellSize = Math.max(10, Math.floor((typeof window !== 'undefined' ? Math.min(window.innerWidth - 200, 900) : 700) / (weeks.length + 2)));
   const gap = Math.max(2, Math.floor(cellSize * 0.2));
 
@@ -225,7 +201,6 @@ const ContributionHeatmap = ({ allStats }) => {
         </div>
       </div>
       <div className="relative overflow-x-auto">
-        {/* Month labels */}
         <div className="flex ml-8" style={{ gap: `${gap}px` }}>
           {weeks.map((_, wi) => {
             const month = months.find(m => m.index === wi);
@@ -272,9 +247,6 @@ const ContributionHeatmap = ({ allStats }) => {
   );
 };
 
-/* ═══════════════════════════════════════════
-   DSA TOPIC BAR CHART (LeetCode Tag Stats)
-   ═══════════════════════════════════════════ */
 const DSATopicChart = ({ tagStats }) => {
   if (!tagStats || tagStats.length === 0) return null;
   const max = Math.max(...tagStats.map(t => t.problemsSolved));
@@ -299,11 +271,7 @@ const DSATopicChart = ({ tagStats }) => {
   );
 };
 
-/* ═══════════════════════════════════════════
-   PLATFORM BREAKDOWN CARDS
-   ═══════════════════════════════════════════ */
 const LeetCodeCard = ({ data }) => {
-  // Debug: Log data status
   console.log('LeetCodeCard rendered with data:', data);
   
   if (!data) {
@@ -400,9 +368,6 @@ const HackerRankCard = ({ data }) => {
   );
 };
 
-/* ═══════════════════════════════════════════
-   TOP REPOS
-   ═══════════════════════════════════════════ */
 const TopRepos = ({ repos }) => {
   if (!repos || repos.length === 0) return null;
   return (
@@ -432,16 +397,12 @@ const TopRepos = ({ repos }) => {
   );
 };
 
-/* ═══════════════════════════════════════════
-   CONTEST RATING + STREAK CARDS
-   ═══════════════════════════════════════════ */
 const StatsOverview = ({ leetcode, codeforces }) => {
   const items = [];
   if (leetcode?.contestRating > 0) items.push({ label: 'LC Contest Rating', value: leetcode.contestRating, icon: <Zap className="w-4 h-4" />, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10' });
   if (leetcode?.contestsAttended > 0) items.push({ label: 'LC Contests', value: leetcode.contestsAttended, icon: <Trophy className="w-4 h-4" />, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10' });
   if (codeforces?.rating > 0) items.push({ label: 'CF Rating', value: codeforces.rating, icon: <Award className="w-4 h-4" />, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-500/10' });
 
-  // Total problems solved across all platforms
   let total = 0;
   [leetcode, codeforces].forEach(s => { if (s?.totalSolved) total += s.totalSolved; });
 
@@ -468,9 +429,6 @@ const StatsOverview = ({ leetcode, codeforces }) => {
   );
 };
 
-/* ═══════════════════════════════════════════
-   PLATFORM SETUP MODAL
-   ═══════════════════════════════════════════ */
 const PlatformModal = ({ open, onClose, profile, onSave }) => {
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
@@ -522,9 +480,6 @@ const PlatformModal = ({ open, onClose, profile, onSave }) => {
   );
 };
 
-/* ═══════════════════════════════════════════
-   MAIN COMPONENT
-   ═══════════════════════════════════════════ */
 const CodingStats = () => {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({});
@@ -602,8 +557,7 @@ const CodingStats = () => {
       const statsMap = {};
       const promises = entries.slice(0, 20).map(async (entry) => {
         let totalSolved = 0;
-        
-        // Use backend endpoints instead of directly calling external APIs
+
         if (entry.leetcodeUsername) {
           try {
             const r = await api.get(`/coding-profile/stats/leetcode/${entry.leetcodeUsername}`);
@@ -625,8 +579,6 @@ const CodingStats = () => {
             console.warn(`Failed to fetch Codeforces for ${entry.codeforcesUsername}:`, e.message);
           }
         }
-        
-
 
         statsMap[entry.userId] = { totalSolved };
       });
@@ -654,7 +606,6 @@ const CodingStats = () => {
 
   return (
     <div className="space-y-6">
-      {/* Toast */}
       {toast && (
         <div className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium flex items-center gap-2 ${toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'
           }`} style={{ animation: 'slideInRight 0.3s ease' }}>
@@ -663,7 +614,6 @@ const CodingStats = () => {
         </div>
       )}
 
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Coding Stats</h1>
@@ -683,7 +633,6 @@ const CodingStats = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 bg-gray-100 dark:bg-[#11111b] rounded-xl p-1 w-fit">
         {[
           { id: 'stats', label: 'Stats & Heatmap', icon: BarChart3 },
@@ -717,7 +666,6 @@ const CodingStats = () => {
             </div>
           ) : (
             <>
-              {/* Platform Badges */}
               <div className="flex gap-2 flex-wrap">
                 {PLATFORMS.filter(p => profile[p.key]).map(p => (
                   <a key={p.key} href={p.link(profile[p.key])} target="_blank" rel="noopener noreferrer"
@@ -733,10 +681,8 @@ const CodingStats = () => {
                 </div>
               )}
 
-              {/* Overview: Total Solved + Contest Ratings */}
               <StatsOverview leetcode={stats.leetcode} codeforces={stats.codeforces} />
 
-              {/* Platform Breakdown Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 <LeetCodeCard data={stats.leetcode} />
                 <CodeforcesCard data={stats.codeforces} />
@@ -745,13 +691,10 @@ const CodingStats = () => {
                 <HackerRankCard data={stats.hackerrank} />
               </div>
 
-              {/* DSA Topic Analysis */}
               <DSATopicChart tagStats={stats.leetcode?.tagStats} />
 
-              {/* Top Repos */}
               <TopRepos repos={stats.github?.topRepos} />
 
-              {/* Heatmap */}
               <ContributionHeatmap allStats={Object.values(stats).filter(Boolean)} />
             </>
           )}

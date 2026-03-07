@@ -41,9 +41,9 @@ const testimonials = [
     },
     {
         text: "SkillSync's category analytics helped our team track learning across different domains. It's become essential for our growth plans.",
-        name: "Rudra Sharma",
+        name: "Khushi Dhir",
         role: "Product Manager",
-        initials: "RS",
+        initials: "KD",
         gradient: "from-amber-400 to-red-500"
     }
 ];

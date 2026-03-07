@@ -1,12 +1,9 @@
 package com.skillsync.backend.service;
 
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.skillsync.backend.dto.GroupActivityDTO;
 import com.skillsync.backend.model.GroupActivity;
 import com.skillsync.backend.model.GroupActivity.ActivityType;
@@ -15,7 +12,6 @@ import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.GroupActivityRepository;
 import com.skillsync.backend.repository.StudyGroupRepository;
 import com.skillsync.backend.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

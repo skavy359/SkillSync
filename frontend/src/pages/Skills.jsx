@@ -66,7 +66,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
         try {
             const categoryId = assignCategoryForm.categoryId;
             if (categoryId) {
-                // Assign a category
                 await assignCategory(selectedSkillForCategory.id, categoryId);
                 setInitialSkills(prev => prev.map(s => {
                     if (s.id === selectedSkillForCategory.id) {
@@ -77,7 +76,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                 }));
                 setShowAssignSuccessMessage(true);
             } else {
-                // Remove category
                 await removeCategory(selectedSkillForCategory.id);
                 setInitialSkills(prev => prev.map(s => {
                     if (s.id === selectedSkillForCategory.id) {
@@ -319,27 +317,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                         >
                             Cancel
                         </Button>
-                        {/* {selectedSkillForCategory?.categoryId && (
-                            <Button 
-                                variant="ghost" 
-                                onClick={() => {
-                                    setInitialSkills(prev => prev.map(s => {
-                                        if (s.id === selectedSkillForCategory.id) {
-                                            return { ...s, category: null, categoryId: null };
-                                        }
-                                        return s;
-                                    }));
-                                    setIsAssignCategoryModalOpen(false);
-                                    setAssignCategoryForm({ categoryId: '' });
-                                    setSelectedSkillForCategory(null);
-                                    setShowAssignSuccessMessage(true);
-                                    setTimeout(() => setShowAssignSuccessMessage(false), 3000);
-                                }}
-                                disabled={isAssignLoading}
-                            >
-                                Remove Category
-                            </Button>
-                        )} */}
                         <Button 
                             variant="primary" 
                             onClick={handleAssignCategory}

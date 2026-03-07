@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.skillsync.backend.dto.AddSkillRequest;
 import com.skillsync.backend.dto.AdminUserResponse;
 import com.skillsync.backend.dto.CategoryResponse;
@@ -520,17 +518,14 @@ public class UserService {
         String categoryName = skill.getCategory() != null ? skill.getCategory().getName() : null;
         Long categoryId = skill.getCategory() != null ? skill.getCategory().getId() : null;
 
-        // Auto-calculate progress from sessions vs estimated hours
         int progress = skill.getProgress();
         if (skill.getEstimatedHours() != null && skill.getEstimatedHours() > 0) {
             double hoursLogged = totalMinutes / 60.0;
             progress = (int) Math.min(100, Math.round((hoursLogged / skill.getEstimatedHours()) * 100));
         }
 
-        // Auto-calculate level based on progress
         String level = calculateLevelFromProgress(progress);
-        
-        // Auto-mark as COMPLETED if progress is 100%
+
         SkillStatus status = skill.getStatus();
         if (progress >= 100) {
             status = SkillStatus.COMPLETED;
@@ -1252,7 +1247,6 @@ public class UserService {
 
                     Skill skill = goal.getSkill();
 
-                    // Calculate progress dynamically from sessions vs estimated hours (same as mapSkill)
                     int totalMinutes = learningSessionRepository
                             .sumDurationMinutesBySkill(skill);
 

@@ -10,7 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,8 +39,6 @@ public class ForumService {
         this.userRepository = userRepository;
         this.skillRepository = skillRepository;
     }
-
-    // --- Posts ---
 
     @Transactional
     public PostResponse createPost(CreatePostRequest request) {
@@ -84,7 +81,6 @@ public class ForumService {
             postPage = postRepository.findAllByOrderByCreatedAtDesc(pageable);
         }
 
-        // Batch fetch upvote status for current user
         List<ForumPost> posts = postPage.getContent();
         Set<Long> upvotedPostIds = postUpvoteRepository.findByUserAndPostIn(user, posts)
                 .stream()
@@ -131,8 +127,6 @@ public class ForumService {
         postRepository.delete(post);
     }
 
-    // --- Replies ---
-
     @Transactional
     public ReplyResponse addReply(Long postId, CreateReplyRequest request) {
         User user = getCurrentUser();
@@ -163,8 +157,6 @@ public class ForumService {
 
         replyRepository.delete(reply);
     }
-
-    // --- Upvotes ---
 
     @Transactional
     public PostResponse togglePostUpvote(Long postId) {
@@ -218,8 +210,6 @@ public class ForumService {
         return mapReply(reply, nowUpvoted);
     }
 
-    // --- Accept answer ---
-
     @Transactional
     public ReplyResponse acceptAnswer(Long replyId) {
         User user = getCurrentUser();
@@ -231,14 +221,12 @@ public class ForumService {
             throw new RuntimeException("Only the post author can accept answers");
         }
 
-        // Unaccept all other replies first
         List<ForumReply> allReplies = replyRepository.findByPostOrderByCreatedAtAsc(post);
         for (ForumReply r : allReplies) {
             r.setAcceptedAnswer(false);
         }
         replyRepository.saveAll(allReplies);
 
-        // Toggle: if it was already accepted, leave it unaccepted
         boolean wasAccepted = reply.isAcceptedAnswer();
         reply.setAcceptedAnswer(!wasAccepted);
         ForumReply saved = replyRepository.save(reply);
@@ -246,8 +234,6 @@ public class ForumService {
         boolean upvoted = replyUpvoteRepository.existsByUserAndReply(user, reply);
         return mapReply(saved, upvoted);
     }
-
-    // --- Helpers ---
 
     private PostResponse mapPost(ForumPost post, User currentUser) {
         boolean upvoted = postUpvoteRepository.existsByUserAndPost(currentUser, post);

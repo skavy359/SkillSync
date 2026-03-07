@@ -5,7 +5,6 @@ import com.skillsync.backend.service.ForumService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 
@@ -14,12 +13,9 @@ import java.util.Map;
 public class ForumController {
 
     private final ForumService forumService;
-
     public ForumController(ForumService forumService) {
         this.forumService = forumService;
     }
-
-    // --- Posts ---
 
     @PostMapping("/posts")
     public ResponseEntity<PostResponse> createPost(@RequestBody CreatePostRequest request) {
@@ -48,8 +44,6 @@ public class ForumController {
         return ResponseEntity.ok(Map.of("message", "Post deleted"));
     }
 
-    // --- Replies ---
-
     @GetMapping("/posts/{postId}/replies")
     public ResponseEntity<List<ReplyResponse>> getReplies(@PathVariable Long postId) {
         return ResponseEntity.ok(forumService.getReplies(postId));
@@ -72,8 +66,6 @@ public class ForumController {
         return ResponseEntity.ok(Map.of("message", "Reply deleted"));
     }
 
-    // --- Upvotes ---
-
     @PostMapping("/posts/{id}/upvote")
     public ResponseEntity<PostResponse> togglePostUpvote(@PathVariable Long id) {
         return ResponseEntity.ok(forumService.togglePostUpvote(id));
@@ -83,8 +75,6 @@ public class ForumController {
     public ResponseEntity<ReplyResponse> toggleReplyUpvote(@PathVariable Long id) {
         return ResponseEntity.ok(forumService.toggleReplyUpvote(id));
     }
-
-    // --- Accept Answer ---
 
     @PutMapping("/replies/{id}/accept")
     public ResponseEntity<ReplyResponse> acceptAnswer(@PathVariable Long id) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus, X, Clock, BookOpen, Check, Trash2, Edit3, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Clock, BookOpen, Check, Trash2, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
 import { getStudyEvents, createStudyEvent, updateStudyEventStatus, deleteStudyEvent } from '../services/studyPlannerService';
 
 const COLORS = [
@@ -43,7 +43,6 @@ const StudyPlanner = () => {
   const [skills, setSkills] = useState([]);
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Form state
   const [formTitle, setFormTitle] = useState('');
   const [formDesc, setFormDesc] = useState('');
   const [formDate, setFormDate] = useState('');
@@ -71,7 +70,6 @@ const StudyPlanner = () => {
     try {
       const data = await getStudyEvents(currentMonth + 1, currentYear);
       const eventList = Array.isArray(data) ? data : [];
-      // Auto-mark past PLANNED events as MISSED
       const now = new Date();
       const updated = [];
       for (const ev of eventList) {
@@ -98,7 +96,6 @@ const StudyPlanner = () => {
     try {
       const api = (await import('../services/api')).default;
       const res = await api.get('/skills', { params: { size: 100 } });
-      // Response structure: res.data.data = { content: [...], pageable: ... }
       const skillList = res.data?.data?.content || res.data?.content || [];
       console.log('Fetched skills:', skillList);
       setSkills(Array.isArray(skillList) ? skillList : []);
@@ -124,7 +121,6 @@ const StudyPlanner = () => {
     setSelectedDate(today);
   };
 
-  // Calendar grid
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const calendarDays = [];
@@ -196,14 +192,12 @@ const StudyPlanner = () => {
     }
   };
 
-  // Stats
   const totalPlanned = events.filter(e => e.status === 'PLANNED').length;
   const totalCompleted = events.filter(e => e.status === 'COMPLETED').length;
   const totalMissed = events.filter(e => e.status === 'MISSED').length;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Study Planner</h1>
@@ -217,10 +211,8 @@ const StudyPlanner = () => {
         </button>
       </div>
 
-      {/* Success Message */}
       {successMsg && <SuccessToast message={successMsg} />}
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: 'Planned', count: totalPlanned, color: 'from-blue-500 to-blue-600', icon: CalendarIcon },
@@ -240,9 +232,7 @@ const StudyPlanner = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar */}
         <div className="lg:col-span-2 bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-5">
-          {/* Month nav */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <button onClick={goToPrevMonth} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#313244] transition-colors">
@@ -260,14 +250,12 @@ const StudyPlanner = () => {
             </button>
           </div>
 
-          {/* Day headers */}
           <div className="grid grid-cols-7 mb-2">
             {DAYS.map(d => (
               <div key={d} className="text-center text-xs font-semibold text-gray-400 dark:text-[#585b70] py-2">{d}</div>
             ))}
           </div>
 
-          {/* Calendar grid */}
           <div className="grid grid-cols-7 gap-px bg-gray-100 dark:bg-[#313244] rounded-xl overflow-hidden">
             {calendarDays.map((day, i) => {
               const dayEvents = getEventsForDay(day);
@@ -314,7 +302,6 @@ const StudyPlanner = () => {
           </div>
         </div>
 
-        {/* Sidebar — selected day events */}
         <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4]">
@@ -369,7 +356,6 @@ const StudyPlanner = () => {
                         {ev.description && (
                           <p className="text-xs text-gray-400 dark:text-[#585b70] mt-1 line-clamp-2">{ev.description}</p>
                         )}
-                        {/* Actions */}
                         <div className="flex items-center gap-2 mt-2">
                           {ev.status === 'PLANNED' && (
                             <>
@@ -404,7 +390,6 @@ const StudyPlanner = () => {
         </div>
       </div>
 
-      {/* Create Event Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
           <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] w-full max-w-md p-6" onClick={e => e.stopPropagation()}>

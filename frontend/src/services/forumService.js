@@ -1,7 +1,5 @@
 import api from './api';
 
-// --- Posts ---
-
 export const createPost = async (data) => {
   const res = await api.post('/forum/posts', data);
   return res.data;
@@ -22,8 +20,6 @@ export const deletePost = async (id) => {
   return res.data;
 };
 
-// --- Replies ---
-
 export const getReplies = async (postId) => {
   const res = await api.get(`/forum/posts/${postId}/replies`);
   return res.data;
@@ -39,8 +35,6 @@ export const deleteReply = async (postId, replyId) => {
   return res.data;
 };
 
-// --- Upvotes ---
-
 export const togglePostUpvote = async (postId) => {
   const res = await api.post(`/forum/posts/${postId}/upvote`);
   return res.data;
@@ -50,8 +44,6 @@ export const toggleReplyUpvote = async (replyId) => {
   const res = await api.post(`/forum/replies/${replyId}/upvote`);
   return res.data;
 };
-
-// --- Accept Answer ---
 
 export const acceptAnswer = async (replyId) => {
   const res = await api.put(`/forum/replies/${replyId}/accept`);

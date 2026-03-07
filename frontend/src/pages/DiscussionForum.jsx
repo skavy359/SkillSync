@@ -110,7 +110,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
@@ -141,7 +140,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
         </div>
       )}
 
-      {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <form onSubmit={handleSearch} className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -181,7 +179,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
         </div>
       </div>
 
-      {/* Posts list */}
       {loading ? (
         <div className="text-center py-16">
           <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto" />
@@ -205,7 +202,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
                 className="w-full text-left bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] p-5 hover:shadow-md hover:border-purple-200 dark:hover:border-purple-500/30 transition-all duration-200 group"
               >
                 <div className="flex items-start gap-4">
-                  {/* Upvote column */}
                   <div className="flex flex-col items-center shrink-0 min-w-[44px]">
                     <div
                       onClick={(e) => handleUpvote(e, post.id)}
@@ -224,7 +220,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
                     </span>
                   </div>
 
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1.5">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${tagInfo.bg}`}>
@@ -261,7 +256,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-2">
           {Array.from({ length: totalPages }, (_, i) => (
@@ -280,7 +274,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
         </div>
       )}
 
-      {/* New Post Modal */}
       {showNewPost && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] w-full max-w-xl shadow-2xl">
@@ -291,7 +284,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
               </button>
             </div>
             <div className="p-5 space-y-4">
-              {/* Tag selection */}
               <div>
                 <label className="block text-xs font-medium text-gray-500 dark:text-[#6c7086] mb-2">Category</label>
                 <div className="flex gap-2 flex-wrap">

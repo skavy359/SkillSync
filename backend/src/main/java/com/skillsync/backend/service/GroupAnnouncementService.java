@@ -2,12 +2,10 @@ package com.skillsync.backend.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.skillsync.backend.dto.CreateAnnouncementRequest;
 import com.skillsync.backend.dto.GroupAnnouncementDTO;
 import com.skillsync.backend.model.GroupActivity.ActivityType;
@@ -20,7 +18,6 @@ import com.skillsync.backend.repository.GroupAnnouncementRepository;
 import com.skillsync.backend.repository.GroupMembershipRepository;
 import com.skillsync.backend.repository.StudyGroupRepository;
 import com.skillsync.backend.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,7 +39,6 @@ public class GroupAnnouncementService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Verify user is ADMIN
         GroupMembership membership = membershipRepository.findByGroupIdAndUserId(groupId, userId)
             .orElseThrow(() -> new RuntimeException("Not a member of this group"));
 
@@ -60,7 +56,6 @@ public class GroupAnnouncementService {
         announcement = announcementRepository.save(announcement);
         log.info("Announcement {} created by user {} in group {}", announcement.getId(), userId, groupId);
 
-        // Record activity
         groupActivityService.recordActivity(groupId, ActivityType.ANNOUNCEMENT_POSTED, userId, 
             user.getName() + " posted an announcement: " + request.getTitle());
 
@@ -84,7 +79,6 @@ public class GroupAnnouncementService {
         GroupAnnouncement announcement = announcementRepository.findById(announcementId)
             .orElseThrow(() -> new RuntimeException("Announcement not found"));
 
-        // Verify user is ADMIN of the group
         GroupMembership membership = membershipRepository.findByGroupIdAndUserId(announcement.getGroup().getId(), userId)
             .orElseThrow(() -> new RuntimeException("Not a member of this group"));
 
@@ -110,7 +104,6 @@ public class GroupAnnouncementService {
         GroupAnnouncement announcement = announcementRepository.findById(announcementId)
             .orElseThrow(() -> new RuntimeException("Announcement not found"));
 
-        // Verify user is ADMIN or creator
         if (!announcement.getCreatedBy().getId().equals(userId)) {
             GroupMembership membership = membershipRepository.findByGroupIdAndUserId(announcement.getGroup().getId(), userId)
                 .orElseThrow(() -> new RuntimeException("Not a member of this group"));

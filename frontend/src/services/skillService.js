@@ -46,8 +46,6 @@ export const getSessionStats = async (skillId) => {
 
 export const assignCategory = async (skillId, categoryId) => {
     if (!categoryId || categoryId === '') {
-        // If categoryId is empty, don't call the assign endpoint
-        // The skill will remain without a category
         return null;
     }
     const { data } = await api.put(`/skills/${skillId}/category/${categoryId}`);

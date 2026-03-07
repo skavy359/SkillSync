@@ -94,13 +94,11 @@ const FindCollaborators = ({ onNavigate }) => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Find Collaborators</h1>
                 <p className="text-sm text-gray-500 dark:text-[#6c7086] mt-1">Discover study groups and connect with learners</p>
             </div>
 
-            {/* Search */}
             <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] p-4">
                 <div className="flex items-center gap-3 pl-3 pr-4 py-2 border border-gray-200 dark:border-[#313244] rounded-lg bg-gray-50 dark:bg-[#181825] focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:border-purple-500 transition-all">
                     <Search className="w-4 h-4 text-gray-400" />
@@ -114,7 +112,6 @@ const FindCollaborators = ({ onNavigate }) => {
                 </div>
             </div>
 
-            {/* Skill Filter */}
             {skills.length > 0 && (
                 <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] p-4">
                     <p className="text-xs font-semibold text-gray-600 dark:text-[#a6adc8] mb-3">Filter by Skill</p>
@@ -146,7 +143,6 @@ const FindCollaborators = ({ onNavigate }) => {
                 </div>
             )}
 
-            {/* Groups List */}
             {loading ? (
                 <div className="flex justify-center py-12">
                     <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
@@ -197,7 +193,6 @@ const FindCollaborators = ({ onNavigate }) => {
                         </div>
                     ))}
 
-                    {/* Load More */}
                     {hasMore && (
                         <div className="flex justify-center pt-4">
                             <button

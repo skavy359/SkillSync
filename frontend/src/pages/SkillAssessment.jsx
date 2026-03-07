@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { BrainCircuit, Play, ChevronRight, Clock, Trophy, RotateCcw, CheckCircle2, XCircle, ArrowLeft, Zap, Target, TrendingUp, History, Check } from 'lucide-react';
+import { BrainCircuit, ChevronRight, Clock, Trophy, RotateCcw, CheckCircle2, XCircle, ArrowLeft, Zap, Target, TrendingUp, History, Check } from 'lucide-react';
 import { generateQuiz, submitQuizAttempt, getQuizHistory } from '../services/quizService';
 
 const DIFFICULTIES = [
@@ -150,7 +150,6 @@ const SkillAssessment = () => {
 
   const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
-  // ===== SETUP VIEW =====
   if (view === 'setup') {
     return (
       <div className="space-y-6">
@@ -171,13 +170,11 @@ const SkillAssessment = () => {
           </div>
         )}
 
-        {/* Skill Selection */}
         <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-6">
           <h2 className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4] mb-4 flex items-center gap-2">
             <Target className="w-4 h-4 text-purple-500" /> Choose a Skill
           </h2>
 
-          {/* User's skills */}
           {skills.length > 0 && (
             <div className="mb-4">
               <p className="text-xs text-gray-500 dark:text-[#6c7086] mb-2">Your skills</p>
@@ -211,7 +208,6 @@ const SkillAssessment = () => {
           </div>
         </div>
 
-        {/* Difficulty */}
         <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-6">
           <h2 className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4] mb-4 flex items-center gap-2">
             <Zap className="w-4 h-4 text-yellow-500" /> Difficulty Level
@@ -237,7 +233,6 @@ const SkillAssessment = () => {
           </div>
         </div>
 
-        {/* Question Count */}
         <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-6">
           <h2 className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4] mb-4">Number of Questions</h2>
           <div className="flex gap-3">
@@ -257,7 +252,6 @@ const SkillAssessment = () => {
           </div>
         </div>
 
-        {/* Start */}
         <button
           onClick={startQuiz}
           disabled={(!selectedSkill && !customSkill.trim()) || loading}
@@ -278,7 +272,6 @@ const SkillAssessment = () => {
     );
   }
 
-  // ===== QUIZ VIEW =====
   if (view === 'quiz') {
     const q = questions[currentQ];
     const isAnswered = answers[currentQ] !== undefined;
@@ -286,7 +279,6 @@ const SkillAssessment = () => {
 
     return (
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={resetQuiz} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#313244] transition-colors">
@@ -302,7 +294,6 @@ const SkillAssessment = () => {
           </div>
         </div>
 
-        {/* Progress */}
         <div className="w-full bg-gray-200 dark:bg-[#313244] rounded-full h-2">
           <div
             className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
@@ -310,7 +301,6 @@ const SkillAssessment = () => {
           />
         </div>
 
-        {/* Question Cards Row (dots) */}
         <div className="flex gap-1.5 justify-center">
           {questions.map((_, i) => (
             <button
@@ -329,7 +319,6 @@ const SkillAssessment = () => {
           ))}
         </div>
 
-        {/* Question */}
         <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-6">
           <p className="text-xs text-purple-500 dark:text-purple-400 font-semibold mb-2">Question {currentQ + 1} of {questions.length}</p>
           <h2 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4] mb-6">{q.question}</h2>
@@ -357,7 +346,6 @@ const SkillAssessment = () => {
           </div>
         </div>
 
-        {/* Navigation */}
         <div className="flex items-center justify-between">
           <button
             onClick={prevQuestion}
@@ -388,7 +376,6 @@ const SkillAssessment = () => {
     );
   }
 
-  // ===== RESULTS VIEW =====
   if (view === 'results' && quizResult) {
     const grade = getGrade(quizResult.percentage);
     return (
@@ -407,7 +394,6 @@ const SkillAssessment = () => {
           </div>
         )}
 
-        {/* Score Card */}
         <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-8 text-center">
           <div className={`text-7xl font-black mb-2 ${grade.color}`}>{grade.letter}</div>
           <p className="text-lg text-gray-600 dark:text-[#a6adc8] mb-4">{grade.msg}</p>
@@ -437,7 +423,6 @@ const SkillAssessment = () => {
           </div>
         </div>
 
-        {/* Question Review */}
         <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-6">
           <h3 className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4] mb-4">Question Review</h3>
           <div className="space-y-4">
@@ -468,7 +453,6 @@ const SkillAssessment = () => {
     );
   }
 
-  // ===== HISTORY VIEW =====
   if (view === 'history') {
     return (
       <div className="space-y-6">

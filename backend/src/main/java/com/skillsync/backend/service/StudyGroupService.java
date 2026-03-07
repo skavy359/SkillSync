@@ -2,12 +2,10 @@ package com.skillsync.backend.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.skillsync.backend.dto.CreateStudyGroupRequest;
 import com.skillsync.backend.dto.GroupMemberDTO;
 import com.skillsync.backend.dto.StudyGroupDTO;
@@ -22,7 +20,6 @@ import com.skillsync.backend.repository.GroupMembershipRepository;
 import com.skillsync.backend.repository.SkillRepository;
 import com.skillsync.backend.repository.StudyGroupRepository;
 import com.skillsync.backend.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,7 +53,6 @@ public class StudyGroupService {
 
         group = groupRepository.save(group);
 
-        // Add creator as ADMIN member
         GroupMembership adminMembership = new GroupMembership();
         adminMembership.setGroup(group);
         adminMembership.setUser(creator);
@@ -66,8 +62,7 @@ public class StudyGroupService {
         group.setMemberCount(1);
         groupRepository.save(group);
 
-        // Record activity
-        groupActivityService.recordActivity(group.getId(), ActivityType.GROUP_CREATED, userId, 
+        groupActivityService.recordActivity(group.getId(), ActivityType.GROUP_CREATED, userId,
             "Group created by " + creator.getName());
 
         log.info("Created study group: {} by user: {}", group.getId(), userId);
@@ -124,7 +119,6 @@ public class StudyGroupService {
         StudyGroup group = groupRepository.findById(groupId)
             .orElseThrow(() -> new RuntimeException("Group not found"));
 
-        // Only allow joining public groups
         if (!group.getIsPublic()) {
             throw new RuntimeException("Cannot join private groups directly");
         }
@@ -132,23 +126,19 @@ public class StudyGroupService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Check if already a member
         if (membershipRepository.findByGroupIdAndUserId(groupId, userId).isPresent()) {
             throw new RuntimeException("User is already a member");
         }
 
-        // Add as MEMBER
         GroupMembership membership = new GroupMembership();
         membership.setGroup(group);
         membership.setUser(user);
         membership.setRole(GroupRole.MEMBER);
         membershipRepository.save(membership);
 
-        // Update member count
         group.setMemberCount((int) membershipRepository.countByGroupId(groupId));
         groupRepository.save(group);
 
-        // Record activity
         groupActivityService.recordActivity(groupId, ActivityType.MEMBER_JOINED, userId, 
             user.getName() + " joined the group");
 
@@ -161,7 +151,6 @@ public class StudyGroupService {
         StudyGroup group = groupRepository.findById(groupId)
             .orElseThrow(() -> new RuntimeException("Group not found"));
 
-        // Check if user is admin
         GroupMembership membership = membershipRepository.findByGroupIdAndUserId(groupId, userId)
             .orElseThrow(() -> new RuntimeException("User is not a member of this group"));
 
@@ -169,7 +158,6 @@ public class StudyGroupService {
             throw new RuntimeException("Only admins can update the group");
         }
 
-        // Update allowed fields
         if (request.getDescription() != null) {
             group.setDescription(request.getDescription());
         }
@@ -190,7 +178,6 @@ public class StudyGroupService {
         StudyGroup group = groupRepository.findById(groupId)
             .orElseThrow(() -> new RuntimeException("Group not found"));
 
-        // Verify current user is ADMIN
         GroupMembership adminMembership = membershipRepository.findByGroupIdAndUserId(groupId, currentUserId)
             .orElseThrow(() -> new RuntimeException("User not member of group"));
         
@@ -201,7 +188,6 @@ public class StudyGroupService {
         User newMember = userRepository.findById(newMemberId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Check if already a member
         if (membershipRepository.findByGroupIdAndUserId(groupId, newMemberId).isPresent()) {
             throw new RuntimeException("User is already a member");
         }
@@ -212,7 +198,6 @@ public class StudyGroupService {
         membership.setRole(GroupRole.MEMBER);
         membership = membershipRepository.save(membership);
 
-        // Update member count
         group.setMemberCount((int) membershipRepository.countByGroupId(groupId));
         groupRepository.save(group);
 
@@ -225,7 +210,6 @@ public class StudyGroupService {
         StudyGroup group = groupRepository.findById(groupId)
             .orElseThrow(() -> new RuntimeException("Group not found"));
 
-        // Verify current user is ADMIN
         GroupMembership adminMembership = membershipRepository.findByGroupIdAndUserId(groupId, currentUserId)
             .orElseThrow(() -> new RuntimeException("User not member of group"));
         
@@ -233,18 +217,15 @@ public class StudyGroupService {
             throw new RuntimeException("Only admins can remove members");
         }
 
-        // Can't remove the last member (admin)
         if (group.getMemberCount() <= 1) {
             throw new RuntimeException("Cannot remove the last member of a group");
         }
 
         membershipRepository.deleteByGroupIdAndUserId(groupId, memberId);
 
-        // Update member count
         group.setMemberCount((int) membershipRepository.countByGroupId(groupId));
         groupRepository.save(group);
 
-        // Record activity
         User removedUser = userRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         groupActivityService.recordActivity(groupId, ActivityType.MEMBER_REMOVED, currentUserId, 

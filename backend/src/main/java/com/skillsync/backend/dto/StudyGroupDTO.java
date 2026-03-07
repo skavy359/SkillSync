@@ -2,7 +2,6 @@ package com.skillsync.backend.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,8 +25,6 @@ public class StudyGroupDTO {
     private Integer memberCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    
-    // For group details view
     private List<GroupMemberDTO> members;
     private Boolean isMember;
     private Boolean isAdmin;

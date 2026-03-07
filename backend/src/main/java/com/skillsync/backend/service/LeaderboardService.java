@@ -3,9 +3,7 @@ package com.skillsync.backend.service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
-
 import com.skillsync.backend.dto.LeaderboardEntryResponse;
 import com.skillsync.backend.dto.SharingProfileResponse;
 import com.skillsync.backend.model.LearningSession;
@@ -15,7 +13,6 @@ import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.LearningSessionRepository;
 import com.skillsync.backend.repository.SkillRepository;
 import com.skillsync.backend.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 
 @Service

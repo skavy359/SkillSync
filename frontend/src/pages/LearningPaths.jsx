@@ -7,7 +7,6 @@ const LearningPaths = ({ onNavigate, onSelectRoadmap, userSkills = [] }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const allRoadmaps = getAvailableRoadmaps();
 
-  // Find roadmaps that match user's skills
   const myRoadmaps = userSkills
     .map(skill => {
       const roadmap = getRoadmapForSkill(skill.name);
@@ -17,7 +16,6 @@ const LearningPaths = ({ onNavigate, onSelectRoadmap, userSkills = [] }) => {
 
   const myRoadmapIds = new Set(myRoadmaps.map(r => r.id));
 
-  // Filter by search
   const filteredRoadmaps = allRoadmaps.filter(r =>
     r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -66,7 +64,6 @@ const LearningPaths = ({ onNavigate, onSelectRoadmap, userSkills = [] }) => {
           </span>
         </div>
 
-        {/* Progress bar */}
         <div className="w-full h-2 bg-gray-100 dark:bg-[#313244] rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-500"
@@ -82,7 +79,6 @@ const LearningPaths = ({ onNavigate, onSelectRoadmap, userSkills = [] }) => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
@@ -102,7 +98,6 @@ const LearningPaths = ({ onNavigate, onSelectRoadmap, userSkills = [] }) => {
           </p>
         </div>
 
-        {/* Search */}
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -115,7 +110,6 @@ const LearningPaths = ({ onNavigate, onSelectRoadmap, userSkills = [] }) => {
         </div>
       </div>
 
-      {/* My Roadmaps */}
       {myRoadmaps.length > 0 && !searchQuery && (
         <div>
           <div className="flex items-center gap-2 mb-4">
@@ -135,7 +129,6 @@ const LearningPaths = ({ onNavigate, onSelectRoadmap, userSkills = [] }) => {
         </div>
       )}
 
-      {/* All Roadmaps */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-4">
           {searchQuery ? 'Search Results' : 'All Roadmaps'}

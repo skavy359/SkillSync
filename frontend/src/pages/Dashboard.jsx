@@ -10,7 +10,6 @@ import ActivityHeatmap from '../components/ui/ActivityHeatmap';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
-
 import {
     Lightbulb,
     Zap,
@@ -34,7 +33,6 @@ import { getMySkills, addSkill } from "../services/skillService";
 import { getAllCategories } from "../services/categoryService";
 import { createGoal } from "../services/goalService";
 
-
 const Dashboard = ({ onNavigate, onSelectSkill }) => {
 
     const [learningStats, setLearningStats] = useState(null);
@@ -46,7 +44,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     const [recentSkills, setRecentSkills] = useState([]);
     const [recentSessions, setRecentSessions] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [showLogModal, setShowLogModal] = useState(false);
     const [allSkills, setAllSkills] = useState([]);
     const [logForm, setLogForm] = useState({
@@ -486,7 +483,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
             </div>
 
             <Card className={`p-6 bg-gradient-to-br ${burnoutContent.gradient} ${burnoutContent.border} relative overflow-hidden`}>
-                {/* Animated background pulse */}
                 <div className={`absolute inset-0 opacity-20 ${
                     riskLevel === 'HIGH' ? 'animate-pulse' : ''
                 }`} style={{
@@ -503,7 +499,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                         <TrendingUp className={`w-7 h-7 ${
                             riskLevel === 'HIGH' ? 'text-red-600 dark:text-red-400' : riskLevel === 'MEDIUM' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
                         }`} />
-                        {/* Pulsing dot */}
                         <div className={`absolute top-3 right-3 w-3 h-3 rounded-full animate-pulse ${
                             riskLevel === 'HIGH' ? 'bg-red-500' : riskLevel === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'
                         }`}>
@@ -520,7 +515,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                             </Badge>
                         </div>
                         <p className="text-gray-600 dark:text-[#9399b2] mb-3">{burnoutContent.message}</p>
-                        {/* Animated metrics bar */}
                         <div className="mb-3">
                             <div className="flex items-center justify-between mb-1">
                                 <span className="text-xs font-medium text-gray-500 dark:text-[#7f849c]">Weekly Activity Level</span>

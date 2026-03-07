@@ -6,7 +6,6 @@ import { getMySkills } from '../services/skillService';
 import GroupChat from '../components/GroupChat';
 import GroupAnnouncements from '../components/GroupAnnouncements';
 import GroupActivityFeed from '../components/GroupActivityFeed';
-import Button from '../components/ui/Button';
 
 const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
     const [group, setGroup] = useState(null);
@@ -156,7 +155,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => onNavigate('study-groups')}
@@ -182,23 +180,19 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                 )}
             </div>
 
-            {/* Success Message */}
             {successMsg && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg">
                     <p className="text-sm font-medium text-green-700 dark:text-green-400">{successMsg}</p>
                 </div>
             )}
 
-            {/* Error Message */}
             {errorMsg && (
                 <div className="p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
                     <p className="text-sm font-medium text-red-700 dark:text-red-400">{errorMsg}</p>
                 </div>
             )}
 
-            {/* About */}
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-[#1e1e2e] dark:to-[#181825] rounded-2xl border-2 border-gray-200 dark:border-[#313244] p-6 hover:border-transparent hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-indigo-500/20 transition-all">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-lg flex items-center justify-center">
@@ -216,7 +210,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                     )}
                 </div>
 
-                {/* Content */}
                 {editingAbout ? (
                     <div className="space-y-4">
                         <textarea
@@ -248,7 +241,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                             {group.description || 'No description provided'}
                         </p>
 
-                        {/* Info Footer */}
                         <div className="space-y-2 pt-5 border-t border-gray-200 dark:border-[#313244]">
                             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-[#a6adc8]">
                                 <Calendar className="w-4 h-4 text-indigo-500" />
@@ -263,7 +255,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                 )}
             </div>
 
-            {/* Tabs */}
             <div className="flex gap-2 border-b border-gray-200 dark:border-[#313244]">
                 {[
                     { id: 'members', label: 'Members', icon: Users },
@@ -289,7 +280,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                 })}
             </div>
 
-            {/* Tab Content */}
             {activeTab === 'members' && (
                 <div>
                     <h3 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4] mb-6 flex items-center gap-2">
@@ -298,12 +288,9 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {members.map(member => (
                             <div key={member.userId} className="group relative bg-white dark:bg-[#1e1e2e] rounded-2xl overflow-hidden border border-gray-200 dark:border-[#313244] hover:border-transparent transition-all duration-300 hover:shadow-xl dark:hover:shadow-xl dark:hover:shadow-indigo-500/20 transform hover:-translate-y-1">
-                                {/* Gradient Background */}
                                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/20 dark:to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                
-                                {/* Content */}
+
                                 <div className="relative p-5 space-y-4">
-                                    {/* Avatar & Header */}
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
                                             <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -330,20 +317,17 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                                         )}
                                     </div>
 
-                                    {/* Email */}
                                     <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-[#a6adc8]">
                                         <Mail className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
                                         <span className="truncate">{member.userEmail}</span>
                                     </div>
 
-                                    {/* About */}
                                     {member.userAbout && (
                                         <p className="text-sm text-gray-600 dark:text-[#a6adc8] line-clamp-2 leading-relaxed">
                                             {member.userAbout}
                                         </p>
                                     )}
 
-                                    {/* Role Badge */}
                                     <div className="flex gap-2 pt-2">
                                         {member.role === 'ADMIN' && (
                                             <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-500/20 dark:to-pink-500/20 text-purple-600 dark:text-purple-300">
@@ -361,14 +345,12 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                 </div>
             )}
 
-            {/* Chat Tab */}
             {activeTab === 'chat' && (
                 <div className="h-96">
                     <GroupChat groupId={groupId} currentUserId={currentUserId} />
                 </div>
             )}
 
-            {/* Announcements Tab */}
             {activeTab === 'announcements' && (
                 <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] p-5">
                     <GroupAnnouncements 
@@ -380,14 +362,12 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                 </div>
             )}
 
-            {/* Activity Tab */}
             {activeTab === 'activity' && (
                 <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] p-5">
                     <GroupActivityFeed groupId={groupId} refreshKey={refreshActivities} />
                 </div>
             )}
 
-            {/* Invite Modal */}
             {showInviteModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowInviteModal(false)}>
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
@@ -421,7 +401,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                 </div>
             )}
 
-            {/* Remove Member Confirmation Modal */}
             {removeConfirm && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] w-full max-w-sm p-6 shadow-xl">
@@ -458,7 +437,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                 </div>
             )}
 
-            {/* Create Announcement Modal */}
             {showAnnouncementModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] w-full max-w-lg p-6">

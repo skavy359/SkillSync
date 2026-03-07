@@ -16,7 +16,6 @@ import {
     CheckCircle,
     Brain,
     BookOpen,
-    CalendarDays,
     Activity,
     Sparkles
 } from 'lucide-react';
@@ -195,16 +194,13 @@ const Analytics = () => {
     const burnoutMetrics = calculateBurnoutMetrics();
     const insights = generateInsights();
 
-    // Computed stats
     const totalHours = Math.round(learningStats.totalMinutes / 60);
     const avgSessionLen = learningStats.totalSessions > 0 ? Math.round(learningStats.totalMinutes / learningStats.totalSessions) : 0;
     const activeSkills = allSkills.filter(s => s.status === 'ACTIVE').length;
     const completedSkills = allSkills.filter(s => s.status === 'COMPLETED').length;
 
-    // Best skill by time
     const bestSkill = topSkills.length > 0 ? topSkills.reduce((a, b) => a.totalMinutes > b.totalMinutes ? a : b) : null;
 
-    // Category with most time
     const bestCategory = categoryStats.length > 0
         ? categoryStats.reduce((a, b) => (a.totalMinutes || 0) > (b.totalMinutes || 0) ? a : b)
         : null;
@@ -217,7 +213,6 @@ const Analytics = () => {
                 action={false}
             />
 
-            {/* Key Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <GradientStatCard
                     title="Current Streak"
@@ -253,11 +248,8 @@ const Analytics = () => {
                 />
             </div>
 
-            {/* Learning Overview + Quick Stats */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left: Learning Velocity / Burnout */}
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Burnout Analysis */}
                     <Card className="p-6">
                         <div className="flex items-start justify-between mb-6">
                             <div className="flex items-center gap-2">
@@ -302,7 +294,6 @@ const Analytics = () => {
                         </div>
                     </Card>
 
-                    {/* Charts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <BarChartCard
                             title="Top Skills by Time"
@@ -329,9 +320,7 @@ const Analytics = () => {
                     </div>
                 </div>
 
-                {/* Right sidebar */}
                 <div className="space-y-6">
-                    {/* Quick Highlights */}
                     <Card className="p-5">
                         <h3 className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4] mb-4 flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-purple-500" /> Highlights
@@ -389,7 +378,6 @@ const Analytics = () => {
                         </div>
                     </Card>
 
-                    {/* Goals Progress */}
                     {goals.length > 0 && (
                         <Card className="p-5">
                             <h3 className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4] mb-3 flex items-center gap-2">
@@ -411,7 +399,6 @@ const Analytics = () => {
                 </div>
             </div>
 
-            {/* Insights */}
             <Section title="Insights & Recommendations">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {insights.map((insight, index) => {

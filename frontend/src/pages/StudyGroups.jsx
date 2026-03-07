@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Plus, Users, BookOpen, ChevronRight, Loader2, X, MailOpen, CheckCircle, XCircle } from 'lucide-react';
 import { getMyGroups, createStudyGroup, getMyInvitations, acceptInvitation, rejectInvitation } from '../services/studyGroupService';
 import { getMySkills } from '../services/skillService';
-import Button from '../components/ui/Button';
-import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 
 const StudyGroups = ({ onNavigate, onSelectGroup }) => {
@@ -95,7 +93,6 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
         }
     };
 
-
     const handleNavigate = (page) => {
         if (page === 'group-details') {
             handleNavigateToGroup(selectedGroupId);
@@ -106,7 +103,6 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Study Groups</h1>
@@ -128,14 +124,12 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                 </div>
             </div>
 
-            {/* Success Message */}
             {successMsg && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg">
                     <p className="text-sm font-medium text-green-700 dark:text-green-400">{successMsg}</p>
                 </div>
             )}
 
-            {/* Invitations */}
             {myInvitations.length > 0 && (
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -150,11 +144,9 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {myInvitations.map(inv => (
                             <div key={inv.id} className="group relative bg-gradient-to-br from-white to-gray-50 dark:from-[#1e1e2e] dark:to-[#181825] rounded-2xl border-2 border-amber-200 dark:border-amber-500/30 p-6 hover:border-amber-400 dark:hover:border-amber-500/60 hover:shadow-xl dark:hover:shadow-amber-500/20 transition-all">
-                                {/* Glow effect on hover */}
                                 <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/20 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity pointer-events-none" />
                                 
                                 <div className="relative z-10">
-                                    {/* Header with icon and group name */}
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-white shadow-lg">
@@ -174,14 +166,12 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                                         </div>
                                     </div>
 
-                                    {/* Invited by info */}
                                     <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-amber-100 dark:border-amber-500/20">
                                         <p className="text-xs text-amber-900 dark:text-amber-300 font-medium">
                                             🎯 Invited by <span className="font-bold text-amber-800 dark:text-amber-200">{inv.invitedByName}</span>
                                         </p>
                                     </div>
 
-                                    {/* Action buttons */}
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => handleAcceptInvitation(inv.id)}
@@ -203,7 +193,6 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                 </div>
             )}
 
-            {/* My Groups */}
             {loading ? (
                 <div className="flex justify-center py-12">
                     <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
@@ -251,7 +240,6 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                 </div>
             )}
 
-            {/* Create Group Modal */}
             {showCreateModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowCreateModal(false)}>
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] w-full max-w-md p-6" onClick={e => e.stopPropagation()}>

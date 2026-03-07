@@ -15,14 +15,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.CreateMessageRequest;
 import com.skillsync.backend.dto.GroupMessageDTO;
 import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.UserRepository;
 import com.skillsync.backend.service.GroupMessageService;
-
 import lombok.RequiredArgsConstructor;
 
 @RestController

@@ -2,7 +2,6 @@ package com.skillsync.backend.controller;
 
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.CodingProfileRequest;
 import com.skillsync.backend.dto.CodingProfileResponse;
@@ -26,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/coding-profile")
 @RequiredArgsConstructor
 public class CodingProfileController {
-
     private final UserRepository userRepository;
     private final CodingStatsService codingStatsService;
 
@@ -61,7 +58,6 @@ public class CodingProfileController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Coding leaderboard fetched", profiles));
     }
 
-    // Stats endpoints
     @GetMapping("/stats/leetcode/{username}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getLeetCodeStats(@PathVariable String username) {
         Map<String, Object> stats = codingStatsService.fetchLeetCodeStats(username);

@@ -91,7 +91,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
 
             setSessions(prev => [newSession, ...prev]);
 
-            // Refetch skill to update progress instantly
             getMySkills({ size: 100 }).then(data => {
                 const skills = data?.content || [];
                 const found = skills.find(s => String(s.id) === String(skillId));
@@ -117,8 +116,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
         }
     };
 
-
-
     const handleEditSkill = async (e) => {
         e.preventDefault();
         setIsEditLoading(true);
@@ -133,9 +130,7 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 updated.categoryId = editForm.categoryId;
                 setSuccessMessage('Skill updated and category assigned successfully!');
             } else {
-                // Empty categoryId means "Others" - no category assigned
                 if (skill.categoryId) {
-                    // User is removing the category
                     updated.categoryId = null;
                     updated.category = null;
                     setSuccessMessage('Skill updated and category removed!');
@@ -541,8 +536,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                     />
                 </form>
             </Modal>
-
-
 
             <Modal
                 isOpen={isEditModalOpen}

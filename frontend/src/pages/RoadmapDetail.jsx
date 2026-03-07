@@ -11,7 +11,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
   useEffect(() => {
     if (roadmap) {
       setCompletedTopics(getCompletedTopics(roadmap.id));
-      // Expand all sections by default
       const expanded = {};
       roadmap.sections.forEach(s => { expanded[s.id] = true; });
       setExpandedSections(expanded);
@@ -47,7 +46,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Back button */}
       <button
         onClick={() => onNavigate('learning-paths')}
         className="flex items-center gap-2 text-sm text-gray-600 dark:text-[#a6adc8] hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
@@ -56,7 +54,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
         Back to Learning Paths
       </button>
 
-      {/* Header */}
       <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-4">
@@ -79,7 +76,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
           </a>
         </div>
 
-        {/* Stats row */}
         <div className="flex items-center gap-6 mb-4 text-sm">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-indigo-500" />
@@ -101,7 +97,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
           </div>
         </div>
 
-        {/* Progress bar */}
         <div className="flex items-center gap-3">
           <div className="flex-1 h-3 bg-gray-100 dark:bg-[#313244] rounded-full overflow-hidden">
             <div
@@ -118,9 +113,7 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
         </div>
       </div>
 
-      {/* Timeline sections */}
       <div className="relative">
-        {/* Vertical connector line */}
         <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-gray-200 via-gray-200 to-transparent dark:from-[#313244] dark:via-[#313244]" />
 
         <div className="space-y-4">
@@ -132,12 +125,10 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
 
             return (
               <div key={section.id} className="relative">
-                {/* Section header */}
                 <button
                   onClick={() => toggleSection(section.id)}
                   className="relative z-10 w-full flex items-center gap-3 group"
                 >
-                  {/* Circle marker */}
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border-2 transition-all duration-300 ${
                     sectionDone
                       ? 'bg-green-500 border-green-500 text-white'
@@ -171,7 +162,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
                   </div>
                 </button>
 
-                {/* Topics */}
                 {isExpanded && (
                   <div className="ml-[60px] mt-2 space-y-2">
                     {sectionTopics.map((topic) => {
@@ -186,7 +176,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
                           }`}
                         >
                           <div className="flex items-start gap-3">
-                            {/* Checkbox */}
                             <button
                               onClick={() => handleToggle(topic.id)}
                               className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
@@ -222,7 +211,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
                                 {topic.description}
                               </p>
 
-                              {/* Resources */}
                               {topic.resources && topic.resources.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-2">
                                   {topic.resources.map((res, i) => (
@@ -252,7 +240,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
         </div>
       </div>
 
-      {/* Completion message */}
       {progress === 100 && (
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-500/10 dark:to-emerald-500/10 rounded-2xl border border-green-200 dark:border-green-500/20 p-6 text-center">
           <Trophy className="w-10 h-10 text-amber-500 mx-auto mb-2" />

@@ -72,7 +72,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
   const handleAcceptAnswer = async (replyId) => {
     try {
       const updated = await acceptAnswer(replyId);
-      // Refresh all replies to update accepted state
       const repliesData = await getReplies(postId);
       setReplies(repliesData);
       showSuccess('Answer accepted! ✓');
@@ -89,7 +88,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
       setReplies(prev => [...prev, newReply]);
       setReplyContent('');
       showSuccess('Reply posted successfully!');
-      // Update reply count in post
       setPost(prev => ({ ...prev, replyCount: prev.replyCount + 1 }));
     } catch (err) {
       console.error('Failed to send reply', err);
@@ -153,7 +151,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Back */}
       <button
         onClick={() => onNavigate('discussions')}
         className="flex items-center gap-2 text-sm text-gray-600 dark:text-[#a6adc8] hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
@@ -168,10 +165,8 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
         </div>
       )}
 
-      {/* Post */}
       <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-6">
         <div className="flex items-start gap-4">
-          {/* Upvote */}
           <div className="flex flex-col items-center shrink-0">
             <button
               onClick={handlePostUpvote}
@@ -190,7 +185,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
             </span>
           </div>
 
-          {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${tagInfo.bg}`}>
@@ -231,7 +225,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
         </div>
       </div>
 
-      {/* Replies */}
       <div>
         <h2 className="text-sm font-semibold text-gray-600 dark:text-[#a6adc8] mb-3 flex items-center gap-2">
           <MessageCircle className="w-4 h-4" />
@@ -262,7 +255,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
                     </div>
                   )}
                   <div className="flex items-start gap-3">
-                    {/* Upvote */}
                     <div className="flex flex-col items-center shrink-0">
                       <button
                         onClick={() => handleReplyUpvote(reply.id)}
@@ -316,7 +308,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
         )}
       </div>
 
-      {/* Reply input */}
       <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-4">
         <textarea
           placeholder="Write your reply..."

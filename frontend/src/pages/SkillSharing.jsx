@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Download, Clock, Brain, Zap, Flame, Trophy, Star, Sparkles, Copy, Check } from 'lucide-react';
-import Button from '../components/ui/Button';
 import leaderboardService from '../services/leaderboardService';
 import { getMyProfile } from '../services/profileService';
 
@@ -71,12 +70,10 @@ const SharingCard = ({ profile }) => {
           boxShadow: `0 0 60px ${rank.glow}, inset 0 0 60px rgba(139,92,246,0.05)`,
         }}
       >
-        {/* Animated gradient border effect */}
         <div className="absolute inset-0 opacity-30 pointer-events-none"
           style={{ background: 'conic-gradient(from 0deg, transparent, rgba(139,92,246,0.3), transparent, rgba(236,72,153,0.3), transparent)' }}
         />
 
-        {/* Dot grid pattern */}
         <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
           style={{
             backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
@@ -84,12 +81,10 @@ const SharingCard = ({ profile }) => {
           }}
         />
 
-        {/* Glow orbs */}
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-pink-500/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 p-8">
-          {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-purple-400" />
@@ -101,7 +96,6 @@ const SharingCard = ({ profile }) => {
             </div>
           </div>
 
-          {/* Profile */}
           <div className="text-center mb-8">
             <div className="relative inline-block mb-4">
               <div className="w-24 h-24 rounded-full flex items-center justify-center text-white font-black text-4xl mx-auto"
@@ -112,14 +106,12 @@ const SharingCard = ({ profile }) => {
               >
                 {profile.userName[0].toUpperCase()}
               </div>
-              {/* Ring */}
               <div className="absolute inset-[-3px] rounded-full border-2 border-dashed border-purple-500/40 animate-[spin_10s_linear_infinite]" />
             </div>
             <h1 className="text-3xl font-black text-white mb-1 tracking-tight">{profile.userName}</h1>
             <p className="text-sm text-purple-300/60 font-medium">Achievement Card</p>
           </div>
 
-          {/* Power Bar */}
           <div className="mb-8 px-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-purple-300 uppercase tracking-[0.15em]">Power Level</span>
@@ -137,7 +129,6 @@ const SharingCard = ({ profile }) => {
             </div>
           </div>
 
-          {/* Stats Grid */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
               { label: 'Skills', value: profile.totalSkills, icon: Brain, color: '#8b5cf6' },
@@ -165,7 +156,6 @@ const SharingCard = ({ profile }) => {
             })}
           </div>
 
-          {/* Extra stats */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
               <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider mb-0.5">Avg/Session</p>
@@ -177,7 +167,6 @@ const SharingCard = ({ profile }) => {
             </div>
           </div>
 
-          {/* Specialization */}
           {profile.mostActiveCategory && (
             <div className="mb-6 p-4 rounded-xl text-center" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(236,72,153,0.1))', border: '1px solid rgba(139,92,246,0.15)' }}>
               <p className="text-[10px] font-bold text-purple-300/50 uppercase tracking-[0.2em] mb-1">⟨ Specialization ⟩</p>
@@ -185,7 +174,6 @@ const SharingCard = ({ profile }) => {
             </div>
           )}
 
-          {/* Top Skills */}
           {profile.topSkills && profile.topSkills.length > 0 && (
             <div className="mb-4">
               <p className="text-[10px] font-bold text-white/30 mb-2 uppercase tracking-[0.15em]">Top Achievements</p>
@@ -203,14 +191,12 @@ const SharingCard = ({ profile }) => {
             </div>
           )}
 
-          {/* Footer */}
           <div className="pt-4 border-t border-white/5 text-center">
             <p className="text-[10px] text-white/15 font-mono tracking-[0.3em]">SKILLSYNC • ACHIEVEMENT CARD</p>
           </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="flex gap-3 justify-center max-w-2xl mx-auto">
         <button
           onClick={downloadAsImage}

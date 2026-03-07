@@ -9,11 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.GroupActivityDTO;
 import com.skillsync.backend.service.GroupActivityService;
-
 import lombok.RequiredArgsConstructor;
 
 @RestController

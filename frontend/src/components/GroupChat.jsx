@@ -94,7 +94,6 @@ const GroupChat = ({ groupId, currentUserId }) => {
 
     return (
         <div className="flex flex-col h-full bg-gradient-to-b from-gray-50 to-white dark:from-[#11111b] dark:to-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] overflow-hidden">
-            {/* Messages Container */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4 hide-scrollbar">
                 {loading ? (
                     <div className="flex items-center justify-center h-full">
@@ -114,7 +113,6 @@ const GroupChat = ({ groupId, currentUserId }) => {
                             key={msg.id}
                             className={`flex gap-3 ${msg.userId === currentUserId ? 'flex-row-reverse' : 'flex-row'}`}
                         >
-                            {/* Avatar */}
                             <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white text-xs font-bold ${
                                 msg.userId === currentUserId
                                     ? 'from-indigo-500 to-blue-600'
@@ -123,9 +121,7 @@ const GroupChat = ({ groupId, currentUserId }) => {
                                 {msg.userName?.charAt(0).toUpperCase() || '?'}
                             </div>
 
-                            {/* Message Bubble */}
                             <div className={`flex flex-col max-w-xs gap-1 ${msg.userId === currentUserId ? 'items-end' : 'items-start'}`}>
-                                {/* User Info */}
                                 <div className="flex items-center gap-2 px-3">
                                     <p className="text-xs font-bold text-gray-900 dark:text-[#cdd6f4]">
                                         {msg.userName}
@@ -141,7 +137,6 @@ const GroupChat = ({ groupId, currentUserId }) => {
                                     )}
                                 </div>
 
-                                {/* Message Content */}
                                 <div 
                                     onContextMenu={(e) => msg.userId === currentUserId && handleContextMenu(e, msg.id)}
                                     className={`rounded-2xl px-4 py-2.5 shadow-sm transition-all cursor-context-menu ${
@@ -159,7 +154,6 @@ const GroupChat = ({ groupId, currentUserId }) => {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area */}
             <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 dark:border-[#313244] flex gap-2 bg-white dark:bg-[#1e1e2e]">
                 <input
                     type="text"
@@ -178,7 +172,6 @@ const GroupChat = ({ groupId, currentUserId }) => {
                 </button>
             </form>
 
-            {/* Context Menu */}
             {contextMenu && (
                 <div
                     className="fixed bg-white dark:bg-[#313244] border border-gray-200 dark:border-[#45475a] rounded-lg shadow-lg z-50 py-1 min-w-40"
@@ -197,7 +190,6 @@ const GroupChat = ({ groupId, currentUserId }) => {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] w-full max-w-sm p-6 shadow-xl">

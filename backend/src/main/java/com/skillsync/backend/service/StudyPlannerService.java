@@ -8,7 +8,6 @@ import com.skillsync.backend.repository.SkillRepository;
 import com.skillsync.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;

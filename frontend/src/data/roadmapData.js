@@ -1,6 +1,3 @@
-// Learning Paths & Roadmaps Data
-// Curated from roadmap.sh — each topic links to roadmap.sh for detailed learning
-
 export const ROADMAPS = {
   react: {
     id: 'react',
@@ -2057,7 +2054,6 @@ export const ROADMAPS = {
 
 };
 
-// Skill name to roadmap ID mapping (case-insensitive fuzzy matching)
 export const SKILL_TO_ROADMAP = {
   'react': 'react',
   'reactjs': 'react',
@@ -2279,13 +2275,11 @@ export const SKILL_TO_ROADMAP = {
   'component library': 'designsystem',
 };
 
-// Get roadmap by skill name (fuzzy match)
 export function getRoadmapForSkill(skillName) {
   if (!skillName) return null;
   const normalized = skillName.toLowerCase().trim();
   const roadmapId = SKILL_TO_ROADMAP[normalized];
   if (roadmapId && ROADMAPS[roadmapId]) return ROADMAPS[roadmapId];
-  // Partial match
   for (const [key, id] of Object.entries(SKILL_TO_ROADMAP)) {
     if (normalized.includes(key) || key.includes(normalized)) {
       if (ROADMAPS[id]) return ROADMAPS[id];
@@ -2294,7 +2288,6 @@ export function getRoadmapForSkill(skillName) {
   return null;
 }
 
-// Get all available roadmaps as array
 export function getAvailableRoadmaps() {
   return Object.values(ROADMAPS);
 }

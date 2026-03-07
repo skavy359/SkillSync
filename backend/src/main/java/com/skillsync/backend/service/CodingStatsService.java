@@ -3,13 +3,10 @@ package com.skillsync.backend.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -54,8 +51,7 @@ public class CodingStatsService {
             result.put("totalEasy", solvedRes.getOrDefault("totalEasy", 0));
             result.put("totalMedium", solvedRes.getOrDefault("totalMedium", 0));
             result.put("totalHard", solvedRes.getOrDefault("totalHard", 0));
-            
-            // Parse submission calendar from JSON string
+
             Map<String, Integer> submissionCalendar = new HashMap<>();
             if (calendarRes != null) {
                 Object calendarRaw = calendarRes.get("submissionCalendar");
@@ -71,7 +67,6 @@ public class CodingStatsService {
             }
             result.put("submissionCalendar", submissionCalendar);
 
-            // Try to get contest info (non-blocking)
             try {
                 Map<String, Object> contestRes = restTemplate.getForObject(
                     "https://alfa-leetcode-api.onrender.com/" + username + "/contest",
@@ -100,8 +95,7 @@ public class CodingStatsService {
         }
         try {
             log.info("Fetching Codeforces stats for: {}", username);
-            
-            // Fetch user info
+
             Map<String, Object> infoRes = restTemplate.getForObject(
                 "https://codeforces.com/api/user.info?handles=" + username,
                 Map.class
@@ -112,15 +106,13 @@ public class CodingStatsService {
                 return null;
             }
 
-            // Extract user data from result array
             List<Map<String, Object>> resultList = (List<Map<String, Object>>) infoRes.get("result");
             if (resultList == null || resultList.isEmpty()) {
                 return null;
             }
             
             Map<String, Object> user = resultList.get(0);
-            
-            // Fetch submissions to count solved problems
+
             Map<String, Object> statusRes = restTemplate.getForObject(
                 "https://codeforces.com/api/user.status?handle=" + username + "&from=1&count=10000",
                 Map.class
@@ -155,7 +147,6 @@ public class CodingStatsService {
             return null;
         }
     }
-
 
     @Cacheable(value = "githubStats", key = "#username", unless = "#result == null")
     public Map<String, Object> fetchGitHubStats(String username) {

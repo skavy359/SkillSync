@@ -39,7 +39,6 @@ html.dark select:focus {
     outline-color: #6366f1;
 }
 
-/* Universal scrollbar hiding */
 html {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -84,4 +83,3 @@ nav.hide-scrollbar::-webkit-scrollbar {
     width: 0 !important;
     height: 0 !important;
 }
-

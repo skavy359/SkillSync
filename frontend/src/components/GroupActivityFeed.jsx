@@ -62,7 +62,6 @@ const GroupActivityFeed = ({ groupId, refreshKey }) => {
 
     return (
         <div className="space-y-4">
-            {/* Header */}
             <div className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <div>
@@ -75,7 +74,6 @@ const GroupActivityFeed = ({ groupId, refreshKey }) => {
                 </div>
             </div>
 
-            {/* Activity List */}
             {loading ? (
                 <div className="flex justify-center py-8">
                     <Loader2 className="w-6 h-6 text-indigo-600 dark:text-indigo-400 animate-spin" />

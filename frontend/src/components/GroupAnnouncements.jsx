@@ -28,13 +28,11 @@ const GroupAnnouncements = ({ groupId, isAdmin, onCreateClick, refreshKey }) => 
     const handleTogglePin = async (announcementId) => {
         try {
             setTogglingPin(announcementId);
-            
-            // Update locally first (optimistically)
+
             const updatedAnnouncements = announcements.map(a => 
                 a.id === announcementId ? { ...a, isPinned: !a.isPinned } : a
             );
             
-            // Sort: pinned announcements first
             const sortedAnnouncements = updatedAnnouncements.sort((a, b) => {
                 if (a.isPinned === b.isPinned) return 0;
                 return a.isPinned ? -1 : 1;
@@ -42,7 +40,6 @@ const GroupAnnouncements = ({ groupId, isAdmin, onCreateClick, refreshKey }) => 
             
             setAnnouncements(sortedAnnouncements);
             
-            // Then make the API call
             await togglePinAnnouncement(announcementId);
         } catch (error) {
             console.error('Error toggling pin:', error);
@@ -77,7 +74,6 @@ const GroupAnnouncements = ({ groupId, isAdmin, onCreateClick, refreshKey }) => 
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             {isAdmin && (
                 <button
                     type="button"
@@ -88,7 +84,6 @@ const GroupAnnouncements = ({ groupId, isAdmin, onCreateClick, refreshKey }) => 
                 </button>
             )}
 
-            {/* Announcements List */}
             {loading ? (
                 <div className="flex justify-center py-12">
                     <Loader2 className="w-6 h-6 text-indigo-600 dark:text-indigo-400 animate-spin" />
@@ -110,7 +105,6 @@ const GroupAnnouncements = ({ groupId, isAdmin, onCreateClick, refreshKey }) => 
                                     : 'bg-white dark:bg-[#1e1e2e] border-gray-200 dark:border-[#313244] hover:border-transparent hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-indigo-500/20'
                             }`}
                         >
-                            {/* Pinned Badge */}
                             {announcement.isPinned && (
                                 <div className="absolute -top-3 -right-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
                                     <Pin className="w-3 h-3 fill-current" />
@@ -118,7 +112,6 @@ const GroupAnnouncements = ({ groupId, isAdmin, onCreateClick, refreshKey }) => 
                                 </div>
                             )}
 
-                            {/* Content */}
                             <div className="mb-4">
                                 <h4 className="font-bold text-lg text-gray-900 dark:text-[#cdd6f4] mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                                     {announcement.title}
@@ -131,7 +124,6 @@ const GroupAnnouncements = ({ groupId, isAdmin, onCreateClick, refreshKey }) => 
                                 </p>
                             </div>
 
-                            {/* Actions */}
                             {isAdmin && (
                                 <div className="flex gap-2 justify-end pt-3 border-t border-gray-200 dark:border-[#313244]">
                                     <button
@@ -156,7 +148,6 @@ const GroupAnnouncements = ({ groupId, isAdmin, onCreateClick, refreshKey }) => 
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] w-full max-w-sm p-6 shadow-xl">

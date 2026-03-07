@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Trophy, Flame, Clock, Lightbulb, Medal, Crown, TrendingUp, Filter } from 'lucide-react';
+import { Flame, Lightbulb, Crown, TrendingUp } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import leaderboardService from '../services/leaderboardService';
 import { getMyProfile } from '../services/profileService';
@@ -80,7 +80,6 @@ const Leaderboard = () => {
         </div>
       )}
 
-      {/* Tabs */}
       <div className="flex gap-3">
         {TABS.map(tab => {
           const Icon = tab.icon;
@@ -101,7 +100,6 @@ const Leaderboard = () => {
         })}
       </div>
 
-      {/* Podium for top 3 */}
       {top3.length >= 3 && (
         <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] p-8">
           <div className="flex items-end justify-center gap-4 mb-6">
@@ -122,7 +120,6 @@ const Leaderboard = () => {
                   </p>
                   <p className="text-lg font-black text-gray-900 dark:text-[#cdd6f4]">{entry.value}</p>
                   <p className="text-[10px] text-gray-400 dark:text-[#585b70]">{entry.metric}</p>
-                  {/* Podium bar */}
                   <div className={`${colors.h} w-20 mt-2 rounded-t-xl bg-gradient-to-t ${colors.bg} flex items-end justify-center pb-2`}>
                     <span className="text-white font-black text-lg">#{rank}</span>
                   </div>
@@ -133,7 +130,6 @@ const Leaderboard = () => {
         </div>
       )}
 
-      {/* Full list */}
       <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] overflow-hidden">
         <div className="p-4 border-b border-gray-100 dark:border-[#313244]">
           <h3 className="text-sm font-bold text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">

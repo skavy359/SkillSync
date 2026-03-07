@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/leaderboard")
 @RequiredArgsConstructor
 public class LeaderboardController {
-
     private final LeaderboardService leaderboardService;
 
     @GetMapping("/skills")

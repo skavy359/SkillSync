@@ -1,7 +1,6 @@
 package com.skillsync.backend.model;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -52,7 +51,6 @@ public class GroupInvitation {
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
-        // Invitations expire in 7 days
         expiresAt = LocalDateTime.now().plusDays(7);
     }
 

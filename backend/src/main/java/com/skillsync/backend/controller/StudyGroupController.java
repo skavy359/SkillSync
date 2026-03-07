@@ -1,7 +1,6 @@
 package com.skillsync.backend.controller;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.CreateStudyGroupRequest;
 import com.skillsync.backend.dto.GroupMemberDTO;
@@ -26,7 +24,6 @@ import com.skillsync.backend.dto.UpdateStudyGroupRequest;
 import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.UserRepository;
 import com.skillsync.backend.service.StudyGroupService;
-
 import lombok.RequiredArgsConstructor;
 
 @RestController

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.*;
 
 @Service
@@ -81,8 +80,7 @@ public class GeminiService {
             logger.info("Full Gemini response: {}", responseBody);
             
             JsonNode root = objectMapper.readTree(responseBody);
-            
-            // Check for error in response
+
             if (root.has("error")) {
                 logger.error("Gemini API error: {}", root.path("error").asText());
                 return Collections.emptyList();
@@ -100,7 +98,6 @@ public class GeminiService {
 
             logger.info("Extracted text from Gemini: {}", text);
 
-            // Strip markdown code blocks if present
             text = text.trim();
             if (text.startsWith("```json")) {
                 text = text.substring(7);
