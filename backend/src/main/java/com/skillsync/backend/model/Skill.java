@@ -38,4 +38,7 @@ public class Skill {
 
     @ManyToOne
     private SkillCategory category;
+
+    @Column
+    private Double estimatedHours;
 }
