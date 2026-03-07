@@ -1,6 +1,7 @@
 package com.skillsync.backend.controller;
 
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.skillsync.backend.dto.AddSkillRequest;
 import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.SkillResponse;
@@ -29,6 +31,7 @@ import com.skillsync.backend.dto.stats.SkillVelocityResponse;
 import com.skillsync.backend.model.SkillLevel;
 import com.skillsync.backend.model.SkillStatus;
 import com.skillsync.backend.service.UserService;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -280,6 +283,19 @@ public class SkillController {
         return new ApiResponse<>(
                 true,
                 "Category assigned to skill",
+                response
+        );
+    }
+
+    @DeleteMapping("/{skillId}/category")
+    public ApiResponse<SkillResponse> removeCategory(
+            @PathVariable Long skillId) {
+
+        SkillResponse response = userService.removeCategoryFromSkill(skillId);
+
+        return new ApiResponse<>(
+                true,
+                "Category removed from skill",
                 response
         );
     }
