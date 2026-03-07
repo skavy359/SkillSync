@@ -1,6 +1,7 @@
 package com.skillsync.backend.model;
 
 import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -70,6 +71,14 @@ public class User {
 
     @Column(columnDefinition = "BOOLEAN DEFAULT true")
     private Boolean notifAchievementNotifications = true;
+
+    // Coding Platform Usernames
+    private String leetcodeUsername;
+    private String codeforcesUsername;
+    private String githubUsername;
+    private String hackerrankUsername;
+    private String atcoderUsername;
+    private String spojUsername;
 
     @PrePersist
     public void prePersist() {
