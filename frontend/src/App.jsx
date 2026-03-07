@@ -16,6 +16,16 @@ import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
 import Leaderboard from './pages/Leaderboard';
 import SkillSharing from './pages/SkillSharing';
+import LearningPaths from './pages/LearningPaths';
+import RoadmapDetail from './pages/RoadmapDetail';
+import DiscussionForum from './pages/DiscussionForum';
+import ForumPostDetail from './pages/ForumPostDetail';
+import StudyPlanner from './pages/StudyPlanner';
+import SkillAssessment from './pages/SkillAssessment';
+import CodingStats from './pages/CodingStats';
+import StudyGroups from './pages/StudyGroups';
+import GroupDetails from './pages/GroupDetails';
+import BrowseStudyGroups from './pages/BrowseStudyGroups';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminLayout from './pages/AdminLayout';
@@ -28,14 +38,17 @@ import AdminNotifications from './pages/AdminNotifications';
 import { getMyProfile } from './services/profileService';
 
 function App() {
-    const [showSplash, setShowSplash] = useState(true);
+    const [showSplash, setShowSplash] = useState(!localStorage.getItem('token'));
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [authPage, setAuthPage] = useState('login');
     const [currentUser, setCurrentUser] = useState(null);
     const [currentPage, setCurrentPage] = useState('dashboard');
     const [selectedSkillId, setSelectedSkillId] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+    const [selectedGroupId, setSelectedGroupId] = useState(null);
     const [adminPage, setAdminPage] = useState('admin');
+    const [selectedRoadmapId, setSelectedRoadmapId] = useState(null);
+    const [selectedPostId, setSelectedPostId] = useState(null);
     const [showCategoryDeleteSuccess, setShowCategoryDeleteSuccess] = useState(false);
 
     useEffect(() => {
@@ -182,6 +195,26 @@ function App() {
                 return <Leaderboard />;
             case 'skill-sharing':
                 return <SkillSharing />;
+            case 'learning-paths':
+                return <LearningPaths onNavigate={setCurrentPage} onSelectRoadmap={setSelectedRoadmapId} />;
+            case 'roadmap-detail':
+                return <RoadmapDetail roadmapId={selectedRoadmapId} onNavigate={setCurrentPage} />;
+            case 'discussions':
+                return <DiscussionForum onNavigate={setCurrentPage} onSelectPost={setSelectedPostId} />;
+            case 'forum-post-detail':
+                return <ForumPostDetail postId={selectedPostId} onNavigate={setCurrentPage} currentUserId={currentUser?.id} />;
+            case 'study-planner':
+                return <StudyPlanner />;
+            case 'coding-stats':
+                return <CodingStats />;
+            case 'assessments':
+                return <SkillAssessment />;
+            case 'study-groups':
+                return <StudyGroups onNavigate={setCurrentPage} onSelectGroup={setSelectedGroupId} />;
+            case 'group-details':
+                return <GroupDetails groupId={selectedGroupId} onNavigate={setCurrentPage} currentUserId={currentUser?.id} />;
+            case 'browse-study-groups':
+                return <BrowseStudyGroups onNavigate={setCurrentPage} onSelectGroup={setSelectedGroupId} />;
             case 'notifications':
                 return <Notifications />;
             case 'profile':
