@@ -10,7 +10,7 @@ import ActivityHeatmap from '../components/ui/ActivityHeatmap';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
-import FormRow from '../components/ui/FormRow';
+
 import {
     Lightbulb,
     Zap,
@@ -61,8 +61,8 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     const [dashboardCategories, setDashboardCategories] = useState([]);
     const [addSkillForm, setAddSkillForm] = useState({
         name: '',
-        level: 'Beginner',
         categoryId: '',
+        estimatedHours: ''
     });
 
     const [showCreateGoalModal, setShowCreateGoalModal] = useState(false);
@@ -284,12 +284,12 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         try {
             const newSkill = await addSkill({
                 name: addSkillForm.name,
-                level: addSkillForm.level.toUpperCase(),
-                categoryId: addSkillForm.categoryId ? parseInt(addSkillForm.categoryId) : null
+                categoryId: addSkillForm.categoryId ? parseInt(addSkillForm.categoryId) : null,
+                estimatedHours: addSkillForm.estimatedHours ? parseFloat(addSkillForm.estimatedHours) : null
             });
             
             setShowAddSkillModal(false);
-            setAddSkillForm({ name: '', level: 'Beginner', categoryId: '' });
+            setAddSkillForm({ name: '', categoryId: '', estimatedHours: '' });
             setShowAddSkillSuccess(true);
             setTimeout(() => {
                 const mainElement = document.querySelector('main');
@@ -485,10 +485,32 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 />
             </div>
 
-            <Card className={`p-6 bg-gradient-to-br ${burnoutContent.gradient} ${burnoutContent.border}`}>
-                <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-white/60 dark:bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <Card className={`p-6 bg-gradient-to-br ${burnoutContent.gradient} ${burnoutContent.border} relative overflow-hidden`}>
+                {/* Animated background pulse */}
+                <div className={`absolute inset-0 opacity-20 ${
+                    riskLevel === 'HIGH' ? 'animate-pulse' : ''
+                }`} style={{
+                    background: riskLevel === 'HIGH' 
+                        ? 'radial-gradient(circle at 80% 20%, rgba(239,68,68,0.3) 0%, transparent 50%)'
+                        : riskLevel === 'MEDIUM'
+                        ? 'radial-gradient(circle at 80% 20%, rgba(245,158,11,0.2) 0%, transparent 50%)'
+                        : 'radial-gradient(circle at 80% 20%, rgba(16,185,129,0.2) 0%, transparent 50%)'
+                }} />
+                <div className="relative z-10 flex items-start space-x-4">
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform hover:scale-110 ${
+                        riskLevel === 'HIGH' ? 'bg-red-100 dark:bg-red-500/20' : riskLevel === 'MEDIUM' ? 'bg-yellow-100 dark:bg-yellow-500/20' : 'bg-green-100 dark:bg-green-500/20'
+                    }`}>
+                        <TrendingUp className={`w-7 h-7 ${
+                            riskLevel === 'HIGH' ? 'text-red-600 dark:text-red-400' : riskLevel === 'MEDIUM' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
+                        }`} />
+                        {/* Pulsing dot */}
+                        <div className={`absolute top-3 right-3 w-3 h-3 rounded-full animate-pulse ${
+                            riskLevel === 'HIGH' ? 'bg-red-500' : riskLevel === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'
+                        }`}>
+                            <div className={`absolute inset-0 rounded-full animate-ping opacity-75 ${
+                                riskLevel === 'HIGH' ? 'bg-red-400' : riskLevel === 'MEDIUM' ? 'bg-yellow-400' : 'bg-green-400'
+                            }`} />
+                        </div>
                     </div>
                     <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
@@ -498,18 +520,33 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                             </Badge>
                         </div>
                         <p className="text-gray-600 dark:text-[#9399b2] mb-3">{burnoutContent.message}</p>
-                        <div className="flex items-center space-x-6 text-sm">
-                            <div className="flex items-center text-gray-700 dark:text-[#a6adc8]">
-                                <span className="font-medium">Avg per skill:</span>
-                                <span className="ml-2">{Math.round(avgMinutesPerSkill)} min</span>
+                        {/* Animated metrics bar */}
+                        <div className="mb-3">
+                            <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-medium text-gray-500 dark:text-[#7f849c]">Weekly Activity Level</span>
+                                <span className="text-xs font-bold text-gray-700 dark:text-[#a6adc8]">{weeklyMinutes} min</span>
                             </div>
-                            <div className="flex items-center text-gray-700 dark:text-[#a6adc8]">
-                                <span className="font-medium">Consistency:</span>
-                                <span className="ml-2">{getConsistency()}</span>
+                            <div className="w-full h-2.5 bg-white/40 dark:bg-black/20 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                                        riskLevel === 'HIGH' ? 'bg-gradient-to-r from-red-400 to-red-600' : riskLevel === 'MEDIUM' ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-green-400 to-emerald-600'
+                                    }`}
+                                    style={{ width: `${Math.min(100, (weeklyMinutes / 420) * 100)}%` }}
+                                />
                             </div>
-                            <div className="flex items-center text-gray-700 dark:text-[#a6adc8]">
-                                <span className="font-medium">Completion:</span>
-                                <span className="ml-2">{Math.round(completionRate)}%</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                            <div className="bg-white/40 dark:bg-black/15 rounded-lg p-2 text-center">
+                                <span className="block text-lg font-bold text-gray-900 dark:text-[#cdd6f4]">{Math.round(avgMinutesPerSkill)}</span>
+                                <span className="text-xs text-gray-500 dark:text-[#7f849c]">Avg min/skill</span>
+                            </div>
+                            <div className="bg-white/40 dark:bg-black/15 rounded-lg p-2 text-center">
+                                <span className="block text-lg font-bold text-gray-900 dark:text-[#cdd6f4]">{getConsistency()}</span>
+                                <span className="text-xs text-gray-500 dark:text-[#7f849c]">Consistency</span>
+                            </div>
+                            <div className="bg-white/40 dark:bg-black/15 rounded-lg p-2 text-center">
+                                <span className="block text-lg font-bold text-gray-900 dark:text-[#cdd6f4]">{Math.round(completionRate)}%</span>
+                                <span className="text-xs text-gray-500 dark:text-[#7f849c]">Completion</span>
                             </div>
                         </div>
                     </div>
@@ -755,22 +792,22 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                         required
                     />
 
-                    <FormRow columns={2} gap={4}>
-                        <Select
-                            label="Level"
-                            value={addSkillForm.level}
-                            onChange={(e) => setAddSkillForm({ ...addSkillForm, level: e.target.value })}
-                            options={['Beginner', 'Intermediate', 'Advanced']}
-                        />
+                    <Select
+                        label="Category (Optional)"
+                        value={addSkillForm.categoryId}
+                        onChange={(e) => setAddSkillForm({ ...addSkillForm, categoryId: e.target.value })}
+                        options={dashboardCategories.map(cat => ({ value: cat.id, label: cat.name }))}
+                        placeholder="Select a category or leave empty"
+                    />
 
-                        <Select
-                            label="Category"
-                            value={addSkillForm.categoryId}
-                            onChange={(e) => setAddSkillForm({ ...addSkillForm, categoryId: e.target.value })}
-                            options={dashboardCategories.map(cat => ({ value: cat.id, label: cat.name }))}
-                            placeholder="Select a category"
-                        />
-                    </FormRow>
+                    <Input
+                        label="Estimated Hours"
+                        type="number"
+                        placeholder="e.g., 50"
+                        value={addSkillForm.estimatedHours}
+                        onChange={(e) => setAddSkillForm({ ...addSkillForm, estimatedHours: e.target.value })}
+                    />
+                    <p className="text-xs text-gray-400 dark:text-[#585b70] -mt-2">Progress will auto-update based on logged session hours</p>
                 </form>
             </Modal>
 
