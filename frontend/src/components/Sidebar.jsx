@@ -10,7 +10,14 @@ import {
     User,
     Settings,
     Trophy,
-    Share2
+    Share2,
+    Map,
+    MessageSquare,
+    Calendar,
+    BrainCircuit,
+    Code2,
+    Users,
+    Compass
 } from 'lucide-react';
 import { getTodayMinutes } from '../services/profileService';
 
@@ -34,6 +41,13 @@ const Sidebar = ({ currentPage, onNavigate }) => {
         { id: 'goals', label: 'Goals', icon: Target },
         { id: 'sessions', label: 'Sessions', icon: Clock },
         { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+        { id: 'learning-paths', label: 'Learning Paths', icon: Map },
+        { id: 'study-planner', label: 'Study Planner', icon: Calendar },
+        { id: 'assessments', label: 'Assessments', icon: BrainCircuit },
+        { id: 'coding-stats', label: 'Coding Stats', icon: Code2 },
+        { id: 'discussions', label: 'Discussions', icon: MessageSquare },
+        { id: 'study-groups', label: 'Study Groups', icon: Users },
+        { id: 'browse-study-groups', label: 'Browse Groups', icon: Compass },
         { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
         { id: 'skill-sharing', label: 'Share Progress', icon: Share2 },
         { id: 'notifications', label: 'Notifications', icon: Bell },
