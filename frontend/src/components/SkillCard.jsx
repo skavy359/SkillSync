@@ -1,11 +1,12 @@
 import Card from './ui/Card';
 import Badge from './ui/Badge';
 import ProgressBar from './ui/ProgressBar';
-import { Clock } from 'lucide-react';
+import { Clock, X } from 'lucide-react';
 
 const SkillCard = ({
     skill,
-    onClick
+    onClick,
+    onRemoveCategory
 }) => {
     const levelColors = {
         Beginner: 'success',
@@ -55,10 +56,22 @@ const SkillCard = ({
             </div>
 
             {skill.category && (
-                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#272739]">
+                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#272739] flex items-center justify-between">
                     <span className="inline-flex items-center text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/15 px-2 py-1 rounded-md">
                         {skill.category}
                     </span>
+                    {onRemoveCategory && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onRemoveCategory(skill.id);
+                            }}
+                            className="p-1 text-gray-400 dark:text-[#7f849c] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors"
+                            title="Remove category"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             )}
         </Card>
