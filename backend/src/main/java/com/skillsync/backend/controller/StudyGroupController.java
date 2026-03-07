@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +22,7 @@ import com.skillsync.backend.dto.ApiResponse;
 import com.skillsync.backend.dto.CreateStudyGroupRequest;
 import com.skillsync.backend.dto.GroupMemberDTO;
 import com.skillsync.backend.dto.StudyGroupDTO;
+import com.skillsync.backend.dto.UpdateStudyGroupRequest;
 import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.UserRepository;
 import com.skillsync.backend.service.StudyGroupService;
@@ -99,6 +101,15 @@ public class StudyGroupController {
         User currentUser = getCurrentUser();
         StudyGroupDTO group = groupService.joinGroup(groupId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Joined group successfully", group));
+    }
+
+    @PutMapping("/{groupId}")
+    public ResponseEntity<ApiResponse<StudyGroupDTO>> updateGroup(
+            @PathVariable Long groupId,
+            @RequestBody UpdateStudyGroupRequest request) {
+        User currentUser = getCurrentUser();
+        StudyGroupDTO group = groupService.updateGroup(groupId, request, currentUser.getId());
+        return ResponseEntity.ok(new ApiResponse<>(true, "Group updated successfully", group));
     }
 
     @GetMapping("/{groupId}/members")

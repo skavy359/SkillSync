@@ -44,6 +44,15 @@ public class GroupInvitationController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Invitation sent", invitation));
     }
 
+    @PostMapping("/groups/{groupId}/invite-by-email")
+    public ResponseEntity<ApiResponse<GroupInvitationDTO>> inviteUserByEmail(
+            @PathVariable Long groupId,
+            @RequestBody InviteUserRequest request) {
+        User currentUser = getCurrentUser();
+        GroupInvitationDTO invitation = invitationService.inviteUserByEmail(groupId, request.getEmail(), currentUser.getId());
+        return ResponseEntity.ok(new ApiResponse<>(true, "Invitation sent", invitation));
+    }
+
     @PostMapping("/{invitationId}/accept")
     public ResponseEntity<ApiResponse<GroupInvitationDTO>> acceptInvitation(@PathVariable Long invitationId) {
         User currentUser = getCurrentUser();

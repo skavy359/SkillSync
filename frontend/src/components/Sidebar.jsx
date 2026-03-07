@@ -17,7 +17,6 @@ import {
     BrainCircuit,
     Code2,
     Users,
-    Compass
 } from 'lucide-react';
 import { getTodayMinutes } from '../services/profileService';
 
@@ -47,7 +46,6 @@ const Sidebar = ({ currentPage, onNavigate }) => {
         { id: 'coding-stats', label: 'Coding Stats', icon: Code2 },
         { id: 'discussions', label: 'Discussions', icon: MessageSquare },
         { id: 'study-groups', label: 'Study Groups', icon: Users },
-        { id: 'browse-study-groups', label: 'Browse Groups', icon: Compass },
         { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
         { id: 'skill-sharing', label: 'Share Progress', icon: Share2 },
         { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -56,8 +54,8 @@ const Sidebar = ({ currentPage, onNavigate }) => {
     ];
 
     return (
-        <aside className="w-64 bg-white dark:bg-[#1e1e2e] border-r border-gray-200 dark:border-[#313244] flex flex-col">
-            <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-[#313244]">
+        <aside className="w-64 bg-white dark:bg-[#1e1e2e] border-r border-gray-200 dark:border-[#313244] flex flex-col h-screen">
+            <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-[#313244] flex-shrink-0">
                 <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center">
                         <Lightbulb className="w-5 h-5 text-white" />
@@ -66,7 +64,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
                 </div>
             </div>
 
-            <nav className="flex-1 px-3 py-4 space-y-1">
+            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 {menuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = currentPage === item.id;
@@ -91,7 +89,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
                 })}
             </nav>
 
-            <div className="p-4 border-t border-gray-200 dark:border-[#313244]">
+            <div className="p-4 border-t border-gray-200 dark:border-[#313244] flex-shrink-0">
                 <button
                     onClick={() => onNavigate('sessions')}
                     className="w-full text-left bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-500/15 dark:to-indigo-500/10 rounded-xl p-4 hover:shadow-md transition-all"

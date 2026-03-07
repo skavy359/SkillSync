@@ -39,19 +39,49 @@ html.dark select:focus {
     outline-color: #6366f1;
 }
 
-html.dark ::-webkit-scrollbar {
-    width: 8px;
+/* Universal scrollbar hiding */
+html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-html.dark ::-webkit-scrollbar-track {
-    background: #181825;
+body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-html.dark ::-webkit-scrollbar-thumb {
-    background: #45475a;
-    border-radius: 4px;
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-html.dark ::-webkit-scrollbar-thumb:hover {
-    background: #585b70;
+html ::-webkit-scrollbar,
+body ::-webkit-scrollbar,
+* ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
+
+.hide-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+nav.hide-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+
+nav.hide-scrollbar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+

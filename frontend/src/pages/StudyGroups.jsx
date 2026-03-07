@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Users, BookOpen, ChevronRight, Loader2, X } from 'lucide-react';
+import { Plus, Users, BookOpen, ChevronRight, Loader2, X, MailOpen, CheckCircle, XCircle } from 'lucide-react';
 import { getMyGroups, createStudyGroup, getMyInvitations, acceptInvitation, rejectInvitation } from '../services/studyGroupService';
 import { getMySkills } from '../services/skillService';
 import Button from '../components/ui/Button';
@@ -112,12 +112,20 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Study Groups</h1>
                     <p className="text-sm text-gray-500 dark:text-[#6c7086] mt-1">Collaborate with other learners</p>
                 </div>
-                <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/25 transition-all"
-                >
-                    <Plus className="w-4 h-4" /> Create Group
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => onNavigate('browse-study-groups')}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+                    >
+                        Browse
+                    </button>
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/25 transition-all"
+                    >
+                        <Plus className="w-4 h-4" /> Create Group
+                    </button>
+                </div>
             </div>
 
             {/* Success Message */}
@@ -129,30 +137,65 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
 
             {/* Invitations */}
             {myInvitations.length > 0 && (
-                <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl p-4">
-                    <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-400 mb-3">
-                        Pending Invitations ({myInvitations.length})
-                    </h3>
-                    <div className="space-y-2">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <MailOpen className="w-5 h-5 text-amber-500" />
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4]">
+                            Pending Invitations
+                        </h3>
+                        <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                            {myInvitations.length}
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {myInvitations.map(inv => (
-                            <div key={inv.id} className="flex items-center justify-between bg-white dark:bg-[#1e1e2e] p-3 rounded-lg border border-blue-200 dark:border-blue-500/20">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">{inv.groupName}</p>
-                                    <p className="text-xs text-gray-500 dark:text-[#6c7086]">Invited by {inv.invitedByName}</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleAcceptInvitation(inv.id)}
-                                        className="px-3 py-1 text-xs font-semibold rounded-lg bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-500/30 transition-colors"
-                                    >
-                                        Accept
-                                    </button>
-                                    <button
-                                        onClick={() => handleRejectInvitation(inv.id)}
-                                        className="px-3 py-1 text-xs font-semibold rounded-lg bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors"
-                                    >
-                                        Reject
-                                    </button>
+                            <div key={inv.id} className="group relative bg-gradient-to-br from-white to-gray-50 dark:from-[#1e1e2e] dark:to-[#181825] rounded-2xl border-2 border-amber-200 dark:border-amber-500/30 p-6 hover:border-amber-400 dark:hover:border-amber-500/60 hover:shadow-xl dark:hover:shadow-amber-500/20 transition-all">
+                                {/* Glow effect on hover */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/20 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity pointer-events-none" />
+                                
+                                <div className="relative z-10">
+                                    {/* Header with icon and group name */}
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-white shadow-lg">
+                                                <BookOpen className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-base font-bold text-gray-900 dark:text-[#cdd6f4] leading-tight">
+                                                    {inv.groupName}
+                                                </h4>
+                                                <p className="text-xs text-gray-500 dark:text-[#6c7086] mt-0.5">
+                                                    {inv.memberCount} members
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-2xl animate-pulse">
+                                            ✉️
+                                        </div>
+                                    </div>
+
+                                    {/* Invited by info */}
+                                    <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-amber-100 dark:border-amber-500/20">
+                                        <p className="text-xs text-amber-900 dark:text-amber-300 font-medium">
+                                            🎯 Invited by <span className="font-bold text-amber-800 dark:text-amber-200">{inv.invitedByName}</span>
+                                        </p>
+                                    </div>
+
+                                    {/* Action buttons */}
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => handleAcceptInvitation(inv.id)}
+                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg hover:shadow-green-500/30 hover:-translate-y-0.5 transition-all active:translate-y-0"
+                                        >
+                                            <CheckCircle className="w-4 h-4" /> Accept
+                                        </button>
+                                        <button
+                                            onClick={() => handleRejectInvitation(inv.id)}
+                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-gray-200 to-gray-300 dark:from-[#313244] dark:to-[#45475a] text-gray-700 dark:text-[#cdd6f4] hover:shadow-lg hover:-translate-y-0.5 transition-all active:translate-y-0"
+                                        >
+                                            <XCircle className="w-4 h-4" /> Reject
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}

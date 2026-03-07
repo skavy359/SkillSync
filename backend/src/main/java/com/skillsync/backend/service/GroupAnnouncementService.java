@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.skillsync.backend.dto.CreateAnnouncementRequest;
 import com.skillsync.backend.dto.GroupAnnouncementDTO;
+import com.skillsync.backend.model.GroupActivity.ActivityType;
 import com.skillsync.backend.model.GroupAnnouncement;
 import com.skillsync.backend.model.GroupMembership;
 import com.skillsync.backend.model.GroupMembership.GroupRole;
@@ -31,6 +32,7 @@ public class GroupAnnouncementService {
     private final StudyGroupRepository groupRepository;
     private final UserRepository userRepository;
     private final GroupMembershipRepository membershipRepository;
+    private final GroupActivityService groupActivityService;
 
     @Transactional
     public GroupAnnouncementDTO createAnnouncement(Long groupId, CreateAnnouncementRequest request, Long userId) {
@@ -57,6 +59,10 @@ public class GroupAnnouncementService {
 
         announcement = announcementRepository.save(announcement);
         log.info("Announcement {} created by user {} in group {}", announcement.getId(), userId, groupId);
+
+        // Record activity
+        groupActivityService.recordActivity(groupId, ActivityType.ANNOUNCEMENT_POSTED, userId, 
+            user.getName() + " posted an announcement: " + request.getTitle());
 
         return mapToDTO(announcement);
     }

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.skillsync.backend.dto.CreateStudyGroupRequest;
 import com.skillsync.backend.dto.GroupMemberDTO;
 import com.skillsync.backend.dto.StudyGroupDTO;
+import com.skillsync.backend.dto.UpdateStudyGroupRequest;
 import com.skillsync.backend.model.GroupActivity.ActivityType;
 import com.skillsync.backend.model.GroupMembership;
 import com.skillsync.backend.model.GroupMembership.GroupRole;
@@ -156,6 +157,35 @@ public class StudyGroupService {
     }
 
     @Transactional
+    public StudyGroupDTO updateGroup(Long groupId, UpdateStudyGroupRequest request, Long userId) {
+        StudyGroup group = groupRepository.findById(groupId)
+            .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        // Check if user is admin
+        GroupMembership membership = membershipRepository.findByGroupIdAndUserId(groupId, userId)
+            .orElseThrow(() -> new RuntimeException("User is not a member of this group"));
+
+        if (!membership.getRole().equals(GroupRole.ADMIN)) {
+            throw new RuntimeException("Only admins can update the group");
+        }
+
+        // Update allowed fields
+        if (request.getDescription() != null) {
+            group.setDescription(request.getDescription());
+        }
+        if (request.getName() != null) {
+            group.setName(request.getName());
+        }
+        if (request.getImageUrl() != null) {
+            group.setImageUrl(request.getImageUrl());
+        }
+
+        groupRepository.save(group);
+        log.info("Group {} updated by user {}", groupId, userId);
+        return mapToDTO(group, true, false);
+    }
+
+    @Transactional
     public GroupMemberDTO addMember(Long groupId, Long newMemberId, Long currentUserId) {
         StudyGroup group = groupRepository.findById(groupId)
             .orElseThrow(() -> new RuntimeException("Group not found"));
@@ -213,6 +243,12 @@ public class StudyGroupService {
         // Update member count
         group.setMemberCount((int) membershipRepository.countByGroupId(groupId));
         groupRepository.save(group);
+
+        // Record activity
+        User removedUser = userRepository.findById(memberId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        groupActivityService.recordActivity(groupId, ActivityType.MEMBER_REMOVED, currentUserId, 
+            "Member removed: " + removedUser.getName());
 
         log.info("Removed member {} from group {}", memberId, groupId);
     }

@@ -1,18 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Search, Users, BookOpen, ChevronRight, Loader2 } from 'lucide-react';
-import { listPublicGroups, searchGroups, listGroupsBySkill, joinGroup } from '../services/studyGroupService';
-import { getMySkills } from '../services/skillService';
+import { Search, Users, BookOpen, ChevronRight, Loader2, Sparkles, TrendingUp } from 'lucide-react';
+import { listPublicGroups, searchGroups, joinGroup } from '../services/studyGroupService';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-import Select from '../components/ui/Select';
 
 const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
     const [groups, setGroups] = useState([]);
-    const [skills, setSkills] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searching, setSearching] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedSkillId, setSelectedSkillId] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [joiningGroupId, setJoiningGroupId] = useState(null);
@@ -26,11 +22,7 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
     const fetchInitialData = async () => {
         try {
             setLoading(true);
-            const [skillsRes, groupsRes] = await Promise.all([
-                getMySkills(),
-                listPublicGroups(0, PAGE_SIZE)
-            ]);
-            setSkills(skillsRes.content || skillsRes || []);
+            const groupsRes = await listPublicGroups(0, PAGE_SIZE);
             setGroups(groupsRes.content || groupsRes || []);
             setTotalPages(groupsRes.totalPages || 1);
             setCurrentPage(0);
@@ -61,33 +53,12 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
         }
     };
 
-    const handleSkillFilter = async (skillId) => {
-        setSelectedSkillId(skillId);
-        if (!skillId) {
-            fetchInitialData();
-            return;
-        }
-
-        try {
-            setLoading(true);
-            const result = await listGroupsBySkill(skillId, 0, PAGE_SIZE);
-            setGroups(result.content || result || []);
-            setTotalPages(result.totalPages || 1);
-            setCurrentPage(0);
-        } catch (error) {
-            console.error('Error filtering groups:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handlePagination = async (newPage) => {
         try {
             setLoading(true);
             let result;
-            if (selectedSkillId) {
-                result = await listGroupsBySkill(selectedSkillId, newPage, PAGE_SIZE);
-            } else if (searchQuery.trim()) {
+            if (searchQuery.trim()) {
                 result = await searchGroups(searchQuery, newPage, PAGE_SIZE);
             } else {
                 result = await listPublicGroups(newPage, PAGE_SIZE);
@@ -126,13 +97,16 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
     return (
         <div className="flex-1 flex flex-col bg-gray-50 dark:bg-[#11111b]">
             {/* Header */}
-            <div className="bg-white dark:bg-[#1e1e2e] border-b border-gray-200 dark:border-[#313244] px-8 py-6">
-                <div className="max-w-6xl mx-auto">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-2">
-                        Browse Study Groups
-                    </h1>
-                    <p className="text-gray-600 dark:text-[#a6adc8]">
-                        Discover public study groups and find collaborators
+            <div className="px-8 py-8">
+                <div className="max-w-6xl mx-auto bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-[#1e1e2e] dark:to-[#1e1e2e] border-2 border-gray-200 dark:border-[#313244] rounded-3xl px-8 py-8">
+                    <div className="flex items-center gap-3 mb-2">
+                        <Sparkles className="w-8 h-8 text-white dark:text-indigo-400" />
+                        <h1 className="text-4xl font-bold text-white">
+                            Discover Study Groups
+                        </h1>
+                    </div>
+                    <p className="text-indigo-100 dark:text-[#a6adc8]">
+                        Join thriving communities of learners and accelerate your growth together
                     </p>
                 </div>
             </div>
@@ -148,37 +122,23 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
                     )}
 
                     {/* Filters */}
-                    <div className="mb-6 space-y-4">
+                    <div className="mb-8">
                         {/* Search Bar */}
                         <form onSubmit={handleSearch} className="flex gap-2">
                             <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-indigo-400" />
                                 <Input
                                     type="text"
-                                    placeholder="Search group name, skill..."
+                                    placeholder="Search by group name or skill..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10"
+                                    className="pl-12 py-3 text-base bg-white dark:bg-[#1e1e2e] border border-gray-300 dark:border-[#313244]"
                                 />
                             </div>
-                            <Button type="submit" loading={searching}>
+                            <Button type="submit" loading={searching} className="px-8">
                                 Search
                             </Button>
                         </form>
-
-                        {/* Skill Filter */}
-                        <Select
-                            value={selectedSkillId}
-                            onChange={(e) => handleSkillFilter(e.target.value)}
-                            label="Filter by Skill"
-                        >
-                            <option value="">All Skills</option>
-                            {skills.map(skill => (
-                                <option key={skill.id} value={skill.id}>
-                                    {skill.name}
-                                </option>
-                            ))}
-                        </Select>
                     </div>
 
                     {/* Groups Grid */}
@@ -201,59 +161,67 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
                         </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                                 {groups.map(group => (
                                     <div
                                         key={group.id}
                                         onClick={() => handleNavigateToGroup(group.id)}
-                                        className="bg-white dark:bg-[#1e1e2e] rounded-lg p-5 border border-gray-200 dark:border-[#313244] hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-indigo-500/20 hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all cursor-pointer"
+                                        className="group relative bg-white dark:bg-[#1e1e2e] rounded-3xl overflow-hidden border-2 border-gray-200 dark:border-[#313244] hover:border-transparent transition-all duration-300 hover:shadow-2xl dark:hover:shadow-2xl dark:hover:shadow-indigo-500/30 cursor-pointer transform hover:-translate-y-1"
                                     >
-                                        {/* Group Header */}
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-semibold text-gray-900 dark:text-[#cdd6f4] truncate">
-                                                    {group.name}
-                                                </h3>
-                                                <p className="text-xs text-gray-500 dark:text-[#6c7086] mt-1">
-                                                    by {group.createdByName}
-                                                </p>
-                                            </div>
-                                            <ChevronRight className="w-5 h-5 text-gray-400 dark:text-[#6c7086] flex-shrink-0" />
-                                        </div>
+                                        {/* Gradient Background */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/20 dark:to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                                        {/* Description */}
-                                        <p className="text-sm text-gray-600 dark:text-[#a6adc8] mb-3 line-clamp-2">
-                                            {group.description || 'No description'}
-                                        </p>
-
-                                        {/* Skill Badge */}
-                                        {group.skillName && (
-                                            <div className="mb-3 inline-flex items-center px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 text-xs font-medium">
-                                                <BookOpen className="w-3 h-3 mr-1" />
-                                                {group.skillName}
+                                        {/* Content */}
+                                        <div className="relative p-6 space-y-4">
+                                            {/* Header */}
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-bold text-lg text-gray-900 dark:text-[#cdd6f4] truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                        {group.name}
+                                                    </h3>
+                                                    <p className="text-xs text-gray-500 dark:text-[#6c7086] mt-1 flex items-center gap-1">
+                                                        <span>👤</span> {group.createdByName}
+                                                    </p>
+                                                </div>
+                                                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                    <BookOpen className="w-5 h-5 text-white" />
+                                                </div>
                                             </div>
-                                        )}
 
-                                        {/* Footer */}
-                                        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-[#313244]">
-                                            <div className="flex items-center space-x-1 text-gray-600 dark:text-[#a6adc8]">
-                                                <Users className="w-4 h-4" />
-                                                <span className="text-sm font-medium">{group.memberCount}</span>
-                                                <span className="text-xs">members</span>
-                                            </div>
-                                            {group.isMember ? (
-                                                <span className="text-xs font-semibold text-green-600 dark:text-green-400">
-                                                    Joined
-                                                </span>
-                                            ) : (
-                                                <button
-                                                    onClick={(e) => handleJoinGroup(group.id, e)}
-                                                    disabled={joiningGroupId === group.id}
-                                                    className="px-3 py-1 text-xs font-semibold rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                    {joiningGroupId === group.id ? 'Joining...' : 'Join'}
-                                                </button>
+                                            {/* Description */}
+                                            <p className="text-sm text-gray-600 dark:text-[#a6adc8] line-clamp-2 leading-relaxed">
+                                                {group.description || 'A collaborative learning space'}
+                                            </p>
+
+                                            {/* Skill Badge */}
+                                            {group.skillName && (
+                                                <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-500/20 dark:to-blue-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold gap-1">
+                                                    <span>🎯</span>
+                                                    {group.skillName}
+                                                </div>
                                             )}
+
+                                            {/* Stats Footer */}
+                                            <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-[#313244]">
+                                                <div className="flex items-center gap-1">
+                                                    <Users className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                                                    <span className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4]">{group.memberCount}</span>
+                                                    <span className="text-xs text-gray-500 dark:text-[#6c7086]">members</span>
+                                                </div>
+                                                {group.isMember ? (
+                                                    <span className="flex items-center gap-1 text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-3 py-1 rounded-full">
+                                                        <span>✓</span> Joined
+                                                    </span>
+                                                ) : (
+                                                    <button
+                                                        onClick={(e) => handleJoinGroup(group.id, e)}
+                                                        disabled={joiningGroupId === group.id}
+                                                        className="px-4 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:shadow-lg hover:shadow-indigo-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                                                    >
+                                                        {joiningGroupId === group.id ? '...' : 'Join'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

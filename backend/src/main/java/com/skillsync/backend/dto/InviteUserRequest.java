@@ -7,4 +7,5 @@ import lombok.Setter;
 @Setter
 public class InviteUserRequest {
     private Long userId;
+    private String email;
 }

@@ -55,6 +55,11 @@ export const inviteUser = async (groupId, userId) => {
     return data.data;
 };
 
+export const inviteUserByEmail = async (groupId, email) => {
+    const { data } = await api.post(`/group-invitations/groups/${groupId}/invite-by-email`, { email });
+    return data.data;
+};
+
 export const acceptInvitation = async (invitationId) => {
     const { data } = await api.post(`/group-invitations/${invitationId}/accept`);
     return data.data;
@@ -72,5 +77,10 @@ export const getMyInvitations = async () => {
 
 export const getGroupInvitations = async (groupId) => {
     const { data } = await api.get(`/group-invitations/groups/${groupId}`);
+    return data.data;
+};
+
+export const updateGroup = async (groupId, updateData) => {
+    const { data } = await api.put(`/study-groups/${groupId}`, updateData);
     return data.data;
 };
