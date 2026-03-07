@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.skillsync.backend.dto.AddSkillRequest;
 import com.skillsync.backend.dto.AdminUserResponse;
 import com.skillsync.backend.dto.CategoryResponse;
@@ -271,6 +273,7 @@ public class UserService {
         skill.setStatus(SkillStatus.ACTIVE);
         skill.setUser(user);
         skill.setCategory(category);
+        skill.setEstimatedHours(request.getEstimatedHours());
 
         Skill savedSkill = skillRepository.save(skill);
 
@@ -497,6 +500,16 @@ public class UserService {
         return authentication.getName();
     }
 
+    private String calculateLevelFromProgress(int progress) {
+        if (progress < 34) {
+            return SkillLevel.BEGINNER.name();
+        } else if (progress < 67) {
+            return SkillLevel.INTERMEDIATE.name();
+        } else {
+            return SkillLevel.ADVANCED.name();
+        }
+    }
+
     private SkillResponse mapSkill(Skill skill) {
         int totalMinutes = skill.getSessions() != null 
             ? skill.getSessions().stream()
@@ -505,16 +518,36 @@ public class UserService {
             : 0;
 
         String categoryName = skill.getCategory() != null ? skill.getCategory().getName() : null;
+        Long categoryId = skill.getCategory() != null ? skill.getCategory().getId() : null;
 
-        return new SkillResponse(
+        // Auto-calculate progress from sessions vs estimated hours
+        int progress = skill.getProgress();
+        if (skill.getEstimatedHours() != null && skill.getEstimatedHours() > 0) {
+            double hoursLogged = totalMinutes / 60.0;
+            progress = (int) Math.min(100, Math.round((hoursLogged / skill.getEstimatedHours()) * 100));
+        }
+
+        // Auto-calculate level based on progress
+        String level = calculateLevelFromProgress(progress);
+        
+        // Auto-mark as COMPLETED if progress is 100%
+        SkillStatus status = skill.getStatus();
+        if (progress >= 100) {
+            status = SkillStatus.COMPLETED;
+        }
+
+        SkillResponse response = new SkillResponse(
                 skill.getId(),
                 skill.getName(),
-                skill.getLevel().name(),
-                skill.getProgress(),
-                skill.getStatus().name(),
+                level,
+                progress,
+                status.name(),
                 totalMinutes,
                 categoryName
         );
+        response.setCategoryId(categoryId);
+        response.setEstimatedHours(skill.getEstimatedHours());
+        return response;
     }
 
     public UserStatsResponse getMyStats() {
@@ -1219,12 +1252,17 @@ public class UserService {
 
                     Skill skill = goal.getSkill();
 
-                    int progress = skill.getProgress();
-                    int remaining = 100 - progress;
+                    // Calculate progress dynamically from sessions vs estimated hours (same as mapSkill)
+                    int totalMinutes = learningSessionRepository
+                            .sumDurationMinutesBySkill(skill);
 
-                    int totalMinutes =
-                            learningSessionRepository
-                                    .sumDurationMinutesBySkill(skill);
+                    int progress = skill.getProgress();
+                    if (skill.getEstimatedHours() != null && skill.getEstimatedHours() > 0) {
+                        double hoursLogged = totalMinutes / 60.0;
+                        progress = (int) Math.min(100, Math.round((hoursLogged / skill.getEstimatedHours()) * 100));
+                    }
+
+                    int remaining = 100 - progress;
 
                     double velocity = 0;
                     if (totalMinutes > 0) {
@@ -1576,16 +1614,26 @@ public class UserService {
             : 0;
 
         String categoryName = skill.getCategory() != null ? skill.getCategory().getName() : null;
+        Long categoryId = skill.getCategory() != null ? skill.getCategory().getId() : null;
 
-        return new SkillResponse(
+        int progress = skill.getProgress();
+        if (skill.getEstimatedHours() != null && skill.getEstimatedHours() > 0) {
+            double hoursLogged = totalMinutes / 60.0;
+            progress = (int) Math.min(100, Math.round((hoursLogged / skill.getEstimatedHours()) * 100));
+        }
+
+        SkillResponse response = new SkillResponse(
                 skill.getId(),
                 skill.getName(),
                 skill.getLevel().name(),
-                skill.getProgress(),
+                progress,
                 skill.getStatus().name(),
                 totalMinutes,
                 categoryName
         );
+        response.setCategoryId(categoryId);
+        response.setEstimatedHours(skill.getEstimatedHours());
+        return response;
     }
 
     public SkillResponse assignCategoryToSkill(Long skillId, Long categoryId) {
@@ -1603,6 +1651,24 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         skill.setCategory(category);
+
+        Skill updated = skillRepository.save(skill);
+
+        return mapToSkillResponse(updated);
+    }
+
+    public SkillResponse removeCategoryFromSkill(Long skillId) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Skill skill = skillRepository.findByIdAndUser(skillId, user)
+                .orElseThrow(() -> new RuntimeException("Skill not found"));
+
+        skill.setCategory(null);
 
         Skill updated = skillRepository.save(skill);
 
