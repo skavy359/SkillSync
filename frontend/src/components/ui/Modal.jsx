@@ -40,28 +40,30 @@ const Modal = ({
             <div className="flex min-h-full items-center justify-center p-4">
                 <div
                     className={`
-            relative bg-white dark:bg-[#1e1e2e] rounded-2xl shadow-xl
+            relative bg-white/80 dark:bg-[#181825]/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 dark:border-white/10
             w-full ${sizes[size]}
-            transform transition-all
+            transform transition-all overflow-hidden
           `}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-[#313244]">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-[#cdd6f4]">{title}</h2>
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-pink-500/5 pointer-events-none" />
+                    
+                    <div className="relative flex items-center justify-between px-8 py-6 border-b border-gray-200/50 dark:border-white/5">
+                        <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{title}</h2>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 dark:hover:text-[#cdd6f4] transition-colors p-1 hover:bg-gray-100 dark:hover:bg-[#313244] rounded-lg"
+                            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl"
                         >
                             <X className="w-5 h-5" />
                         </button>
                     </div>
 
-                    <div className="px-6 py-4">
+                    <div className="relative px-8 py-6">
                         {children}
                     </div>
 
                     {footer && (
-                        <div className="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-[#313244] bg-gray-50 dark:bg-[#181825] rounded-b-2xl">
+                        <div className="relative flex items-center justify-end space-x-3 px-8 py-5 border-t border-gray-200/50 dark:border-white/5 bg-gray-50/50 dark:bg-black/20">
                             {footer}
                         </div>
                     )}
