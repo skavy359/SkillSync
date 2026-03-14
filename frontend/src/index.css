@@ -35,8 +35,10 @@ html.dark textarea::placeholder {
 html.dark input:focus,
 html.dark textarea:focus,
 html.dark select:focus {
-    border-color: #6366f1;
-    outline-color: #6366f1;
+    background-color: #1e1e2e !important;
+    color: #cdd6f4 !important;
+    border-color: #6366f1 !important;
+    outline-color: #6366f1 !important;
 }
 
 html {
