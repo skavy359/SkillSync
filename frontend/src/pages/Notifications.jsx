@@ -82,8 +82,7 @@ const Notifications = () => {
 
     return (
         <div className="max-w-4xl mx-auto pb-12">
-            
-            {/* Header section */}
+
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8">
                 <div>
                     <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 flex items-center gap-3">
@@ -111,7 +110,6 @@ const Notifications = () => {
                 )}
             </div>
 
-            {/* Notification List */}
             {recentNotifications.length > 0 ? (
                 <div className="space-y-4">
                     {recentNotifications.map((notif, idx) => {
@@ -125,17 +123,14 @@ const Notifications = () => {
                                     : 'bg-gray-50 dark:bg-[#181825]/50 border-gray-100 dark:border-white/5 shadow-sm opacity-70 hover:opacity-100'
                                 }`}
                             >
-                                {/* Unread indicator bar */}
                                 {isUnread && (
                                     <div className="absolute left-0 top-6 bottom-6 w-1.5 bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
                                 )}
 
-                                {/* Icon container */}
                                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${getColorClassForType(notif.type)} ${!isUnread && 'opacity-60'}`}>
                                     {getIconForType(notif.type)}
                                 </div>
 
-                                {/* Content */}
                                 <div className="flex-1 min-w-0 pr-4 sm:pr-8">
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1">
                                         <h3 className={`text-lg transition-colors leading-snug line-clamp-2 ${isUnread ? 'font-black text-gray-900 dark:text-white' : 'font-bold text-gray-700 dark:text-gray-400'}`}>
@@ -157,7 +152,6 @@ const Notifications = () => {
                                     </div>
                                 </div>
 
-                                {/* Action Buttons */}
                                 {isUnread && (
                                     <button
                                         onClick={() => handleMarkRead(notif)}

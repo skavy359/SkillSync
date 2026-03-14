@@ -1,5 +1,4 @@
 import React from 'react';
-import Card from './ui/Card';
 import Badge from './ui/Badge';
 import { Clock, X, ChevronRight, Sparkles } from 'lucide-react';
 
@@ -28,7 +27,6 @@ const SkillCard = ({
             onClick={onClick}
             className="group relative flex flex-col bg-white dark:bg-[#1e1e2e] rounded-2xl p-5 border border-gray-200 dark:border-[#313244] hover:border-indigo-500/50 dark:hover:border-indigo-400/50 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
         >
-            {/* Header Area */}
             <div className="flex items-start justify-between mb-4">
                 <div className="flex-1 pr-4">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
@@ -48,7 +46,6 @@ const SkillCard = ({
                 </div>
             </div>
 
-            {/* Progress Area */}
             <div className="mb-5 mt-auto">
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-500 dark:text-[#a6adc8]">Mastery</span>
@@ -62,7 +59,6 @@ const SkillCard = ({
                 </div>
             </div>
 
-            {/* Footer / Meta */}
             <div className={`flex items-center justify-between pt-4 border-t border-gray-100 dark:border-[#313244]/50 ${!skill.category ? 'pb-1' : ''}`}>
                 <div className="flex items-center text-sm font-medium text-gray-500 dark:text-[#7f849c]">
                     <Clock className="w-4 h-4 mr-1.5" />

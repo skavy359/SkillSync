@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Send, Check, AlertCircle, ShieldCheck, Megaphone, Lightbulb, Loader2, MessageSquare, Sparkles, RadioTower, Zap, Eye } from 'lucide-react';
+import { Bell, AlertCircle, Megaphone, Lightbulb, Loader2, MessageSquare, Sparkles, RadioTower, Zap, Eye } from 'lucide-react';
 import adminService from '../services/adminService';
 
 const AdminNotifications = () => {
@@ -24,8 +24,7 @@ const AdminNotifications = () => {
 
   return (
     <div className="space-y-8 relative z-10 w-full max-w-4xl mx-auto p-4 sm:p-0">
-      
-      {/* Cinematic Success Toast */}
+
       {successMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-4 px-6 py-4 bg-emerald-500/90 backdrop-blur-xl border border-emerald-400/50 rounded-2xl shadow-2xl shadow-emerald-500/30 animate-in slide-in-from-bottom-5">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
@@ -35,7 +34,6 @@ const AdminNotifications = () => {
         </div>
       )}
 
-      {/* Hero Header */}
       <div className="flex flex-col relative z-10 text-center items-center mb-10">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/60 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 backdrop-blur-md mb-6 shadow-sm">
           <RadioTower className="w-4 h-4 text-indigo-500 animate-pulse" />
@@ -58,8 +56,7 @@ const AdminNotifications = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          
-        {/* Transmission Console */}
+
         <div className="lg:col-span-3 space-y-6">
             <div className="bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/50 dark:border-white/10 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] relative overflow-hidden group">
                 <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-focus-within:bg-indigo-500/20 transition-colors duration-700" />
@@ -117,10 +114,8 @@ const AdminNotifications = () => {
             </div>
         </div>
 
-        {/* Sidebar panels */}
         <div className="lg:col-span-2 space-y-6">
-            
-            {/* Live Preview */}
+
             <div className="bg-gradient-to-br from-indigo-900 via-[#181825] to-purple-900 p-[1px] rounded-[2.5rem] shadow-2xl overflow-hidden relative group h-full max-h-[400px]">
                 <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/20 to-transparent opacity-50 pointer-events-none" />
                 <div className="bg-[#181825]/90 backdrop-blur-2xl rounded-[2.5rem] p-6 sm:p-8 h-full flex flex-col relative z-10">
@@ -164,7 +159,6 @@ const AdminNotifications = () => {
                 </div>
             </div>
 
-            {/* Protocol Manual */}
             <div className="bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/50 dark:border-white/10 p-6 sm:p-8 shadow-xl">
                 <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">

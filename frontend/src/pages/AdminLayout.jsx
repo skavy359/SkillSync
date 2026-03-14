@@ -40,7 +40,6 @@ const AdminSidebar = ({ currentPage, onNavigate, onLogout, mobileOpen, onMobileC
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
             >
-                {/* Logo Area */}
                 <div className="flex flex-col px-6 py-8 border-b border-gray-200/50 dark:border-white/5 relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500" />
                     <div className="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500/20 blur-2xl rounded-full group-hover:bg-indigo-500/30 transition-colors" />
@@ -72,7 +71,6 @@ const AdminSidebar = ({ currentPage, onNavigate, onLogout, mobileOpen, onMobileC
                     </div>
                 </div>
 
-                {/* Navigation */}
                 <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-hide">
                     <p className="px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4">Core Modules</p>
                     {NAV_ITEMS.map((item) => {
@@ -107,7 +105,6 @@ const AdminSidebar = ({ currentPage, onNavigate, onLogout, mobileOpen, onMobileC
                     })}
                 </nav>
 
-                {/* Bottom Actions */}
                 <div className="px-4 py-6 border-t border-gray-200/50 dark:border-white/5 bg-gray-50/50 dark:bg-[#11111b]/30">
                     <button
                         onClick={onLogout}
@@ -193,7 +190,6 @@ const AdminLayout = ({ children, currentPage, onNavigate, onLogout, adminName })
 
     return (
         <div className="flex h-screen bg-[#FAFAFA] dark:bg-[#0B0F19] overflow-hidden selection:bg-indigo-500/30">
-            {/* Absolute Ambient Backgrounds for the entire shell */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-[120px]" />
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-[120px]" />

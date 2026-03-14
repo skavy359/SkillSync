@@ -46,7 +46,6 @@ public class User {
 
     private LocalDateTime passwordResetTokenExpiresAt;
 
-    // Notification Preferences
     @Column(columnDefinition = "BOOLEAN DEFAULT true")
     private Boolean notifSessionReminders = true;
 

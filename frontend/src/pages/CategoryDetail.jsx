@@ -137,7 +137,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 </div>
             )}
 
-            {/* Category Hero Banner */}
             <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-[#181825] border border-gray-200/50 dark:border-white/5 shadow-sm">
                 
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 dark:from-indigo-500/10 dark:to-purple-500/10 pointer-events-none" />
@@ -177,7 +176,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 </div>
             </div>
 
-            {/* Top Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                     { label: 'Total Tracked', val: stats.totalSkills, icon: Lightbulb, color: 'amber' },
@@ -195,7 +193,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 ))}
             </div>
 
-            {/* Skills Grid */}
             <Section title="Tracked Skills" description={`Managing ${stats.totalSkills} skill${stats.totalSkills !== 1 ? 's' : ''} inside this category`}>
                 {skills.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -224,7 +221,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 )}
             </Section>
 
-            {/* Edit Modal */}
             {isEditModalOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)} />
@@ -256,7 +252,6 @@ const CategoryDetail = ({ categoryId, onNavigate, onSelectSkill, onCategoryDelet
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
             {isDeleteConfirmOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsDeleteConfirmOpen(false)} />

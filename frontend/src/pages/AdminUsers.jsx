@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Modal from '../components/ui/Modal';
 import Button from '../components/ui/Button';
-import Badge from '../components/ui/Badge';
 import {
   getUsers, updateUserRole, deleteUser, getUserSkills,
 } from '../services/adminService';
@@ -112,7 +111,6 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-8 relative z-10 w-full max-w-[100vw] overflow-x-hidden p-4 sm:p-0">
-      {/* Success Toast */}
       {showSuccessMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-4 px-6 py-4 bg-emerald-500/90 backdrop-blur-xl border border-emerald-400/50 rounded-2xl shadow-2xl shadow-emerald-500/20 animate-in slide-in-from-bottom-5">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
@@ -122,7 +120,6 @@ const AdminUsers = () => {
         </div>
       )}
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/60 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 backdrop-blur-md mb-4 shadow-sm">
@@ -152,7 +149,6 @@ const AdminUsers = () => {
         </div>
       )}
 
-      {/* Global Search + Filter Toolbar */}
       <div className="relative bg-white/60 dark:bg-[#181825]/60 backdrop-blur-2xl rounded-3xl border border-white/50 dark:border-white/10 p-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] flex flex-col md:flex-row gap-2 z-20">
         <div className="relative flex-1 group">
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -184,7 +180,6 @@ const AdminUsers = () => {
         </div>
       )}
 
-      {/* Futuristic Users Table */}
       <div className="bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/50 dark:border-white/10 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)]">
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse min-w-[800px] sm:min-w-full">
@@ -279,7 +274,6 @@ const AdminUsers = () => {
           </table>
         </div>
 
-        {/* Cinematic Pagination */}
         {!loading && !error && totalElements > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-8 py-5 border-t border-white/50 dark:border-white/10 bg-gray-50/50 dark:bg-black/20">
             <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
@@ -312,7 +306,6 @@ const AdminUsers = () => {
         )}
       </div>
 
-      {/* Futuristic User Detail Modal */}
       <Modal isOpen={detailModal.open} onClose={() => setDetailModal({ open: false, user: null })}
         title={
           <div className="flex items-center gap-4">
@@ -340,7 +333,6 @@ const AdminUsers = () => {
           </div>
         }>
         <div className="space-y-8 p-2">
-          {/* Identity Info Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: 'Access Level', value: detailModal.user?.role === 'ADMIN' ? 'Administrator' : 'Standard', icon: <ShieldCheck className="w-5 h-5 text-purple-500" />, grad: 'from-purple-50 items-center', txt: detailModal.user?.role === 'ADMIN' ? 'text-purple-600' : 'text-gray-600' },
@@ -359,7 +351,6 @@ const AdminUsers = () => {
             ))}
           </div>
 
-          {/* Role Modification Console */}
           <div className="p-6 rounded-3xl bg-gradient-to-br from-white to-indigo-50/50 dark:from-[#181825] dark:to-indigo-900/10 border border-indigo-100/50 dark:border-indigo-500/20 shadow-lg shadow-indigo-500/5 relative overflow-hidden">
             <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
@@ -381,7 +372,6 @@ const AdminUsers = () => {
             </div>
           </div>
 
-          {/* Skill Matrix Display */}
           <div className="bg-white/40 dark:bg-white/5 rounded-3xl border border-gray-200/50 dark:border-white/10 p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -456,7 +446,6 @@ const AdminUsers = () => {
         </div>
       </Modal>
 
-      {/* Cinematic Delete Confirmation Modal */}
       <Modal isOpen={deleteModal.open} onClose={() => { if (!deleteLoading) { setDeleteModal({ open: false, user: null }); setDeleteError(null); } }}
         title={<span className="text-rose-600 dark:text-rose-400 font-black">Erasure Protocol</span>} size="sm"
         footer={

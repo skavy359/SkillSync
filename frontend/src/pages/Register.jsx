@@ -102,17 +102,14 @@ const Register = ({ onNavigate, onLogin }) => {
     return (
         <div className="min-h-screen flex bg-[#0a0a0f] text-white selection:bg-purple-500/30">
 
-            {/* --- Left Hero Panel --- */}
             <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 relative bg-[#050510] flex-col justify-between p-12 lg:p-16 overflow-hidden border-r border-white/5">
                 
-                {/* Advanced Animated Background */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse-slow" />
                     <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-fuchsia-600/15 rounded-full blur-[100px] translate-y-1/4 translate-x-1/4 animate-pulse-slow" style={{ animationDelay: '2s' }} />
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik01OS4yNSAwSDBWMHogTTEuMjEgNjBIMFYwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiIHN0cm9rZS13aWR0aD0iMSIvPgo8L3N2Zz4=')] opacity-50" />
                 </div>
 
-                {/* Logo Area */}
                 <div className="relative z-10 flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-500/20 border border-white/10 shrink-0">
                         <Lightbulb className="w-6 h-6 text-white" />
@@ -122,7 +119,6 @@ const Register = ({ onNavigate, onLogin }) => {
                     </span>
                 </div>
 
-                {/* Main Copy & Features */}
                 <div className="relative z-10 shrink-0 my-8">
                     <div>
                         <h1 className="text-5xl xl:text-6xl font-black text-white leading-[1.1] tracking-tight mb-6">
@@ -151,7 +147,6 @@ const Register = ({ onNavigate, onLogin }) => {
                         })}
                     </div>
 
-                    {/* Community Bar */}
                     <div className="mt-12 p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-between">
                         <div className="flex -space-x-3">
                             {['KS', 'KD', 'RT', 'MS'].map((avatar, i) => (
@@ -167,19 +162,16 @@ const Register = ({ onNavigate, onLogin }) => {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="relative z-10 text-gray-500 text-sm font-medium">
                     © {new Date().getFullYear()} SkillSync. Free forever core tracking.
                 </div>
             </div>
 
-            {/* --- Right Auth Panel --- */}
             <div className="w-full lg:w-[55%] xl:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-16 relative overflow-y-auto">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 lg:hidden pointer-events-none" />
 
                 <div className="w-full max-w-[420px] relative z-10 my-auto py-8">
-                    
-                    {/* Mobile Logo */}
+
                     <div className="flex items-center gap-3 mb-8 lg:hidden justify-center">
                         <div className="w-10 h-10 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg border border-white/10 shrink-0">
                             <Lightbulb className="w-5 h-5 text-white" />
@@ -314,7 +306,6 @@ const Register = ({ onNavigate, onLogin }) => {
                 </div>
             </div>
 
-            {/* Modals remain mostly identical but restyled */}
             {modalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(null)} />

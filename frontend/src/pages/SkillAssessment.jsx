@@ -57,7 +57,7 @@ const SkillAssessment = () => {
       const res = await api.get('/skills');
       const data = res.data;
       setSkills(Array.isArray(data) ? data : Array.isArray(data?.content) ? data.content : []);
-    } catch { /* ignore */ }
+    } catch { }
   };
 
   const getSkillName = () => {
@@ -161,7 +161,6 @@ const SkillAssessment = () => {
             <p className="text-sm font-bold text-rose-700 dark:text-rose-400">{error}</p>
           </div>
         )}
-        {/* Header Hero */}
         <div className="relative bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 shadow-sm overflow-hidden p-8 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 opacity-80" />
             <div className="absolute -top-32 -left-32 w-64 h-64 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
@@ -191,10 +190,8 @@ const SkillAssessment = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Quick Setup Form */}
+
             <div className="lg:col-span-2 space-y-8">
-                {/* Topic Selection */}
                 <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 p-6 sm:p-8 shadow-sm relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
                     
@@ -238,7 +235,6 @@ const SkillAssessment = () => {
                     </div>
                 </div>
 
-                {/* Question Count */}
                 <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 p-6 sm:p-8 shadow-sm relative overflow-hidden">
                     <h2 className="text-lg font-black text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 flex items-center justify-center">
@@ -266,7 +262,6 @@ const SkillAssessment = () => {
                 </div>
             </div>
 
-            {/* Difficulty & Launch Sidebar */}
             <div className="space-y-6">
                 <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 p-6 sm:p-8 shadow-sm">
                     <h2 className="text-lg font-black text-gray-900 dark:text-white mb-6 flex items-center gap-3">
@@ -344,7 +339,6 @@ const SkillAssessment = () => {
 
     return (
       <div className="max-w-3xl mx-auto space-y-8 pb-12">
-        {/* Quiz Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 p-4 sm:p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <button onClick={() => { if(window.confirm('Abandon current assessment?')) resetQuiz(); }} className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-[#1e1e2e] flex items-center justify-center hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 transition-colors">
@@ -364,7 +358,6 @@ const SkillAssessment = () => {
           </div>
         </div>
 
-        {/* Progress Timeline */}
         <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Progress</span>
@@ -400,7 +393,6 @@ const SkillAssessment = () => {
             </div>
         </div>
 
-        {/* Question Card */}
         <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 p-6 sm:p-10 shadow-lg relative overflow-hidden animate-in slide-in-from-right-8 duration-300">
           <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-indigo-500 to-purple-600" />
           
@@ -439,7 +431,6 @@ const SkillAssessment = () => {
           </div>
         </div>
 
-        {/* Navigation Footer */}
         <div className="flex items-center justify-between bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 p-4 sm:p-6 shadow-sm">
           <button
             onClick={prevQuestion}
@@ -482,7 +473,6 @@ const SkillAssessment = () => {
           </div>
         )}
 
-        {/* Results Hero Banner */}
         <div className={`relative rounded-3xl border overflow-hidden p-8 sm:p-12 text-center shadow-xl ${grade.bg} ${grade.border} animate-in zoom-in-95 duration-500`}>
           <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20 -mr-32 -mt-32 backdrop-filter`} style={{ backgroundColor: 'currentColor', color: grade.color.replace('text-', '') }} />
           
@@ -527,7 +517,6 @@ const SkillAssessment = () => {
           </div>
         </div>
 
-        {/* Detailed Review */}
         <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 p-6 sm:p-8 shadow-sm">
           <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-indigo-500" /> Detailed Review

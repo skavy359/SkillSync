@@ -44,7 +44,6 @@ const StudyPlanner = () => {
   const [showModal, setShowModal] = useState(false);
   const [skills, setSkills] = useState([]);
   const [successMsg, setSuccessMsg] = useState('');
-
   const [formTitle, setFormTitle] = useState('');
   const [formDesc, setFormDesc] = useState('');
   const [formDate, setFormDate] = useState('');
@@ -140,8 +139,7 @@ const StudyPlanner = () => {
 
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-      
-      {/* --- Hero Header --- */}
+
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-700 p-8 md:p-12 shadow-2xl text-white">
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
         <div className="absolute bottom-0 left-10 w-48 h-48 bg-purple-400/20 rounded-full blur-3xl -mb-10"></div>
@@ -171,7 +169,6 @@ const StudyPlanner = () => {
 
       {successMsg && <SuccessToast message={successMsg} />}
 
-      {/* --- Stats Row --- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="relative overflow-hidden rounded-[2rem] border border-blue-100 dark:border-blue-500/20 p-6 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg group">
               <div className="absolute -top-6 -right-6 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform duration-500">
@@ -220,8 +217,7 @@ const StudyPlanner = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        
-        {/* --- Calendar Section --- */}
+
         <div className="lg:col-span-2 bg-white dark:bg-[#1e1e2e] rounded-3xl border border-gray-100 dark:border-[#313244] p-5 md:p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
             <h2 className="text-2xl font-black text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">
@@ -296,7 +292,6 @@ const StudyPlanner = () => {
           </div>
         </div>
 
-        {/* --- Day Detail Sidebar --- */}
         <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl border border-gray-100 dark:border-[#313244] p-5 md:p-8 shadow-sm flex flex-col h-[600px] lg:h-auto">
           <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-100 dark:border-[#313244]">
             <h3 className="text-xl font-black text-gray-900 dark:text-[#cdd6f4]">
@@ -330,7 +325,6 @@ const StudyPlanner = () => {
                 return (
                   <div key={ev.id} className={`rounded-2xl border p-4 relative group transition-all hover:shadow-md ${st.bg}`}>
                     <div className="flex items-start gap-4">
-                      {/* Color Bar / Indicator */}
                       <div className="w-1.5 h-full absolute inset-y-0 left-0 rounded-l-2xl opacity-80" style={{ backgroundColor: ev.color || '#8b5cf6' }} />
                       
                       <div className="flex-1 min-w-0 pl-2">
@@ -354,8 +348,7 @@ const StudyPlanner = () => {
                         {ev.description && (
                           <p className="text-sm font-medium opacity-75 mt-2 line-clamp-3 bg-white/40 dark:bg-black/20 p-3 rounded-xl">{ev.description}</p>
                         )}
-                        
-                        {/* Action Buttons */}
+
                         <div className="flex items-center gap-2 mt-4 pt-4 border-t border-black/5 dark:border-white/5">
                           {ev.status === 'PLANNED' && (
                             <>
@@ -392,7 +385,6 @@ const StudyPlanner = () => {
         </div>
       </div>
 
-      {/* --- Modals --- */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Schedule Study Session" size="lg" footer={<><Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button><Button variant="primary" onClick={handleCreate} disabled={!formTitle.trim() || !formDate || creating}>{creating ? 'Scheduling...' : 'Confirm Schedule'}</Button></>}>
         <form className="space-y-4">
               <div>

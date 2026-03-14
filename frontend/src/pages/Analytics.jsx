@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Section from '../components/ui/Section';
-import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
-import ProgressBar from '../components/ui/ProgressBar';
 import BarChartCard from '../components/ui/BarChartCard';
 import {
     Flame, TrendingUp, Target, AlertTriangle, Clock, Award,
@@ -144,7 +142,6 @@ const Analytics = () => {
 
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-            {/* --- Hero Header --- */}
             <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 p-8 md:p-12 shadow-2xl text-white">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -ml-20 -mb-20"></div>
@@ -163,7 +160,6 @@ const Analytics = () => {
                 </div>
             </div>
 
-            {/* --- Top Stat Cards --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <GradientStatCard
                     title="Current Streak"
@@ -199,13 +195,9 @@ const Analytics = () => {
                 />
             </div>
 
-            {/* --- Main Dashboard Content --- */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-                {/* Left Column */}
                 <div className="lg:col-span-2 space-y-6 lg:space-y-8">
-                    {/* Health Card */}
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200 dark:border-[#313244] overflow-hidden relative">
-                        {/* Background Decor */}
                         <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-500/5 dark:to-purple-500/5 rounded-full blur-2xl pointer-events-none"></div>
 
                         <div className="flex items-center justify-between mb-8 relative z-10">
@@ -252,7 +244,6 @@ const Analytics = () => {
                         </div>
                     </div>
 
-                    {/* Charts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <BarChartCard
                             title="Top Skills by Time"
@@ -279,9 +270,7 @@ const Analytics = () => {
                     </div>
                 </div>
 
-                {/* Right Column */}
                 <div className="space-y-6 lg:space-y-8">
-                    {/* Highlights Card */}
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl p-6 shadow-sm border border-gray-200 dark:border-[#313244]">
                         <h3 className="text-xl font-black text-gray-900 dark:text-[#cdd6f4] mb-6 flex items-center gap-2">
                             <Sparkles className="w-6 h-6 text-purple-500" /> Key Highlights
@@ -336,7 +325,6 @@ const Analytics = () => {
                         </div>
                     </div>
 
-                    {/* Goals Progress */}
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl p-6 shadow-sm border border-gray-200 dark:border-[#313244]">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-black text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">
@@ -375,7 +363,6 @@ const Analytics = () => {
                 </div>
             </div>
 
-            {/* --- Insights Block --- */}
             <Section title="AI Learning Insights" description="Personalized recommendations based on your activity data">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {insights.map((insight, index) => {

@@ -74,10 +74,8 @@ const Login = ({ onNavigate, onLogin }) => {
     return (
         <div className="min-h-screen flex bg-[#0a0a0f] text-white selection:bg-indigo-500/30">
 
-            {/* --- Left Hero Panel --- */}
             <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 relative bg-[#050510] flex-col justify-between p-12 lg:p-16 overflow-hidden border-r border-white/5">
                 
-                {/* Advanced Animated Background */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse-slow" />
                     <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4 animate-pulse-slow" style={{ animationDelay: '2s' }} />
@@ -85,7 +83,6 @@ const Login = ({ onNavigate, onLogin }) => {
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik01OS4yNSAwSDBWMHogTTEuMjEgNjBIMFYwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiIHN0cm9rZS13aWR0aD0iMSIvPgo8L3N2Zz4=')] opacity-50" />
                 </div>
 
-                {/* Logo Area */}
                 <div className="relative z-10 flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/10 shrink-0">
                         <Lightbulb className="w-6 h-6 text-white" />
@@ -95,7 +92,6 @@ const Login = ({ onNavigate, onLogin }) => {
                     </span>
                 </div>
 
-                {/* Main Copy */}
                 <div className="relative z-10 space-y-12 shrink-0 my-8">
                     <div>
                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6 text-sm font-bold shadow-sm backdrop-blur-md text-indigo-300 uppercase tracking-widest">
@@ -110,7 +106,6 @@ const Login = ({ onNavigate, onLogin }) => {
                         </p>
                     </div>
 
-                    {/* Stats Grid */}
                     <div className="grid grid-cols-3 gap-6 pt-4 border-t border-white/10">
                         {stats.map((stat, i) => (
                             <div key={i} className="space-y-1">
@@ -120,7 +115,6 @@ const Login = ({ onNavigate, onLogin }) => {
                         ))}
                     </div>
 
-                    {/* Testimonial Widget */}
                     <div className="relative group">
                         <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
                         <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 transition-all duration-300">
@@ -152,21 +146,17 @@ const Login = ({ onNavigate, onLogin }) => {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="relative z-10 text-gray-500 text-sm font-medium">
                     © {new Date().getFullYear()} SkillSync. Built for learners.
                 </div>
             </div>
 
-            {/* --- Right Auth Panel --- */}
             <div className="w-full lg:w-[55%] xl:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-16 relative">
                 
-                {/* Mobile Glow */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 lg:hidden pointer-events-none" />
 
                 <div className="w-full max-w-[420px] relative z-10">
                     
-                    {/* Mobile Logo */}
                     <div className="flex items-center gap-3 mb-10 lg:hidden justify-center">
                         <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/10 shrink-0">
                             <Lightbulb className="w-5 h-5 text-white" />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Download, X, FileText, ShieldCheck, Search, Loader2, Sparkles, Activity, Eye, Zap, Database } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, X, Search, Loader2, Activity, Eye, Database } from 'lucide-react';
 import adminService from '../services/adminService';
 
 const ACTION_COLORS = {
@@ -72,7 +72,6 @@ const AdminAuditLogs = () => {
   return (
     <div className="space-y-8 relative z-10 w-full max-w-[100vw] overflow-x-hidden p-4 sm:p-0">
       
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/60 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 backdrop-blur-md mb-4 shadow-sm">
@@ -94,7 +93,6 @@ const AdminAuditLogs = () => {
         </button>
       </div>
 
-      {/* Cyber-Filters */}
       <div className="relative group">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-[2rem] blur-xl opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" />
         <div className="relative bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-[2rem] border border-white/50 dark:border-white/10 p-6 shadow-xl">
@@ -143,7 +141,6 @@ const AdminAuditLogs = () => {
         </div>
       )}
 
-      {/* Futuristic Log Entries Table */}
       <div className="bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/50 dark:border-white/10 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)]">
         {loading ? (
             <div className="flex flex-col items-center justify-center py-24 relative z-10 w-full">
@@ -231,7 +228,6 @@ const AdminAuditLogs = () => {
               </table>
             </div>
 
-            {/* Cinematic Pagination */}
             {totalPages > 1 && !hasFilters && (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-8 py-5 border-t border-white/50 dark:border-white/10 bg-gray-50/50 dark:bg-black/20">
                 <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">

@@ -37,7 +37,6 @@ const UserSkillsModal = ({ isOpen, onClose, user }) => {
 
     useEffect(() => {
         if (!isOpen || !user?.id) return;
-
         let cancelled = false;
 
         const fetchSkills = async () => {

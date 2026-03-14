@@ -61,12 +61,10 @@ const SharingCard = ({ profile }) => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      
-      {/* Interactive Card Canvas */}
+
       <div className="group relative w-full max-w-2xl mx-auto transform transition-all hover:-translate-y-2 duration-500 perspective-1000">
           
-        {/* Glow behind card */}
-        <div 
+        <div
             className="absolute -inset-1 blur-2xl opacity-40 group-hover:opacity-70 transition-opacity duration-700 rounded-3xl"
             style={{ backgroundImage: `linear-gradient(135deg, ${rank.color}, #ec4899)` }}
         />
@@ -78,7 +76,6 @@ const SharingCard = ({ profile }) => {
             boxShadow: `inset 0 0 80px rgba(0,0,0,0.8), 0 25px 50px -12px ${rank.glow}`,
           }}
         >
-          {/* Card Background Effects */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#12182b] via-[#0a0f1c] to-[#05080f] pointer-events-none" />
           
           <div className="absolute inset-0 opacity-20"
@@ -93,7 +90,6 @@ const SharingCard = ({ profile }) => {
           />
 
           <div className="relative z-10 p-8 md:p-10">
-            {/* Header */}
             <div className="flex items-center justify-between mb-10">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
@@ -107,7 +103,6 @@ const SharingCard = ({ profile }) => {
               </div>
             </div>
 
-            {/* Profile Avatar & Name */}
             <div className="flex flex-col md:flex-row items-center gap-6 mb-10 text-center md:text-left">
               <div className="relative group/avatar">
                 <div className="absolute inset-[-4px] rounded-full bg-gradient-to-br from-white/20 to-white/5 animate-[spin_4s_linear_infinite]" />
@@ -124,7 +119,6 @@ const SharingCard = ({ profile }) => {
               </div>
             </div>
 
-            {/* Power Level Bar */}
             <div className="mb-10 bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
               <div className="flex items-center justify-between mb-3 text-sm">
                 <span className="font-bold text-gray-300 tracking-wider uppercase">Power Level</span>
@@ -140,7 +134,6 @@ const SharingCard = ({ profile }) => {
               </div>
             </div>
 
-            {/* Core Stats Grid */}
             <div className="grid grid-cols-3 gap-4 mb-8">
               {[
                 { label: 'Skills', value: profile.totalSkills, icon: Brain, color: '#a855f7', bg: 'from-purple-500/20 to-indigo-500/20' },
@@ -163,7 +156,6 @@ const SharingCard = ({ profile }) => {
               })}
             </div>
 
-            {/* Extra Stats */}
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="rounded-[1.25rem] p-4 text-center border border-white/10 bg-white/5 backdrop-blur-sm">
                 <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1.5">Avg Session</p>
@@ -198,7 +190,6 @@ const SharingCard = ({ profile }) => {
               </div>
             )}
 
-            {/* Footer */}
             <div className="pt-6 border-t border-white/10 flex items-center justify-between">
               <p className="text-[10px] text-gray-500 font-mono tracking-[0.2em]">SKILLSYNC VERIFIED</p>
               <div className="flex items-center gap-1">
@@ -211,7 +202,6 @@ const SharingCard = ({ profile }) => {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto mt-10">
         <button
           onClick={downloadAsImage}
@@ -268,8 +258,7 @@ const SkillSharing = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      
-      {/* Hero Header */}
+
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 p-8 md:p-12 shadow-2xl text-white">
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
         <div className="absolute bottom-0 left-10 w-48 h-48 bg-purple-400/20 rounded-full blur-3xl -mb-10 pointer-events-none"></div>

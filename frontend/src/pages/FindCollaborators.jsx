@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Users, BookOpen, ChevronRight, Loader2, Sparkles, Plus, Compass } from 'lucide-react';
+import { Search, Users, BookOpen, ChevronRight, Compass } from 'lucide-react';
 import { listPublicGroups, searchGroups, listGroupsBySkill } from '../services/studyGroupService';
 import { getMySkills } from '../services/skillService';
 
@@ -94,8 +94,7 @@ const FindCollaborators = ({ onNavigate }) => {
 
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 max-w-5xl mx-auto">
-            
-            {/* --- Hero Header --- */}
+
             <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 md:p-12 shadow-2xl text-white">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
                 <div className="absolute bottom-0 left-10 w-48 h-48 bg-blue-400/20 rounded-full blur-3xl -mb-10 pointer-events-none"></div>
@@ -123,7 +122,6 @@ const FindCollaborators = ({ onNavigate }) => {
                 </div>
             </div>
 
-            {/* --- Filters Area --- */}
             <div className="flex flex-col lg:flex-row gap-4">
                 <div className="relative flex-1 group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
@@ -165,7 +163,6 @@ const FindCollaborators = ({ onNavigate }) => {
                 )}
             </div>
 
-            {/* --- Results --- */}
             {loading ? (
                 <div className="flex justify-center py-20">
                     <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin shadow-lg" />

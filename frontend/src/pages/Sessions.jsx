@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PageHeader from '../components/ui/PageHeader';
-import Section from '../components/ui/Section';
-import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
@@ -15,19 +12,16 @@ const Sessions = ({ onNavigate }) => {
     const [filteredSessions, setFilteredSessions] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
-    
-    // Modals
+
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [sessionToDelete, setSessionToDelete] = useState(null);
     const [showLogModal, setShowLogModal] = useState(false);
     const [selectedSession, setSelectedSession] = useState(null);
     
-    // Forms
     const [editForm, setEditForm] = useState({ durationMinutes: 0, sessionDate: '', notes: '' });
     const [logForm, setLogForm] = useState({ skillId: '', durationMinutes: '', notes: '', sessionDate: new Date().toISOString().split('T')[0] });
     
-    // State
     const [editLoading, setEditLoading] = useState(false);
     const [logLoading, setLogLoading] = useState(false);
     const [editError, setEditError] = useState('');
@@ -117,8 +111,7 @@ const Sessions = ({ onNavigate }) => {
         try {
             await addSession(logForm.skillId, { durationMinutes: Number(logForm.durationMinutes), notes: logForm.notes, sessionDate: logForm.sessionDate });
             setShowLogModal(false); setLogForm({ skillId: '', durationMinutes: '', notes: '', sessionDate: new Date().toISOString().split('T')[0] });
-            
-            // Refresh
+
             const refreshedSessions = await Promise.all(skills.map(skill =>
                 fetchSessions(skill.id).then(sessions => (Array.isArray(sessions) ? sessions : []).map(s => ({ ...s, skillId: skill.id, skillName: skill.name }))).catch(() => [])
             ));
@@ -137,7 +130,6 @@ const Sessions = ({ onNavigate }) => {
 
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-            {/* --- Hero Header --- */}
             <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 p-8 md:p-10 shadow-lg text-white">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                 <div className="absolute bottom-0 left-20 w-40 h-40 bg-white/10 rounded-full blur-2xl -mb-10"></div>
@@ -165,7 +157,6 @@ const Sessions = ({ onNavigate }) => {
                 </div>
             </div>
 
-            {/* Notifications */}
             {showSuccessMessage && (
                 <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -173,7 +164,6 @@ const Sessions = ({ onNavigate }) => {
                 </div>
             )}
 
-            {/* --- Stats Grid --- */}
             {allSessions.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl p-6 border border-gray-100 dark:border-[#313244] shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
@@ -211,7 +201,6 @@ const Sessions = ({ onNavigate }) => {
                 </div>
             )}
 
-            {/* --- Main Content Area --- */}
             <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200 dark:border-[#313244]">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-[#cdd6f4]">Session Timeline</h2>
@@ -285,7 +274,6 @@ const Sessions = ({ onNavigate }) => {
                 )}
             </div>
 
-            {/* --- Modals (Re-styled inputs and buttons) --- */}
             <Modal isOpen={showLogModal} onClose={() => setShowLogModal(false)} title="Log a Session" footer={<><Button variant="secondary" onClick={() => setShowLogModal(false)}>Cancel</Button><Button variant="primary" onClick={handleLogSession} disabled={logLoading}>{logLoading ? 'Logging...' : 'Log Session'}</Button></>}>
                 <form className="space-y-4">
                     <div>

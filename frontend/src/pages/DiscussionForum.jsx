@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MessageSquare, Search, Plus, ThumbsUp, MessageCircle, Clock, X, Tag, ExternalLink, Check, ChevronRight } from 'lucide-react';
+import { MessageSquare, Search, Plus, ThumbsUp, MessageCircle, Clock, X, Check, ChevronRight } from 'lucide-react';
 import { getPosts, createPost, togglePostUpvote } from '../services/forumService';
 import Button from '../components/ui/Button';
 
@@ -81,7 +81,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
 
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-      {/* --- Hero Header --- */}
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-700 p-8 md:p-12 shadow-2xl text-white">
         <div className="absolute top-0 left-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -ml-20 -mt-20"></div>
         <div className="absolute bottom-0 right-10 w-48 h-48 bg-purple-400/20 rounded-full blur-3xl -mb-10"></div>
@@ -114,7 +113,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
         </div>
       )}
 
-      {/* --- Search and Filters --- */}
       <div className="flex flex-col lg:flex-row gap-4">
         <form onSubmit={handleSearch} className="relative flex-1 group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors" />
@@ -149,7 +147,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
         </div>
       </div>
 
-      {/* --- Posts Feed --- */}
       {loading ? (
         <div className="flex justify-center py-20">
           <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto shadow-lg" />
@@ -233,7 +230,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-8">
             <div className="flex items-center gap-2 bg-white dark:bg-[#1e1e2e] p-2 rounded-2xl shadow-sm border border-gray-100 dark:border-[#313244]">
@@ -250,7 +246,6 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
         </div>
       )}
 
-      {/* --- New Post Modal --- */}
       {showNewPost && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setShowNewPost(false)}>
           <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl border border-gray-200 dark:border-[#313244] w-full max-w-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>

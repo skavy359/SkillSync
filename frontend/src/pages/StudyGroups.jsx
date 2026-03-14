@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Plus, Users, BookOpen, ChevronRight, Loader2, X, MailOpen, CheckCircle, XCircle, Search, Sparkles } from 'lucide-react';
 import { getMyGroups, createStudyGroup, getMyInvitations, acceptInvitation, rejectInvitation } from '../services/studyGroupService';
 import { getMySkills } from '../services/skillService';
-import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
 import Button from '../components/ui/Button';
 
@@ -68,8 +67,7 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
 
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-            
-            {/* --- Hero Header --- */}
+
             <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-8 md:p-12 shadow-2xl text-white">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                 <div className="absolute bottom-0 left-10 w-48 h-48 bg-indigo-400/20 rounded-full blur-3xl -mb-10"></div>
@@ -111,7 +109,6 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                 </div>
             )}
 
-            {/* --- Pending Invitations --- */}
             {myInvitations.length > 0 && (
                 <div className="space-y-4">
                     <div className="flex items-center gap-3 mb-2">
@@ -174,7 +171,6 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                 </div>
             )}
 
-            {/* --- My Groups List --- */}
             <div>
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">
@@ -236,7 +232,6 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                                 <div className="relative z-10 flex items-center justify-between pt-4 border-t border-gray-100 dark:border-[#313244] mt-auto">
                                     <div className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-[#cdd6f4]">
                                         <div className="flex -space-x-2">
-                                           {/* Mock avatars based on member count */}
                                            {[...Array(Math.min(group.memberCount, 3))].map((_, i) => (
                                                 <div key={i} className="w-7 h-7 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#313244] dark:to-[#45475a] border-2 border-white dark:border-[#1e1e2e]" />
                                             ))}
@@ -256,7 +251,6 @@ const StudyGroups = ({ onNavigate, onSelectGroup }) => {
                 )}
             </div>
 
-            {/* --- Modals --- */}
             <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create New Study Group" size="md" footer={<><Button variant="secondary" onClick={() => setShowCreateModal(false)}>Cancel</Button><Button variant="primary" onClick={handleCreateGroup} disabled={!formData.name.trim() || submitting}>{submitting ? 'Creating...' : 'Launch Group'}</Button></>}>
                 <form className="space-y-5">
                     <div>

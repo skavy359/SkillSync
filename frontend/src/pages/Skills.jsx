@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PageHeader from '../components/ui/PageHeader';
-import EmptyState from '../components/ui/EmptyState';
 import SkillCard from '../components/SkillCard';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -17,12 +15,10 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
     const [filterStatus, setFilterStatus] = useState('all');
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({ name: '', categoryId: '', description: '', estimatedHours: '' });
-    
-    // Status
+
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-    // Category Assignment
     const [isAssignCategoryModalOpen, setIsAssignCategoryModalOpen] = useState(false);
     const [selectedSkillForCategory, setSelectedSkillForCategory] = useState(null);
     const [assignCategoryForm, setAssignCategoryForm] = useState({ categoryId: '' });
@@ -246,7 +242,6 @@ const Skills = ({ onNavigate, onSelectSkill }) => {
                 </div>
             )}
 
-            {/* Modals remain mostly identical in functionality but inherit modern inputs */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Skill" footer={<><Button variant="secondary" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>Cancel</Button><Button variant="primary" onClick={handleSubmit} disabled={isSubmitting}>{isSubmitting ? 'Adding...' : 'Add Skill'}</Button></>}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input label="Skill Name" type="text" placeholder="e.g., React.js, Python, Guitar" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />

@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Section from '../components/ui/Section';
-import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
-import EmptyState from '../components/ui/EmptyState';
 import {
     ArrowLeft, Clock, Calendar, TrendingUp, Plus, Edit, Trash2, 
     Target, AlertTriangle, Check, Sparkles, Activity
@@ -16,7 +12,6 @@ import { getMySkills, addSession, getSessions, deleteSkill, updateSkill, assignC
 import { updateSession, deleteSession } from "../services/sessionService";
 import { getAllCategories } from "../services/categoryService";
 
-// --- Custom Animated Ring Component ---
 const AnimatedRing = ({ progress, size = 160, strokeWidth = 12 }) => {
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
@@ -25,9 +20,7 @@ const AnimatedRing = ({ progress, size = 160, strokeWidth = 12 }) => {
     return (
         <div className="relative inline-flex items-center justify-center">
             <svg width={size} height={size} className="transform -rotate-90">
-                {/* Background Ring */}
                 <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-white/20" />
-                {/* Progress Ring */}
                 <circle 
                     cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth}
                     strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset}
@@ -45,16 +38,14 @@ const AnimatedRing = ({ progress, size = 160, strokeWidth = 12 }) => {
 const SkillDetail = ({ skillId, onNavigate }) => {
     const [skill, setSkill] = useState(null);
     const [sessions, setSessions] = useState([]);
-    const [activeTab, setActiveTab] = useState('overview'); // Added tabbed interface
-    
-    // Modals
+    const [activeTab, setActiveTab] = useState('overview');
+
     const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [isSessionEditModalOpen, setIsSessionEditModalOpen] = useState(false);
     const [isSessionDeleteConfirmOpen, setIsSessionDeleteConfirmOpen] = useState(false);
     
-    // Forms & State
     const [isDeleteLoading, setIsDeleteLoading] = useState(false);
     const [isEditLoading, setIsEditLoading] = useState(false);
     const [editForm, setEditForm] = useState({ name: '', categoryId: '' });
@@ -64,7 +55,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
     const [sessionEditForm, setSessionEditForm] = useState({ durationMinutes: 0, sessionDate: '', notes: '' });
     const [sessionEditLoading, setSessionEditLoading] = useState(false);
     
-    // Notifications
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [validationError, setValidationError] = useState(false);
@@ -80,7 +70,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
 
     const showNotification = (msg) => { setSuccessMessage(msg); setShowSuccessMessage(true); setTimeout(() => setShowSuccessMessage(false), 3000); };
 
-    // --- Handlers ---
     const handleAddSession = async (e) => {
         e.preventDefault();
         const duration = Number(sessionForm.duration);
@@ -160,13 +149,11 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                     <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to My Skills
                 </button>
 
-                {/* --- Hero Banner Section --- */}
                 <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 p-8 md:p-12 shadow-2xl text-white border border-indigo-400/20">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                     <div className="absolute bottom-0 left-10 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl -mb-20"></div>
                     
                     <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-8 md:gap-12">
-                        {/* Text Content */}
                         <div className="flex-1 text-center md:text-left space-y-5">
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
                                 <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest border border-white/20 shadow-sm flex items-center gap-1.5">
@@ -210,7 +197,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                             </div>
                         </div>
 
-                        {/* Progress Ring graphic */}
                         <div className="flex-shrink-0 drop-shadow-2xl">
                             <div className="p-4 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20">
                                 <AnimatedRing progress={skill.progress} size={150} />
@@ -220,9 +206,7 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </div>
             </div>
 
-            {/* --- Main Content Area --- */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-                {/* Left Column: Timeline */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200 dark:border-[#313244]">
                         <div className="flex items-center justify-between mb-8">
@@ -280,7 +264,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                     </div>
                 </div>
 
-                {/* Right Column: Stats */}
                 <div className="space-y-6">
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl p-6 shadow-sm border border-gray-200 dark:border-[#313244]">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4] mb-4 flex items-center gap-2">
@@ -304,7 +287,6 @@ const SkillDetail = ({ skillId, onNavigate }) => {
                 </div>
             </div>
 
-            {/* Modals */}
             <Modal isOpen={isSessionModalOpen} onClose={() => setIsSessionModalOpen(false)} title="Log Practice Session" footer={
                 <><Button variant="secondary" onClick={() => setIsSessionModalOpen(false)}>Cancel</Button><Button variant="primary" onClick={handleAddSession}>Add Session</Button></>
             }>

@@ -92,8 +92,7 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
 
     return (
         <header className="h-20 bg-white/70 dark:bg-[#1e1e2e]/70 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between px-8 relative z-50 transition-colors duration-300">
-            
-            {/* --- Global Search --- */}
+
             <div className="flex-1 max-w-2xl" ref={searchRef}>
                 <div className="relative group/search">
                     <div className={`absolute inset-0 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-2xl blur-xl transition-all duration-500 ${searchFocused ? 'opacity-100 scale-105' : 'opacity-0 scale-95'}`} />
@@ -186,10 +185,8 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                 </div>
             </div>
 
-            {/* --- Right Actions --- */}
             <div className="flex items-center space-x-4 pl-6 lg:ml-8">
-                
-                {/* Setting Icon Button */}
+
                 <button
                     onClick={() => onNavigate && onNavigate('settings')}
                     className="w-10 h-10 flex items-center justify-center text-gray-500 dark:text-[#a6adc8] hover:text-indigo-600 dark:hover:text-indigo-400 bg-gray-50 dark:bg-[#181825] hover:bg-white dark:hover:bg-[#1e1e2e] border border-gray-200/50 dark:border-white/5 hover:border-indigo-500/30 rounded-full transition-all shadow-sm hover:shadow-md"
@@ -197,7 +194,6 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
                     <Settings className="w-5 h-5" />
                 </button>
 
-                {/* Notifications Dropdown */}
                 <div className="relative" ref={notifRef}>
                     <button
                         onClick={() => { setNotifOpen(!notifOpen); setDropdownOpen(false); }}
@@ -288,7 +284,6 @@ const Topbar = ({ onLogout, currentUser, onNavigate, onSelectSkill }) => {
 
                 <div className="hidden sm:block w-px h-8 bg-gray-200 dark:bg-white/10" />
 
-                {/* Profile Dropdown */}
                 <div className="relative" ref={profileRef}>
                     <button
                         onClick={() => { setDropdownOpen(!dropdownOpen); setNotifOpen(false); }}

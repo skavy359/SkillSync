@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import PageHeader from '../components/ui/PageHeader';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
-import ProgressBar from '../components/ui/ProgressBar';
 import ActivityHeatmap from '../components/ui/ActivityHeatmap';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
@@ -18,8 +16,6 @@ import { getMyStats, getMyStreak, getWeeklyStats } from "../services/profileServ
 import { getMySkills, addSkill } from "../services/skillService";
 import { getAllCategories } from "../services/categoryService";
 import { createGoal } from "../services/goalService";
-
-// --- Modern UI Components ---
 
 const GradientStatCard = ({ title, value, subtitle, icon: Icon, gradient, delay = 0, trend, trendValue }) => (
     <div 
@@ -51,8 +47,6 @@ const GradientStatCard = ({ title, value, subtitle, icon: Icon, gradient, delay 
     </div>
 );
 
-// --- Main Page Component ---
-
 const Dashboard = ({ onNavigate, onSelectSkill }) => {
     const [learningStats, setLearningStats] = useState(null);
     const [userStats, setUserStats] = useState(null);
@@ -63,8 +57,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     const [recentSkills, setRecentSkills] = useState([]);
     const [recentSessions, setRecentSessions] = useState([]);
     const [loading, setLoading] = useState(true);
-    
-    // Modals & Forms
+
     const [showLogModal, setShowLogModal] = useState(false);
     const [allSkills, setAllSkills] = useState([]);
     const [logForm, setLogForm] = useState({ skillId: '', durationMinutes: '', notes: '', sessionDate: new Date().toISOString().split('T')[0] });
@@ -79,7 +72,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
     const [goalSubmitting, setGoalSubmitting] = useState(false);
     const [addSkillSubmitting, setAddSkillSubmitting] = useState(false);
     
-    // Status
     const [showAddSkillSuccess, setShowAddSkillSuccess] = useState(false);
     const [validationError, setValidationError] = useState(false);
     const [showLogSessionSuccess, setShowLogSessionSuccess] = useState(false);
@@ -87,7 +79,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
 
     const [userProfile, setUserProfile] = useState(null);
 
-    // --- Data Fetching ---
     const loadRecentSessions = async (skillList) => {
         try {
             const { fetchSessions } = await import('../services/sessionService');
@@ -203,7 +194,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         if (showCreateGoalModal && allSkills.length === 0) getMySkills({ size: 50 }).then(data => setAllSkills(data?.content || [])).catch(() => {});
     }, [showCreateGoalModal]);
 
-    // --- Handlers ---
     const handleLogSession = async (e) => {
         e.preventDefault();
         if (!logForm.skillId || !logForm.durationMinutes) return;
@@ -269,7 +259,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
         } catch (err) { alert('Failed to create goal'); } finally { setGoalSubmitting(false); }
     };
 
-    // --- Render Logic ---
     if (loading) {
         return (
             <div className="flex animate-pulse flex-col space-y-8 p-4">
@@ -342,7 +331,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
 
     return (
         <div className="space-y-8">
-            {/* Animated Hero Header */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-8 shadow-lg text-white">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                 <div className="absolute bottom-0 left-20 w-40 h-40 bg-white/10 rounded-full blur-2xl -mb-10"></div>
@@ -363,7 +351,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </div>
             </div>
 
-            {/* Success Alerts */}
             <div className="space-y-3">
                 {showAddSkillSuccess && (
                     <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
@@ -385,7 +372,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 )}
             </div>
 
-            {/* Premium Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <GradientStatCard
                     title="Total Skills"
@@ -423,7 +409,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 />
             </div>
 
-            {/* Quick Actions Panel */}
             <Section title="Quick Actions">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <button onClick={() => setShowAddSkillModal(true)} className="group relative overflow-hidden rounded-[2rem] p-[1px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/50 hover:to-purple-500/50 transition-colors duration-500 cursor-pointer text-left">
@@ -467,7 +452,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </div>
             </Section>
 
-            {/* Cinematic Telemetry Card (Burnout) */}
             <div className="relative group rounded-[2.5rem] bg-white/60 dark:bg-[#181825]/60 backdrop-blur-3xl border border-white/50 dark:border-white/10 overflow-hidden shadow-xl mt-8">
                 <div className={`absolute -inset-1 blur-2xl opacity-20 ${burnoutContent.iconData.bg} pointer-events-none group-hover:opacity-40 transition-opacity duration-1000`} />
                 
@@ -515,9 +499,7 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
 
             <ActivityHeatmap title="Weekly Activity Trend" description="Your learning consistency over the last 7 days" data={weeklyActivity} />
 
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Recent Skills */}
                 <Section title="Active Skills" action={<Button variant="ghost" size="sm" onClick={() => onNavigate('skills')}>View all <ArrowRight className="w-4 h-4 ml-1" /></Button>}>
                     <Card className="p-1">
                         <div className="flex flex-col">
@@ -555,7 +537,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                     </Card>
                 </Section>
 
-                {/* Recent Sessions */}
                 <Section title="Recent Sessions Log" action={<Button variant="ghost" size="sm" onClick={() => onNavigate('sessions')}>View all <ArrowRight className="w-4 h-4 ml-1" /></Button>}>
                     <Card className="p-1">
                         <div className="flex flex-col">
@@ -593,7 +574,6 @@ const Dashboard = ({ onNavigate, onSelectSkill }) => {
                 </Section>
             </div>
 
-            {/* Modals remain mostly unchanged functionally, relying on updated UI component styles */}
             <Modal isOpen={showLogModal} onClose={() => setShowLogModal(false)} title="Log a Session" footer={<><Button variant="secondary" onClick={() => setShowLogModal(false)}>Cancel</Button><Button variant="primary" onClick={handleLogSession} disabled={logSubmitting}>{logSubmitting ? 'Logging...' : 'Log Session'}</Button></>}>
                 <form onSubmit={handleLogSession} className="space-y-4">
                     <div>

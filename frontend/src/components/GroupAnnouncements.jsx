@@ -44,7 +44,6 @@ const GroupAnnouncements = ({ groupId, isAdmin, onCreateClick, refreshKey }) => 
         } catch (error) {
             console.error('Error toggling pin:', error);
             alert('Failed to toggle announcement pin');
-            // Refresh announcements on error
             const result = await getAnnouncements(groupId, 0, 20);
             setAnnouncements(result.content || result || []);
         } finally {

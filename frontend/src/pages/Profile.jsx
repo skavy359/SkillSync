@@ -113,10 +113,8 @@ const Profile = () => {
                 </div>
             )}
 
-            {/* --- Hero Banner & Profile Header --- */}
             <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-[#181825] border border-gray-200/50 dark:border-white/5 shadow-sm">
                 
-                {/* Stunning Gradient Cover */}
                 <div className="h-48 md:h-64 relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600">
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz4KPC9zdmc+')] opacity-40 mix-blend-overlay" />
                     <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
@@ -127,7 +125,6 @@ const Profile = () => {
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 -mt-16 sm:-mt-20">
                         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 relative z-10">
                             
-                            {/* Avatar */}
                             <div className="relative group">
                                 <div className="absolute -inset-0.5 bg-gradient-to-b from-white to-gray-200 dark:from-white/20 dark:to-white/5 rounded-3xl blur opacity-75 group-hover:opacity-100 transition duration-300" />
                                 <div className="w-32 h-32 md:w-40 md:h-40 relative rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 p-1 flex items-center justify-center shadow-2xl overflow-hidden group-hover:scale-[1.02] transition-transform duration-300">
@@ -143,8 +140,7 @@ const Profile = () => {
                                     </div>
                                 </div>
                             </div>
-                            
-                            {/* User Info */}
+
                             <div className="text-center sm:text-left pb-2">
                                 <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-2">{profile.name}</h1>
                                 <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 md:gap-4 text-sm font-semibold text-gray-600 dark:text-gray-400">
@@ -161,7 +157,6 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        {/* Edit Button */}
                         <div className="flex justify-center sm:justify-end pb-2">
                             <button
                                 onClick={handleOpenEditModal}
@@ -173,7 +168,6 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* Tab Navigation */}
                 <div className="px-6 sm:px-10 border-t border-gray-200/50 dark:border-white/5 overflow-x-auto custom-scrollbar">
                     <div className="flex items-center gap-8 min-w-max">
                         {['overview', 'achievements'].map(tab => (
@@ -194,14 +188,11 @@ const Profile = () => {
                 </div>
             </div>
 
-            {/* --- Tab Content --- */}
             {activeTab === 'overview' && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Left Column: About & Quick Stats */}
                     <div className="lg:col-span-1 space-y-6">
                         
-                        {/* About Card */}
                         <div className="bg-white dark:bg-[#181825] rounded-3xl p-6 border border-gray-200/50 dark:border-white/5 shadow-sm">
                             <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4">About Me</h3>
                             <p className="text-sm font-medium leading-relaxed text-gray-600 dark:text-gray-400">
@@ -209,7 +200,6 @@ const Profile = () => {
                             </p>
                         </div>
 
-                        {/* Streak Card */}
                         <div className="bg-gradient-to-br from-orange-500 to-rose-500 rounded-3xl p-6 border border-orange-400/30 shadow-lg shadow-orange-500/10 text-white relative overflow-hidden group">
                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-all duration-500" />
                            <div className="relative z-10">
@@ -228,10 +218,8 @@ const Profile = () => {
 
                     </div>
 
-                    {/* Right Column: Key Stats & Recent Activity */}
                     <div className="lg:col-span-2 space-y-6">
                         
-                        {/* Highlights Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             {[
                                 { label: 'Tracked Skills', val: stats.totalSkills, sub: `${stats.completedSkills} completed`, icon: Lightbulb, theme: 'indigo' },
@@ -249,7 +237,6 @@ const Profile = () => {
                             ))}
                         </div>
 
-                        {/* Mini Achievements Preview */}
                         <div className="bg-white dark:bg-[#181825] rounded-3xl p-6 border border-gray-200/50 dark:border-white/5 shadow-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-lg font-black text-gray-900 dark:text-white">Recent Trophies</h3>
@@ -274,7 +261,6 @@ const Profile = () => {
                 </div>
             )}
 
-            {/* --- Achievements Tab --- */}
             {activeTab === 'achievements' && (
                 <div className="bg-white dark:bg-[#181825] rounded-3xl p-8 border border-gray-200/50 dark:border-white/5 shadow-sm">
                     <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-8">
@@ -324,8 +310,6 @@ const Profile = () => {
                 </div>
             )}
 
-
-            {/* --- Edit Modal --- */}
             {isEditModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)} />
@@ -348,7 +332,6 @@ const Profile = () => {
                                     </div>
                                 )}
 
-                                {/* Public Info Form */}
                                 <div>
                                     <h4 className="flex items-center gap-2 text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider mb-5">
                                         <Lightbulb className="w-4 h-4 text-indigo-500" /> Public Information
@@ -379,7 +362,6 @@ const Profile = () => {
                                     </div>
                                 </div>
 
-                                {/* Security Form */}
                                 <div>
                                     <h4 className="flex items-center gap-2 text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider mb-2">
                                         <Shield className="w-4 h-4 text-emerald-500" /> Security

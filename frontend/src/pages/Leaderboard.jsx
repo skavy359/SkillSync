@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Flame, Lightbulb, Crown, TrendingUp, Trophy, Star, Target } from 'lucide-react';
+import { Flame, Lightbulb, Crown, Trophy, Star, Target } from 'lucide-react';
 import leaderboardService from '../services/leaderboardService';
 import { getMyProfile } from '../services/profileService';
 
@@ -57,7 +57,6 @@ const Leaderboard = () => {
   const data = getPodium(getData());
   const top3 = data.slice(0, 3);
   const rest = data.slice(3);
-  // Reorder for podium: 2nd, 1st, 3rd
   const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
 
   const podiumStyles = [
@@ -68,8 +67,7 @@ const Leaderboard = () => {
 
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-      
-      {/* --- Hero Section --- */}
+
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 p-8 md:p-12 shadow-2xl text-white">
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
         <div className="absolute bottom-0 left-10 w-48 h-48 bg-yellow-400/20 rounded-full blur-3xl -mb-10 pointer-events-none"></div>
@@ -100,7 +98,6 @@ const Leaderboard = () => {
         </div>
       )}
 
-      {/* --- Tab Navigation --- */}
       <div className="flex flex-wrap gap-3 bg-white dark:bg-[#1e1e2e] p-2 rounded-2xl shadow-sm inline-flex">
         {TABS.map(tab => {
           const Icon = tab.icon;
@@ -121,7 +118,6 @@ const Leaderboard = () => {
         })}
       </div>
 
-      {/* --- Podium Section --- */}
       {top3.length >= 3 && (
         <div className="bg-white dark:bg-[#1e1e2e] rounded-[2rem] border border-gray-100 dark:border-[#313244] p-8 md:p-12 shadow-sm overflow-hidden relative">
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-gray-50 dark:to-black/20 pointer-events-none" />
@@ -135,11 +131,9 @@ const Leaderboard = () => {
 
               return (
                 <div key={entry.userId} className={`flex flex-col items-center group ${isFirst ? 'z-10' : 'z-0'}`}>
-                  
-                  {/* User Avatar & Info */}
+
                   <div className={`relative mb-4 flex flex-col items-center transition-transform duration-500 ${isFirst ? 'scale-110 -translate-y-4 group-hover:-translate-y-6' : 'group-hover:-translate-y-2'}`}>
-                    
-                    {/* Crown for 1st */}
+
                     {isFirst && (
                         <div className="absolute -top-10 left-1/2 -translate-x-1/2 animate-bounce">
                             <Crown className="w-10 h-10 text-yellow-400 drop-shadow-md" />
@@ -157,7 +151,6 @@ const Leaderboard = () => {
                     </div>
                   </div>
 
-                  {/* Podium Pillar */}
                   <div className={`w-24 md:w-32 ${styles.h} rounded-t-2xl bg-gradient-to-t ${styles.bg} shadow-[inset_0_4px_12px_rgba(0,0,0,0.1)] relative flex flex-col items-center justify-start pt-6 overflow-hidden`}>
                      <div className="absolute top-0 w-full h-4 bg-white/20 rounded-t-2xl" />
                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent" />
@@ -172,7 +165,6 @@ const Leaderboard = () => {
         </div>
       )}
 
-      {/* --- Full Rankings Table --- */}
       <div className="bg-white dark:bg-[#1e1e2e] rounded-[2rem] border border-gray-100 dark:border-[#313244] overflow-hidden shadow-sm">
         <div className="px-6 py-5 border-b border-gray-100 dark:border-[#313244] bg-gray-50/50 dark:bg-transparent flex items-center justify-between">
           <h3 className="text-lg font-black text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">

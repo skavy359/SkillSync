@@ -52,7 +52,6 @@ const Sidebar = ({ currentPage, onNavigate }) => {
                 { id: 'goals', label: 'Goals', icon: Target },
                 { id: 'sessions', label: 'Sessions', icon: Clock },
                 { id: 'study-planner', label: 'Study Planner', icon: Calendar },
-                { id: 'coding-stats', label: 'Coding Stats', icon: Code2 },
             ]
         },
         {
@@ -76,7 +75,6 @@ const Sidebar = ({ currentPage, onNavigate }) => {
 
     return (
         <aside className="w-[280px] bg-[#f8fafc]/80 dark:bg-[#11111b]/80 backdrop-blur-xl border-r border-gray-200/50 dark:border-white/5 flex flex-col h-screen transition-colors duration-300">
-            {/* --- Logo Header --- */}
             <div className="h-20 flex items-center px-6 border-b border-gray-200/50 dark:border-white/5 flex-shrink-0 relative">
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-indigo-500/5 to-purple-500/5 pointer-events-none" />
                 <div className="flex items-center space-x-3.5 relative z-10 w-full cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onNavigate('dashboard')}>
@@ -89,7 +87,6 @@ const Sidebar = ({ currentPage, onNavigate }) => {
                 </div>
             </div>
 
-            {/* --- Navigation --- */}
             <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
                 {menuGroups.map((group, idx) => (
                     <div key={idx} className="space-y-1">
@@ -133,13 +130,11 @@ const Sidebar = ({ currentPage, onNavigate }) => {
                 ))}
             </nav>
 
-            {/* --- Footer Widget --- */}
             <div className="p-4 border-t border-gray-200/50 dark:border-white/5 flex-shrink-0 bg-white/30 dark:bg-black/10">
                 <button
                     onClick={() => onNavigate('sessions')}
                     className="w-full text-left relative overflow-hidden rounded-2xl p-4 transition-all duration-300 group hover:shadow-lg border border-gray-100 dark:border-white/5"
                 >
-                    {/* Widget Background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 opacity-80" />
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-blue-400/20 transition-colors" />
                     

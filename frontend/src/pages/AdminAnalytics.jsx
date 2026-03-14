@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  TrendingUp, Users, Activity, Award, AlertCircle, Flame, Clock, Crown,
-  ShieldCheck, ArrowUpRight, Loader2, BarChart3, Target, BookOpen,
+  TrendingUp, Users, Activity, Award, AlertCircle, Flame, Clock, Crown, ArrowUpRight, Loader2, BarChart3, Target, BookOpen,
   Sparkles, Zap, Layers
 } from 'lucide-react';
 import adminService from '../services/adminService';
@@ -118,8 +117,7 @@ const AdminAnalytics = () => {
 
   return (
     <div className="space-y-8 relative z-10 w-full max-w-[100vw] overflow-x-hidden p-4 sm:p-0">
-      
-      {/* Cinematic Header */}
+
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/60 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 backdrop-blur-md mb-4 shadow-sm">
@@ -144,8 +142,7 @@ const AdminAnalytics = () => {
 
       {metrics && (
         <div className="space-y-8">
-          
-          {/* Main Hero Metric - Session Duration */}
+
           <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 to-purple-800 p-8 sm:p-10 shadow-2xl shadow-indigo-500/20 group">
             <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
             <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-purple-500/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-1000" />
@@ -170,7 +167,6 @@ const AdminAnalytics = () => {
             </div>
           </div>
 
-          {/* User Analytics Grid */}
           <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
@@ -187,7 +183,6 @@ const AdminAnalytics = () => {
             </div>
           </div>
 
-          {/* Learning Analytics Grid */}
           <div>
             <div className="flex items-center gap-3 mb-6 mt-12">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
@@ -206,7 +201,6 @@ const AdminAnalytics = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
               
-              {/* Popular Skills */}
               <div className="lg:col-span-1 bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/50 dark:border-white/10 p-6 sm:p-8 shadow-xl">
                 <div className="flex items-center gap-4 mb-8">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
@@ -233,10 +227,8 @@ const AdminAnalytics = () => {
                 )}
               </div>
 
-              {/* Leaderboards */}
               <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                   
-                  {/* Top Learners */}
                   <div className="bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/50 dark:border-white/10 p-6 sm:p-8 shadow-xl flex flex-col">
                       <div className="flex items-center gap-4 mb-8">
                           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
@@ -266,7 +258,6 @@ const AdminAnalytics = () => {
                       )}
                   </div>
 
-                  {/* Most Dedicated */}
                   <div className="bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/50 dark:border-white/10 p-6 sm:p-8 shadow-xl flex flex-col">
                       <div className="flex items-center gap-4 mb-8">
                           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">

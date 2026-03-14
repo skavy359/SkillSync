@@ -22,7 +22,6 @@ import DiscussionForum from './pages/DiscussionForum';
 import ForumPostDetail from './pages/ForumPostDetail';
 import StudyPlanner from './pages/StudyPlanner';
 import SkillAssessment from './pages/SkillAssessment';
-import CodingStats from './pages/CodingStats';
 import StudyGroups from './pages/StudyGroups';
 import GroupDetails from './pages/GroupDetails';
 import BrowseStudyGroups from './pages/BrowseStudyGroups';
@@ -205,8 +204,6 @@ function App() {
                 return <ForumPostDetail postId={selectedPostId} onNavigate={setCurrentPage} currentUserId={currentUser?.id} />;
             case 'study-planner':
                 return <StudyPlanner />;
-            case 'coding-stats':
-                return <CodingStats />;
             case 'assessments':
                 return <SkillAssessment />;
             case 'study-groups':

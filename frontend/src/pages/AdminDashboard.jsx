@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { getAdminStats, getUsers } from '../services/adminService';
 import {
   Users, Layers, CalendarCheck, Activity, AlertCircle, RefreshCw,
-  Clock, ShieldCheck, TrendingUp, ArrowUpRight, Sparkles, UserPlus, FileText
+  Clock, ShieldCheck, ArrowUpRight, Sparkles, UserPlus, FileText
 } from 'lucide-react';
 
 const formatDate = (iso) => {
@@ -13,11 +13,9 @@ const formatDate = (iso) => {
 const GradientStatCard = ({ title, value, subtitle, icon: Icon, gradient, shadowColor, delay = 0 }) => (
   <div className="relative group rounded-3xl p-6 transition-all duration-500 hover:-translate-y-2"
     style={{ animationDelay: `${delay}ms` }}>
-    
-    {/* Floating Glow Behind Card */}
+
     <div className={`absolute -inset-1 bg-gradient-to-r ${gradient} rounded-[2rem] blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none`} />
     
-    {/* Main Card Surface */}
     <div className="absolute inset-0 bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-3xl border border-white/50 dark:border-white/10 overflow-hidden shadow-xl" style={{ boxShadow: `0 20px 40px -20px ${shadowColor}` }}>
         <div className={`absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-bl ${gradient} rounded-full blur-3xl opacity-20 group-hover:opacity-50 transition-all duration-700 group-hover:scale-150`} />
     </div>
@@ -91,7 +89,6 @@ const AdminDashboard = ({ onNavigate }) => {
 
   return (
     <div className="space-y-10">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/60 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 backdrop-blur-md mb-4 shadow-sm">
@@ -127,7 +124,6 @@ const AdminDashboard = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Primary Metrics Layer */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {statsLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
@@ -145,7 +141,6 @@ const AdminDashboard = ({ onNavigate }) => {
         )}
       </div>
 
-      {/* Telemetry Layer */}
       {!statsLoading && stats && (
         <div className="relative rounded-[2.5rem] p-8 border border-white/40 dark:border-white/10 bg-white/40 dark:bg-[#181825]/40 backdrop-blur-2xl shadow-xl overflow-hidden group">
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -185,7 +180,6 @@ const AdminDashboard = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Recent Entities Layer */}
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-6 px-2">
           <div className="flex items-center gap-3">

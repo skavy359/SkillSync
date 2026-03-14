@@ -95,13 +95,11 @@ const Settings = () => {
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-12">
             
-            {/* Header */}
             <div>
                 <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Account Settings</h1>
                 <p className="text-gray-500 dark:text-gray-400 font-medium">Manage your notification preferences, privacy, and account data.</p>
             </div>
 
-            {/* Notifications Section */}
             <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 shadow-sm overflow-hidden">
                 <div className="px-6 sm:px-8 py-6 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
@@ -145,7 +143,6 @@ const Settings = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Legal & About */}
                 <div className="space-y-8">
                     <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 shadow-sm overflow-hidden">
                         <div className="px-6 py-5 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
@@ -192,7 +189,6 @@ const Settings = () => {
                     </div>
                 </div>
 
-                {/* Danger Zone */}
                 <div>
                     <div className="bg-white dark:bg-[#181825] rounded-3xl border border-red-200 dark:border-red-500/20 shadow-sm overflow-hidden group hover:border-red-400 dark:hover:border-red-500/40 transition-colors">
                         <div className="px-6 py-6 border-b border-red-100 dark:border-red-500/10 bg-red-50 dark:bg-red-500/5 flex items-start gap-4">
@@ -219,7 +215,6 @@ const Settings = () => {
                 </div>
             </div>
 
-            {/* Modals */}
             {deleteModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setDeleteModalOpen(false); setDeleteInput(''); }} />

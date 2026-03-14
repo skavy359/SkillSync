@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Unlock, RotateCw, Search, AlertCircle, Check, ShieldCheck, Users, Loader2, Eye, EyeOff, KeyRound, Lock, Sparkles } from 'lucide-react';
+import { Unlock, RotateCw, Search, AlertCircle, Check, ShieldCheck, Loader2, Eye, EyeOff, KeyRound, Lock, Sparkles } from 'lucide-react';
 import Modal from '../components/ui/Modal';
 import Button from '../components/ui/Button';
 import adminService from '../services/adminService';
@@ -48,8 +48,7 @@ const AdminAccounts = () => {
 
   return (
     <div className="space-y-8 relative z-10 w-full max-w-[100vw] overflow-x-hidden p-4 sm:p-0">
-      
-      {/* Cinematic Success Toast */}
+
       {successMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-4 px-6 py-4 bg-emerald-500/90 backdrop-blur-xl border border-emerald-400/50 rounded-2xl shadow-2xl shadow-emerald-500/20 animate-in slide-in-from-bottom-5">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
@@ -59,7 +58,6 @@ const AdminAccounts = () => {
         </div>
       )}
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/60 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 backdrop-blur-md mb-4 shadow-sm">
@@ -83,7 +81,6 @@ const AdminAccounts = () => {
         </div>
       )}
 
-      {/* Glassmorphic Search Bar */}
       <div className="relative group">
         <div className="absolute inset-0 bg-gradient-to-r from-rose-500/20 to-indigo-500/20 rounded-3xl blur-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
         <div className="relative flex items-center bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-3xl border border-gray-200/50 dark:border-white/10 focus-within:border-rose-500/50 focus-within:ring-2 focus-within:ring-rose-500/20 transition-all shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-2">
@@ -95,7 +92,6 @@ const AdminAccounts = () => {
         </div>
       </div>
 
-      {/* Futuristic Users Table */}
       <div className="bg-white/60 dark:bg-[#181825]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/50 dark:border-white/10 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)]">
         {loading ? (
             <div className="flex flex-col items-center justify-center py-24 relative z-10 w-full">
@@ -183,7 +179,6 @@ const AdminAccounts = () => {
         )}
       </div>
 
-      {/* Cinematic Reset Password Modal */}
       <Modal isOpen={resetModal.open} onClose={() => setResetModal({ open: false, userId: null, password: '' })}
         title={
           <div className="flex items-center gap-4">

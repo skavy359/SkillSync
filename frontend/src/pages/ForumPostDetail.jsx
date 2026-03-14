@@ -111,8 +111,7 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-500">
-      
-      {/* Navigation & Alerts */}
+
       <div className="flex items-center justify-between">
           <button
             onClick={() => onNavigate('discussions')}
@@ -129,14 +128,12 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
         </div>
       )}
 
-      {/* --- Main Post --- */}
       <div className="bg-white dark:bg-[#1e1e2e] rounded-[2rem] border border-gray-100 dark:border-[#313244] shadow-sm overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-500/5 dark:to-fuchsia-500/5 rounded-bl-[100px] pointer-events-none -z-0" />
         
         <div className="relative z-10 p-6 md:p-8">
             <div className="flex flex-col md:flex-row gap-6">
                 
-                {/* Voting Column */}
                 <div className="hidden md:flex flex-col items-center shrink-0 w-16">
                     <button
                         onClick={handlePostUpvote}
@@ -154,7 +151,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
                     <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mt-1">Votes</span>
                 </div>
 
-                {/* Content Column */}
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-4">
                         <span className={`text-xs font-bold px-3 py-1.5 rounded-lg ${tagInfo.bg}`}>
@@ -179,7 +175,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between mt-8 pt-6 border-t border-gray-100 dark:border-[#313244] gap-4">
-                        {/* Author Info */}
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-inner">
                                 <span className="text-sm font-bold text-white">{post.authorName?.charAt(0).toUpperCase()}</span>
@@ -190,9 +185,7 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
                             </div>
                         </div>
 
-                        {/* Actions */}
                         <div className="flex items-center gap-2">
-                            {/* Mobile Vote Button */}
                             <button
                                 onClick={handlePostUpvote}
                                 className={`md:hidden flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all ${
@@ -217,7 +210,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
         </div>
       </div>
 
-      {/* --- Replies Section --- */}
       <div className="space-y-6">
         <div className="flex items-center justify-between ml-2">
             <h2 className="text-lg font-black text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">
@@ -254,7 +246,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
                   )}
 
                   <div className="flex flex-col sm:flex-row gap-5">
-                    {/* Reply Vote Column */}
                     <div className="flex flex-row sm:flex-col items-center gap-2 sm:shrink-0 sm:w-12 bg-gray-50 dark:bg-[#181825] sm:bg-transparent p-2 sm:p-0 rounded-xl">
                       <button
                         onClick={() => handleReplyUpvote(reply.id)}
@@ -320,7 +311,6 @@ const ForumPostDetail = ({ postId, onNavigate, currentUserId }) => {
         )}
       </div>
 
-      {/* --- Reply Box --- */}
       <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl border border-gray-200 dark:border-[#313244] overflow-hidden shadow-lg mt-8">
         <div className="bg-gradient-to-r from-gray-50 to-purple-50/30 dark:from-[#181825] dark:to-purple-900/10 px-6 py-4 border-b border-gray-100 dark:border-[#313244] flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-purple-500" />

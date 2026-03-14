@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Section from '../components/ui/Section';
-import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
-import Input from '../components/ui/Input';
-import ProgressBar from '../components/ui/ProgressBar';
-import EmptyState from '../components/ui/EmptyState';
 import {
     Target, Plus, Calendar, TrendingUp, Flag, Edit, Trash2, 
-    AlertTriangle, Check, CheckCircle2, Award, Zap
+    AlertTriangle, CheckCircle2, Award, Zap
 } from 'lucide-react';
 import { getMyGoals, createGoal, getGoalAnalytics, updateGoal, deleteGoal } from "../services/goalService";
 import { getMySkills } from "../services/skillService";
@@ -179,7 +175,6 @@ const Goals = () => {
 
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-            {/* --- Hero Header --- */}
             <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 p-8 md:p-12 shadow-xl text-white">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                 <div className="absolute bottom-0 left-10 w-48 h-48 bg-white/10 rounded-full blur-2xl -mb-10"></div>
@@ -214,7 +209,6 @@ const Goals = () => {
                 </div>
             )}
 
-            {/* --- Stats Row --- */}
             {(goals.length > 0 || completedGoals.length > 0) && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <GradientStatCard
@@ -244,7 +238,6 @@ const Goals = () => {
                 </div>
             )}
 
-            {/* --- Active Goals --- */}
             {activeGoals.length > 0 && (
                 <Section title="Active Goals" description="Stay focused on your current targets">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -255,22 +248,19 @@ const Goals = () => {
 
                             return (
                                 <div key={goal.id} className="bg-white dark:bg-[#1e1e2e] border border-gray-100 dark:border-[#313244] rounded-[2rem] p-6 shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
-                                    {/* Action Buttons */}
                                     <div className="absolute top-4 right-4 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-white/80 dark:bg-[#1e1e2e]/80 backdrop-blur-sm p-1 rounded-xl">
                                         <button onClick={() => handleEditClick(goal)} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-[#a6adc8] dark:hover:bg-indigo-500/20 rounded-lg transition-colors"><Edit className="w-4 h-4" /></button>
                                         <button onClick={() => handleDeleteClick(goal)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:text-[#a6adc8] dark:hover:bg-red-500/20 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
                                     </div>
 
                                     <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center mb-6">
-                                        {/* Progress Ring */}
                                         <div className="flex-shrink-0 mx-auto sm:mx-0">
                                             <RingChart 
                                                 percentage={progress} 
                                                 color={progress >= 75 ? '#10b981' : progress >= 40 ? '#6366f1' : '#f59e0b'} 
                                             />
                                         </div>
-                                        
-                                        {/* Goal Info */}
+
                                         <div className="flex-1 w-full text-center sm:text-left">
                                             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 mb-2">
                                                 <h3 className="text-xl font-bold text-gray-900 dark:text-[#cdd6f4] tracking-tight">{goal.skillName}</h3>
@@ -298,7 +288,6 @@ const Goals = () => {
                                         </div>
                                     </div>
 
-                                    {/* Warnings/Success messages inside card */}
                                     {progress >= 50 && progress < 100 && (
                                         <div className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-800 dark:text-indigo-300 p-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 border border-indigo-100 dark:border-indigo-500/20">
                                             <Flag className="w-4 h-4" /> Halfway there! Keep pushing.
@@ -316,7 +305,6 @@ const Goals = () => {
                 </Section>
             )}
 
-            {/* --- Completed Goals --- */}
             {completedGoals.length > 0 && (
                 <Section title="Completed Milestones" description="Celebrate your past achievements">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -357,7 +345,6 @@ const Goals = () => {
                 </div>
             )}
 
-            {/* --- Modals (Re-styled inputs and buttons) --- */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Set a New Goal" footer={<><Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancel</Button><Button variant="primary" onClick={handleSubmit}>Create Goal</Button></>}>
                 <form id="goalForm" className="space-y-5">
                     <div>
@@ -400,7 +387,6 @@ const Goals = () => {
     );
 };
 
-// Mock Clock icon since it was missing in imports in original
 const Clock = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
 
 export default Goals;

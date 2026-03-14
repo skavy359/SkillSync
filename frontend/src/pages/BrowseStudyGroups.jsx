@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Search, Users, BookOpen, ChevronRight, Loader2, Sparkles, TrendingUp, CheckCircle } from 'lucide-react';
 import { listPublicGroups, searchGroups, joinGroup } from '../services/studyGroupService';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
 
 const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
     const [groups, setGroups] = useState([]);
@@ -68,7 +67,6 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
 
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-            {/* --- Hero Section --- */}
             <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-700 p-8 md:p-12 shadow-2xl text-white">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                 <div className="absolute bottom-0 left-10 w-48 h-48 bg-blue-400/20 rounded-full blur-3xl -mb-10"></div>
@@ -118,7 +116,6 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
                 </div>
             )}
 
-            {/* --- Results Section --- */}
             <div className="mb-4">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">
                      Explore Groups

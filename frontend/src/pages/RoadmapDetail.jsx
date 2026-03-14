@@ -59,7 +59,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
         Back to Learning Paths
       </button>
 
-      {/* Dynamic Roadmap Hero Banner */}
       <div className="relative bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 shadow-sm overflow-hidden p-8 sm:p-10 flex flex-col items-center text-center">
         <div className="absolute top-0 inset-x-0 h-2 opacity-80" style={{ background: `linear-gradient(90deg, ${roadmap.color}88, ${roadmap.color})` }} />
         <div className="absolute -top-32 -left-32 w-64 h-64 rounded-full blur-3xl opacity-10 pointer-events-none" style={{ background: roadmap.color }} />
@@ -112,9 +111,7 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
         </div>
       )}
 
-      {/* Timeline Journey Map */}
       <div className="relative px-2 sm:px-6">
-        {/* Main Timeline Line */}
         <div className="absolute left-[2.25rem] sm:left-[3.25rem] top-8 bottom-8 w-1 lg:w-1.5 bg-gray-100 dark:bg-[#1e1e2e] rounded-full" />
         <div 
             className="absolute left-[2.25rem] sm:left-[3.25rem] top-8 w-1 lg:w-1.5 rounded-full transition-all duration-1000"
@@ -137,7 +134,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
             return (
               <div key={section.id} className="relative z-10 flex flex-col">
                 <div className="flex items-center gap-4 sm:gap-6">
-                    {/* Timeline Node */}
                     <div className="relative z-20">
                         <button onClick={() => toggleSection(section.id)} className={`w-14 h-14 sm:w-16 sm:h-16 rounded-3xl flex items-center justify-center shrink-0 border-4 transition-all duration-300 shadow-sm ${
                             sectionDone ? 'bg-emerald-500 border-emerald-500 text-white' : 
@@ -149,7 +145,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
                         </button>
                     </div>
 
-                    {/* Section Header Card */}
                     <button onClick={() => toggleSection(section.id)} className={`flex-1 group bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 p-4 sm:p-5 flex items-center justify-between hover:shadow-lg transition-all ${isActive ? 'shadow-md border-indigo-200 dark:border-indigo-500/20' : ''}`}>
                         <div className="flex-1 text-left">
                             <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
@@ -165,7 +160,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
                     </button>
                 </div>
 
-                {/* Topics Container */}
                 <div className={`transition-all duration-300 overflow-hidden ${isExpanded ? 'active' : 'hidden'}`}>
                   <div className="ml-[4.5rem] sm:ml-[6rem] mt-4 space-y-3 relative">
                     
@@ -173,7 +167,6 @@ const RoadmapDetail = ({ roadmapId, onNavigate }) => {
                       const done = isComplete(topic.id);
                       return (
                         <div key={topic.id} className="relative flex items-center group">
-                            {/* Branch Line */}
                             <div className={`absolute -left-6 sm:-left-8 top-1/2 w-4 sm:w-6 h-0.5 rounded-full ${done ? 'bg-green-500' : 'bg-gray-200 dark:bg-[#313244]'}`} />
                             
                             <div className={`flex-1 bg-white dark:bg-[#181825] rounded-2xl border p-4 sm:p-5 transition-all duration-300 flex items-start sm:items-center gap-4 ${

@@ -107,7 +107,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
 
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-            {/* --- Hero Header --- */}
             <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 md:p-10 shadow-2xl text-white">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                 <div className="absolute bottom-0 left-10 w-48 h-48 bg-indigo-400/20 rounded-full blur-3xl -mb-10"></div>
@@ -168,9 +167,7 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-                {/* --- Main Content Area --- */}
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Tabs */}
                     <div className="flex gap-2 p-1.5 bg-gray-100 dark:bg-[#181825] rounded-xl overflow-x-auto custom-scrollbar">
                         {[
                             { id: 'members', label: 'Members', icon: Users },
@@ -196,7 +193,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                         })}
                     </div>
 
-                    {/* Tab Contents */}
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl border border-gray-100 dark:border-[#313244] overflow-hidden shadow-sm min-h-[500px]">
                         {activeTab === 'members' && (
                             <div className="p-6 md:p-8">
@@ -278,9 +274,7 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                     </div>
                 </div>
 
-                {/* --- Sidebar --- */}
                 <div className="space-y-6">
-                    {/* About Card */}
                     <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl border border-gray-100 dark:border-[#313244] p-6 shadow-sm relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-500/5 dark:to-blue-500/5 rounded-bl-full -z-0" />
                         
@@ -343,7 +337,6 @@ const GroupDetails = ({ groupId, onNavigate, currentUserId }) => {
                 </div>
             </div>
 
-            {/* --- Modals --- */}
             <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="Invite Member" size="sm" footer={<><Button variant="secondary" onClick={() => setShowInviteModal(false)}>Cancel</Button><Button variant="primary" onClick={handleInviteUser} disabled={submitting || !invitingEmail.trim()}>{submitting ? 'Sending...' : 'Send Invite'}</Button></>}>
                 <div className="space-y-4">
                     <div>

@@ -37,7 +37,6 @@ const LearningPaths = ({ onNavigate, onSelectRoadmap, userSkills = [] }) => {
         onClick={() => handleSelectRoadmap(roadmap.id)}
         className={`group text-left relative w-full bg-white dark:bg-[#181825] rounded-3xl border ${isActive ? 'border-indigo-200 dark:border-indigo-500/30' : 'border-gray-200/50 dark:border-white/5'} p-6 sm:p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col`}
       >
-        {/* Decorative Top Lip & Background Glow */}
         <div className="absolute top-0 left-0 right-0 h-1.5 opacity-80" style={{ background: `linear-gradient(90deg, ${roadmap.color}88, ${roadmap.color})` }} />
         <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none" style={{ background: roadmap.color }} />
 
@@ -92,8 +91,7 @@ const LearningPaths = ({ onNavigate, onSelectRoadmap, userSkills = [] }) => {
 
   return (
     <div className="space-y-10 max-w-7xl mx-auto pb-12">
-      
-      {/* Hero Header Section */}
+
       <div className="relative rounded-3xl overflow-hidden bg-white dark:bg-[#181825] border border-gray-200/50 dark:border-white/5 shadow-sm">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-fuchsia-500/5 to-amber-500/5 dark:from-indigo-500/10 dark:via-fuchsia-500/10 dark:to-amber-500/10 pointer-events-none" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FolderKanban, Lightbulb, Clock, Plus, ArrowRight, Check, Target, TrendingUp, Search } from 'lucide-react';
+import { FolderKanban, Lightbulb, Clock, Plus, Check, TrendingUp, Search } from 'lucide-react';
 import { getAllCategories, createCategory } from "../services/categoryService";
 import { getMySkills } from "../services/skillService";
 import { fetchSessions } from "../services/sessionService";
@@ -138,8 +138,7 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto pb-12">
-            
-            {/* Header & Controls */}
+
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
                     <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-2">My Categories</h1>
@@ -167,7 +166,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 </div>
             </div>
 
-            {/* Success Messages */}
             {(showSuccessMessage || showDeleteSuccessMessage) && (
                 <div className="fixed top-24 right-8 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
                     <div className="bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 font-bold">
@@ -177,7 +175,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 </div>
             )}
 
-            {/* Quick Stats Banner */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
                     { label: 'Total Categories', icon: FolderKanban, val: categoriesWithStats.length, color: 'indigo' },
@@ -196,7 +193,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 ))}
             </div>
 
-            {/* Grids */}
             {filteredCategories.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredCategories.map((category, index) => {
@@ -257,7 +253,6 @@ const Categories = ({ onNavigate, onSelectCategory, onShowDeleteSuccess, onDismi
                 </div>
             )}
 
-            {/* Add Category Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
