@@ -11,4 +11,5 @@ public interface ForumReplyUpvoteRepository extends JpaRepository<ForumReplyUpvo
     Optional<ForumReplyUpvote> findByUserAndReply(User user, ForumReply reply);
     boolean existsByUserAndReply(User user, ForumReply reply);
     List<ForumReplyUpvote> findByUserAndReplyIn(User user, List<ForumReply> replies);
+    void deleteByReply(ForumReply reply);
 }
