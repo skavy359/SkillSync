@@ -11,4 +11,5 @@ public interface ForumPostUpvoteRepository extends JpaRepository<ForumPostUpvote
     Optional<ForumPostUpvote> findByUserAndPost(User user, ForumPost post);
     boolean existsByUserAndPost(User user, ForumPost post);
     List<ForumPostUpvote> findByUserAndPostIn(User user, List<ForumPost> posts);
+    void deleteByPost(ForumPost post);
 }
