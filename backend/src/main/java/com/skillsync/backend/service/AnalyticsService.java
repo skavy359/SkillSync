@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import com.skillsync.backend.dto.EngagementMetricsResponse;
+import com.skillsync.backend.model.Role;
 import com.skillsync.backend.model.Skill;
 import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.LearningSessionRepository;
@@ -73,6 +74,7 @@ public class AnalyticsService {
         double averageSessionsPerUser = totalUsers > 0 ? totalSessionsCompleted / (double) totalUsers : 0;
 
         List<Map<String, Object>> topUsers = userRepository.findAll().stream()
+                .filter(user -> user.getRole() != Role.ADMIN)
                 .map(user -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("userName", user.getName());
@@ -84,6 +86,7 @@ public class AnalyticsService {
                 .collect(Collectors.toList());
 
         List<Map<String, Object>> topUsersBySessionMinutes = userRepository.findAll().stream()
+                .filter(user -> user.getRole() != Role.ADMIN)
                 .map(user -> {
                     int totalMinutes = learningSessionRepository.findAll().stream()
                             .filter(session -> session.getSkill().getUser().getId().equals(user.getId()))
