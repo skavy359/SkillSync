@@ -1,738 +1,362 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import ProgressBar from '../components/ui/ProgressBar';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 import EmptyState from '../components/ui/EmptyState';
 import {
-    ArrowLeft,
-    Clock,
-    Calendar,
-    TrendingUp,
-    Plus,
-    Edit,
-    Trash2,
-    Target,
-    AlertTriangle,
-    Check
+    ArrowLeft, Clock, Calendar, TrendingUp, Plus, Edit, Trash2, 
+    Target, AlertTriangle, Check, Sparkles, Activity
 } from 'lucide-react';
-import { useEffect } from "react";
 import { getMySkills, addSession, getSessions, deleteSkill, updateSkill, assignCategory, removeCategory } from "../services/skillService";
 import { updateSession, deleteSession } from "../services/sessionService";
 import { getAllCategories } from "../services/categoryService";
 
+// --- Custom Animated Ring Component ---
+const AnimatedRing = ({ progress, size = 160, strokeWidth = 12 }) => {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (progress / 100) * circumference;
+    
+    return (
+        <div className="relative inline-flex items-center justify-center">
+            <svg width={size} height={size} className="transform -rotate-90">
+                {/* Background Ring */}
+                <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-white/20" />
+                {/* Progress Ring */}
+                <circle 
+                    cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth}
+                    strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset}
+                    className="text-white transition-all duration-1000 ease-out" 
+                />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                <span className="text-4xl font-extrabold tracking-tight">{progress}%</span>
+                <span className="text-xs font-medium uppercase tracking-wider opacity-80 mt-1">Mastery</span>
+            </div>
+        </div>
+    );
+};
+
 const SkillDetail = ({ skillId, onNavigate }) => {
+    const [skill, setSkill] = useState(null);
+    const [sessions, setSessions] = useState([]);
+    const [activeTab, setActiveTab] = useState('overview'); // Added tabbed interface
+    
+    // Modals
     const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [isSessionEditModalOpen, setIsSessionEditModalOpen] = useState(false);
+    const [isSessionDeleteConfirmOpen, setIsSessionDeleteConfirmOpen] = useState(false);
+    
+    // Forms & State
     const [isDeleteLoading, setIsDeleteLoading] = useState(false);
     const [isEditLoading, setIsEditLoading] = useState(false);
     const [editForm, setEditForm] = useState({ name: '', categoryId: '' });
     const [editCategories, setEditCategories] = useState([]);
-    const [sessionForm, setSessionForm] = useState({
-        duration: '',
-        date: new Date().toISOString().split('T')[0],
-        notes: ''
-    });
-
-    const [skill, setSkill] = useState(null);
-    const [sessions, setSessions] = useState([]);
-    const [isSessionEditModalOpen, setIsSessionEditModalOpen] = useState(false);
-    const [isSessionDeleteConfirmOpen, setIsSessionDeleteConfirmOpen] = useState(false);
+    const [sessionForm, setSessionForm] = useState({ duration: '', date: new Date().toISOString().split('T')[0], notes: '' });
     const [selectedSession, setSelectedSession] = useState(null);
-    const [sessionEditForm, setSessionEditForm] = useState({
-        durationMinutes: 0,
-        sessionDate: '',
-        notes: ''
-    });
+    const [sessionEditForm, setSessionEditForm] = useState({ durationMinutes: 0, sessionDate: '', notes: '' });
     const [sessionEditLoading, setSessionEditLoading] = useState(false);
+    
+    // Notifications
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [validationError, setValidationError] = useState(false);
 
     useEffect(() => {
         if (!skillId) return;
-
         getMySkills({ size: 100 }).then(data => {
-            const skills = data?.content || [];
-            const found = skills.find(s => String(s.id) === String(skillId));
-            if (found) {
-                setSkill(found);
-                setEditForm({ name: found.name, categoryId: found.categoryId || '' });
-                setProgressForm({ progress: found.progress });
-            }
-        }).catch(() => { });
-        getSessions(skillId).then(data => {
-            setSessions(Array.isArray(data) ? data : []);
-        }).catch(() => setSessions([]));
+            const found = (data?.content || []).find(s => String(s.id) === String(skillId));
+            if (found) { setSkill(found); setEditForm({ name: found.name, categoryId: found.categoryId || '' }); }
+        }).catch(() => {});
+        getSessions(skillId).then(data => setSessions(Array.isArray(data) ? data : [])).catch(() => setSessions([]));
     }, [skillId]);
 
+    const showNotification = (msg) => { setSuccessMessage(msg); setShowSuccessMessage(true); setTimeout(() => setShowSuccessMessage(false), 3000); };
+
+    // --- Handlers ---
     const handleAddSession = async (e) => {
         e.preventDefault();
-        
         const duration = Number(sessionForm.duration);
-        if (duration > 1440) {
-            setIsSessionModalOpen(false);
-            setValidationError(true);
-            return;
-        }
+        if (duration > 1440) return setValidationError(true), setIsSessionModalOpen(false);
 
         try {
-            const newSession = await addSession(skillId, {
-                durationMinutes: Number(sessionForm.duration),
-                sessionDate: sessionForm.date,
-                notes: sessionForm.notes,
-            });
-
+            const newSession = await addSession(skillId, { durationMinutes: duration, sessionDate: sessionForm.date, notes: sessionForm.notes });
             setSessions(prev => [newSession, ...prev]);
-
             getMySkills({ size: 100 }).then(data => {
-                const skills = data?.content || [];
-                const found = skills.find(s => String(s.id) === String(skillId));
-                if (found) {
-                    setSkill(found);
-                }
-            }).catch(() => { });
-
-            setIsSessionModalOpen(false);
-            setSessionForm({
-                duration: '',
-                date: new Date().toISOString().split('T')[0],
-                notes: ''
+                const found = (data?.content || []).find(s => String(s.id) === String(skillId));
+                if (found) setSkill(found);
             });
-            
-            setSuccessMessage('Session logged successfully! Progress updated.');
-            setShowSuccessMessage(true);
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 3000);
-        } catch (err) {
-            console.error("Add session failed", err);
-        }
+            setIsSessionModalOpen(false);
+            setSessionForm({ duration: '', date: new Date().toISOString().split('T')[0], notes: '' });
+            showNotification('Session logged successfully! Progress updated.');
+        } catch (err) {}
     };
 
     const handleEditSkill = async (e) => {
-        e.preventDefault();
-        setIsEditLoading(true);
-
+        e.preventDefault(); setIsEditLoading(true);
         try {
-            const updated = await updateSkill(skillId, {
-                name: editForm.name
-            });
-
-            if (editForm.categoryId) {
-                await assignCategory(skillId, editForm.categoryId);
-                updated.categoryId = editForm.categoryId;
-                setSuccessMessage('Skill updated and category assigned successfully!');
-            } else {
-                if (skill.categoryId) {
-                    updated.categoryId = null;
-                    updated.category = null;
-                    setSuccessMessage('Skill updated and category removed!');
-                } else {
-                    setSuccessMessage('Skill updated successfully!');
-                }
-            }
-
-            setSkill(updated);
-            setIsEditModalOpen(false);
-            setShowSuccessMessage(true);
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 3000);
-        } catch (err) {
-            console.error("Update skill failed", err);
-            alert('Failed to update skill. Please try again.');
-        } finally {
-            setIsEditLoading(false);
-        }
+            const updated = await updateSkill(skillId, { name: editForm.name });
+            if (editForm.categoryId) { await assignCategory(skillId, editForm.categoryId); updated.categoryId = editForm.categoryId; }
+            else if (skill.categoryId) { await removeCategory(skillId); updated.categoryId = null; updated.category = null; }
+            setSkill(updated); setIsEditModalOpen(false); showNotification('Skill updated successfully!');
+        } catch (err) { alert('Failed to update skill.'); } finally { setIsEditLoading(false); }
     };
 
     const handleDeleteSkill = async () => {
         setIsDeleteLoading(true);
         try {
             await deleteSkill(skillId);
-            setIsDeleteConfirmOpen(false);
-            setSuccessMessage('Skill deleted successfully!');
-            setShowSuccessMessage(true);
-
-            setTimeout(() => {
-                const mainElement = document.querySelector('main');
-                if (mainElement) mainElement.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 0);
-
-            setTimeout(() => {
-                onNavigate('skills');
-            }, 1500);
-        } catch (err) {
-            console.error("Delete skill failed", err);
-            alert('Failed to delete skill. Please try again.');
-            setIsDeleteLoading(false);
-        }
-    };
-
-    const handleOpenSessionEditModal = (session) => {
-        setSelectedSession(session);
-        setSessionEditForm({
-            durationMinutes: session.durationMinutes,
-            sessionDate: session.sessionDate ? session.sessionDate.split('T')[0] : '',
-            notes: session.notes || ''
-        });
-        setIsSessionEditModalOpen(true);
-    };
-
-    const handleSessionEditFormChange = (e) => {
-        const { name, value } = e.target;
-        setSessionEditForm(prev => ({
-            ...prev,
-            [name]: name === 'durationMinutes' ? parseInt(value) || 0 : value
-        }));
+            showNotification('Skill deleted successfully!');
+            setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+            setTimeout(() => onNavigate('skills'), 1500);
+        } catch (err) { alert('Failed to delete skill.'); setIsDeleteLoading(false); }
     };
 
     const handleSessionEditSubmit = async () => {
-        if (!sessionEditForm.durationMinutes || !sessionEditForm.sessionDate) {
-            alert('Please fill in all required fields');
-            return;
-        }
-
-        const duration = Number(sessionEditForm.durationMinutes);
-        if (duration > 1440) {
-            setIsSessionEditModalOpen(false);
-            setValidationError(true);
-            return;
-        }
+        if (!sessionEditForm.durationMinutes || !sessionEditForm.sessionDate) return alert('Fill required fields');
+        if (Number(sessionEditForm.durationMinutes) > 1440) return setValidationError(true), setIsSessionEditModalOpen(false);
 
         try {
             setSessionEditLoading(true);
-
-            await updateSession(skillId, selectedSession.id, {
-                durationMinutes: sessionEditForm.durationMinutes,
-                sessionDate: sessionEditForm.sessionDate,
-                notes: sessionEditForm.notes
-            });
-
-            setSessions(prevSessions =>
-                prevSessions.map(s =>
-                    s.id === selectedSession.id
-                        ? {
-                            ...s,
-                            durationMinutes: sessionEditForm.durationMinutes,
-                            sessionDate: sessionEditForm.sessionDate,
-                            notes: sessionEditForm.notes
-                        }
-                        : s
-                )
-            );
-
-            setIsSessionEditModalOpen(false);
-            setShowSuccessMessage(true);
-            setSuccessMessage('Session updated successfully!');
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 3000);
-        } catch (err) {
-            console.error('Error updating session:', err);
-            alert('Failed to update session');
-        } finally {
-            setSessionEditLoading(false);
-        }
-    };
-
-    const handleOpenSessionDeleteConfirm = (session) => {
-        setSelectedSession(session);
-        setIsSessionDeleteConfirmOpen(true);
+            await updateSession(skillId, selectedSession.id, sessionEditForm);
+            setSessions(prev => prev.map(s => s.id === selectedSession.id ? { ...s, ...sessionEditForm } : s));
+            setIsSessionEditModalOpen(false); showNotification('Session updated successfully!');
+        } catch (err) { alert('Failed to update session'); } finally { setSessionEditLoading(false); }
     };
 
     const handleConfirmSessionDelete = async () => {
         if (!selectedSession) return;
-
         try {
             await deleteSession(skillId, selectedSession.id);
-
-            setSessions(prevSessions =>
-                prevSessions.filter(s => s.id !== selectedSession.id)
-            );
-
-            setIsSessionDeleteConfirmOpen(false);
-            setSelectedSession(null);
-            setShowSuccessMessage(true);
-            setSuccessMessage('Session deleted successfully!');
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 3000);
-        } catch (err) {
-            console.error('Error deleting session:', err);
-            setIsSessionDeleteConfirmOpen(false);
-        }
+            setSessions(prev => prev.filter(s => s.id !== selectedSession.id));
+            setIsSessionDeleteConfirmOpen(false); setSelectedSession(null); showNotification('Session deleted successfully!');
+        } catch (err) {}
     };
 
-    const getProgressLevel = (progress) => {
-        if (progress >= 100) return 'Completed';
-        if (progress >= 80) return 'Advanced';
-        if (progress >= 30) return 'Intermediate';
-        return 'Beginner';
-    };
+    const getProgressLevel = (p) => p >= 100 ? 'Master' : p >= 80 ? 'Advanced' : p >= 30 ? 'Intermediate' : 'Beginner';
+    
+    if (!skill) return <div className="flex items-center justify-center p-12 text-gray-500 animate-pulse">Loading skill details...</div>;
 
-    const getProgressLevelColor = (progress) => {
-        if (progress >= 100) return 'success';
-        if (progress >= 80) return 'danger';
-        if (progress >= 30) return 'warning';
-        return 'primary';
-    };
-
-    const getProgressMessage = (progress) => {
-        if (progress >= 100) return 'Congratulations! You\'ve completed this skill!';
-        if (progress >= 75) return 'Almost there! You\'re doing amazing!';
-        if (progress >= 50) return 'Great progress! Keep it up!';
-        if (progress >= 25) return 'You\'re making solid progress!';
-        return 'Good start! Keep improving!';
-    };
-
-    if (!skill) {
-        return <div className="p-8 text-gray-500 dark:text-[#7f849c]">Loading skill...</div>;
-    }
+    const totalTimeHours = Math.round(sessions.reduce((a, s) => a + s.durationMinutes, 0) / 60);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
             {showSuccessMessage && (
-                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
+                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl flex items-center gap-3 shadow-sm">
                     <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                     <p className="text-sm font-medium text-green-700 dark:text-green-400">{successMessage}</p>
                 </div>
             )}
 
-            <Button
-                variant="ghost"
-                icon={ArrowLeft}
-                onClick={() => onNavigate('skills')}
-            >
-                Back to Skills
-            </Button>
+            <div>
+                <button onClick={() => onNavigate('skills')} className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-indigo-600 dark:text-[#a6adc8] dark:hover:text-indigo-400 transition-colors mb-4">
+                    <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to My Skills
+                </button>
 
-            <Card className="p-8">
-                <div className="flex items-start justify-between mb-6">
-                    <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-3">
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-[#cdd6f4]">{skill.name}</h1>
-                            <Badge variant={getProgressLevelColor(skill.progress)} size="lg">
-                                {skill.progress >= 100 ? '✨ COMPLETED' : getProgressLevel(skill.progress).toUpperCase()}
-                            </Badge>
-                        </div>
-                        <p className="text-gray-600 dark:text-[#9399b2] mb-4">{skill.description}</p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-[#9399b2]">
-                            <div className="flex items-center">
-                                <Clock className="w-4 h-4 mr-1.5" />
-                                <span>{Math.round(sessions.reduce((a, s) => a + s.durationMinutes, 0) / 60)}h logged</span>
+                {/* --- Hero Banner Section --- */}
+                <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 p-8 md:p-12 shadow-2xl text-white border border-indigo-400/20">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                    <div className="absolute bottom-0 left-10 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl -mb-20"></div>
+                    
+                    <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-8 md:gap-12">
+                        {/* Text Content */}
+                        <div className="flex-1 text-center md:text-left space-y-5">
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
+                                <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest border border-white/20 shadow-sm flex items-center gap-1.5">
+                                    <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                                    {getProgressLevel(skill.progress)}
+                                </span>
+                                {skill.status && (
+                                    <span className="px-3 py-1 bg-black/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest border border-white/10 shadow-sm">
+                                        {skill.status}
+                                    </span>
+                                )}
                             </div>
-                            <div className="flex items-center">
-                                <TrendingUp className="w-4 h-4 mr-1.5" />
-                                <span>{sessions.length} sessions</span>
+                            
+                            <h1 className="text-4xl md:text-6xl font-black tracking-tight drop-shadow-sm">{skill.name}</h1>
+                            
+                            <div className="flex items-center justify-center md:justify-start gap-6 text-indigo-100 font-medium">
+                                <div className="flex items-center bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm">
+                                    <Clock className="w-5 h-5 mr-2 opacity-80" />
+                                    <span><strong className="text-white text-lg">{totalTimeHours}</strong> hours</span>
+                                </div>
+                                <div className="flex items-center bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm">
+                                    <Activity className="w-5 h-5 mr-2 opacity-80" />
+                                    <span><strong className="text-white text-lg">{sessions.length}</strong> sessions</span>
+                                </div>
+                            </div>
+                            
+                            <div className="pt-4 flex items-center justify-center md:justify-start gap-3">
+                                <button onClick={() => setIsSessionModalOpen(true)} className="px-6 py-3 bg-white text-indigo-700 font-bold rounded-xl shadow-lg hover:bg-indigo-50 hover:shadow-xl transition-all hover:-translate-y-0.5 flex items-center gap-2">
+                                    <Plus className="w-5 h-5" /> Log Session
+                                </button>
+                                <button onClick={() => {
+                                    setEditForm({ name: skill.name, categoryId: skill.categoryId || '' });
+                                    getAllCategories().then(data => { if (Array.isArray(data)) setEditCategories(data); });
+                                    setIsEditModalOpen(true);
+                                }} className="p-3 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-all border border-white/20" title="Edit Skill">
+                                    <Edit className="w-5 h-5" />
+                                </button>
+                                <button onClick={() => setIsDeleteConfirmOpen(true)} className="p-3 bg-red-500/20 text-red-200 rounded-xl hover:bg-red-500/40 hover:text-white transition-all border border-red-500/30" title="Delete Skill">
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center space-x-2">
-                        <Button 
-                            variant="secondary" 
-                            icon={Edit} 
-                            size="sm"
-                            onClick={() => {
-                                setEditForm({ name: skill.name, categoryId: skill.categoryId || '' });
-                                getAllCategories()
-                                    .then(data => {
-                                        if (Array.isArray(data)) {
-                                            setEditCategories(data);
-                                        }
-                                    })
-                                    .catch(() => { });
-                                setIsEditModalOpen(true);
-                            }}
-                        >
-                            Edit
-                        </Button>
-                        <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setIsDeleteConfirmOpen(true)}
-                        >
-                            <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                        </Button>
+                        {/* Progress Ring graphic */}
+                        <div className="flex-shrink-0 drop-shadow-2xl">
+                            <div className="p-4 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20">
+                                <AnimatedRing progress={skill.progress} size={150} />
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-500/15 dark:to-blue-500/10 rounded-2xl p-6">
-                    <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-1">Overall Progress</h3>
-                            <p className="text-sm text-gray-600 dark:text-[#9399b2]">{getProgressMessage(skill.progress)}</p>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{skill.progress}%</div>
-                            <div className="text-sm text-gray-600 dark:text-[#9399b2]">Complete</div>
-                        </div>
-                    </div>
-                    <ProgressBar progress={skill.progress} size="lg" />
-                </div>
-            </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/15 rounded-xl flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">
-                        {Math.round(sessions.reduce((a, s) => a + s.durationMinutes, 0) / 60)}h
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Total Time</p>
-                </Card>
-
-                <Card className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-green-100 dark:bg-green-500/15 rounded-xl flex items-center justify-center">
-                            <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
-                        </div>
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">{sessions.length}</h3>
-                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Sessions</p>
-                </Card>
-
-                <Card className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/15 rounded-xl flex items-center justify-center">
-                            <Target className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                        </div>
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-1">
-                        {sessions.length
-                            ? Math.round((sessions.reduce((a, s) => a + s.durationMinutes, 0) / sessions.length) / 60 * 10) / 10
-                            : 0}h
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-[#9399b2]">Avg per Session</p>
-                </Card>
             </div>
 
-            <Section
-                title="Learning Sessions"
-                description="Track your practice sessions and progress"
-                action={
-                    <Button
-                        variant="primary"
-                        icon={Plus}
-                        onClick={() => setIsSessionModalOpen(true)}
-                    >
-                        Add Session
-                    </Button>
-                }
-            >
-                {sessions.length > 0 ? (
-                    <Card className="p-4">
-                        <div className="space-y-3">
-                            {sessions.map((session) => (
-                                <div
-                                    key={session.id}
-                                    className="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-[#181825] rounded-xl hover:bg-gray-100 dark:hover:bg-[#272739] transition-colors"
-                                >
-                                    <div className="w-12 h-12 bg-white dark:bg-[#1e1e2e] border border-gray-200 dark:border-[#313244] rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <Clock className="w-5 h-5 text-gray-600 dark:text-[#9399b2]" />
-                                    </div>
+            {/* --- Main Content Area --- */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                {/* Left Column: Timeline */}
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200 dark:border-[#313244]">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">
+                                <TrendingUp className="w-6 h-6 text-indigo-500" /> Session History
+                            </h2>
+                            <span className="text-sm font-medium text-gray-500 dark:text-[#a6adc8] bg-gray-100 dark:bg-[#313244] px-3 py-1 rounded-full">{sessions.length} entries</span>
+                        </div>
 
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center space-x-3">
-                                                <span className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4]">
-                                                    {session.durationMinutes} minutes
-                                                </span>
-                                                <div className="flex items-center text-sm text-gray-500 dark:text-[#7f849c]">
-                                                    <Calendar className="w-4 h-4 mr-1.5" />
-                                                    {session.sessionDate}
+                        {sessions.length > 0 ? (
+                            <div className="relative border-l-2 border-indigo-100 dark:border-indigo-500/20 ml-3 pl-8 space-y-8">
+                                {sessions.map((session, i) => (
+                                    <div key={session.id} className="relative group">
+                                        <div className="absolute -left-[41px] top-1 w-5 h-5 bg-white dark:bg-[#1e1e2e] border-4 border-indigo-500 rounded-full shadow-sm group-hover:scale-125 transition-transform" />
+                                        
+                                        <div className="bg-white dark:bg-[#181825] border border-gray-100 dark:border-[#313244] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group-hover:border-indigo-200 dark:group-hover:border-indigo-500/30">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div>
+                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold leading-5 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 mb-2">
+                                                        <Clock className="w-3.5 h-3.5 mr-1" /> {session.durationMinutes} min
+                                                    </span>
+                                                    <div className="flex items-center text-sm font-semibold text-gray-500 dark:text-[#7f849c]">
+                                                        <Calendar className="w-4 h-4 mr-1.5" />
+                                                        {new Date(session.sessionDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity space-x-1">
+                                                    <button onClick={() => { setSelectedSession(session); setSessionEditForm({ durationMinutes: session.durationMinutes, sessionDate: session.sessionDate ? session.sessionDate.split('T')[0] : '', notes: session.notes || '' }); setIsSessionEditModalOpen(true); }} className="p-2 bg-gray-50 hover:bg-gray-100 dark:bg-[#272739] dark:hover:bg-[#313244] text-gray-600 dark:text-[#cdd6f4] rounded-lg transition-colors" title="Edit">
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={() => { setSelectedSession(session); setIsSessionDeleteConfirmOpen(true); }} className="p-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg transition-colors" title="Delete">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center space-x-2">
-                                                <button 
-                                                    className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-white rounded-lg transition-all"
-                                                    onClick={() => handleOpenSessionEditModal(session)}
-                                                    title="Edit session"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button 
-                                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-white rounded-lg transition-all"
-                                                    onClick={() => handleOpenSessionDeleteConfirm(session)}
-                                                    title="Delete session"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
+                                            {session.notes && (
+                                                <p className="text-gray-700 dark:text-[#a6adc8] leading-relaxed mt-3 bg-gray-50 dark:bg-[#1e1e2e] p-3 rounded-xl border border-gray-100 dark:border-[#313244]/50">
+                                                    {session.notes}
+                                                </p>
+                                            )}
                                         </div>
-                                        <p className="text-sm text-gray-700 dark:text-[#a6adc8]">{session.notes}</p>
                                     </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 px-4 border-2 border-dashed border-gray-200 dark:border-[#313244] rounded-2xl">
+                                <div className="w-16 h-16 bg-gray-100 dark:bg-[#272739] rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Clock className="w-8 h-8 text-gray-400 dark:text-[#6c7086]" />
                                 </div>
-                            ))}
-                        </div>
-                    </Card>
-                ) : (
-                    <EmptyState
-                        icon={Clock}
-                        title="No sessions yet"
-                        description="Start logging your practice sessions"
-                        actionLabel="Add First Session"
-                        actionIcon={Plus}
-                        onAction={() => setIsSessionModalOpen(true)}
-                    />
-                )}
-            </Section>
-
-            <Modal
-                isOpen={isSessionModalOpen}
-                onClose={() => setIsSessionModalOpen(false)}
-                title="Log Practice Session"
-                footer={
-                    <>
-                        <Button variant="secondary" onClick={() => setIsSessionModalOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button variant="primary" onClick={(e) => {
-                            e.preventDefault();
-                            handleAddSession(e);
-                        }}>
-                            Add Session
-                        </Button>
-                    </>
-                }
-            >
-                <form id="addSessionForm" onSubmit={handleAddSession} className="space-y-4">
-                    <Input
-                        label="Duration (minutes)"
-                        type="number"
-                        placeholder="60"
-                        value={sessionForm.duration}
-                        onChange={(e) => setSessionForm({ ...sessionForm, duration: e.target.value })}
-                        required
-                        min="1"
-                        max="1440"
-                    />
-
-                    <Input
-                        label="Date"
-                        type="date"
-                        value={sessionForm.date}
-                        onChange={(e) => setSessionForm({ ...sessionForm, date: e.target.value })}
-                        required
-                    />
-
-                    <Textarea
-                        label="Notes"
-                        placeholder="What did you learn or practice?"
-                        value={sessionForm.notes}
-                        onChange={(e) => setSessionForm({ ...sessionForm, notes: e.target.value })}
-                        rows={4}
-                    />
-                </form>
-            </Modal>
-
-            <Modal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                title="Edit Skill"
-                footer={
-                    <>
-                        <Button variant="secondary" onClick={() => setIsEditModalOpen(false)} disabled={isEditLoading}>
-                            Cancel
-                        </Button>
-                        {skill?.categoryId && (
-                            <Button 
-                                variant="danger" 
-                                onClick={async () => {
-                                    setIsEditLoading(true);
-                                    try {
-                                        await removeCategory(skillId);
-                                        setSkill({ ...skill, categoryId: null, category: null });
-                                        setEditForm({ name: skill.name, categoryId: '' });
-                                        setIsEditModalOpen(false);
-                                        setSuccessMessage('Category removed successfully!');
-                                        setShowSuccessMessage(true);
-                                        setTimeout(() => setShowSuccessMessage(false), 3000);
-                                    } catch (err) {
-                                        console.error('Failed to remove category', err);
-                                        alert('Failed to remove category. Please try again.');
-                                    } finally {
-                                        setIsEditLoading(false);
-                                    }
-                                }}
-                                disabled={isEditLoading}
-                                size="sm"
-                            >
-                                Remove Category
-                            </Button>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4] mb-2">No sessions logged</h3>
+                                <p className="text-gray-500 dark:text-[#a6adc8] mb-6 max-w-sm mx-auto">Start tracking the time you spend learning and practicing to see your mastery grow.</p>
+                                <Button variant="primary" icon={Plus} onClick={() => setIsSessionModalOpen(true)}>Log First Session</Button>
+                            </div>
                         )}
-                        <Button variant="primary" onClick={(e) => {
-                            e.preventDefault();
-                            handleEditSkill(e);
-                        }} disabled={isEditLoading}>
-                            {isEditLoading ? 'Saving...' : 'Save Changes'}
-                        </Button>
-                    </>
-                }
-            >
-                <form id="editSkillForm" onSubmit={handleEditSkill} className="space-y-4">
-                    <Input
-                        label="Skill Name"
-                        type="text"
-                        placeholder="Enter skill name"
-                        value={editForm.name}
-                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        required
-                    />
-                    <Select
-                        label="Category (Optional)"
-                        value={editForm.categoryId}
-                        onChange={(e) => setEditForm({ ...editForm, categoryId: e.target.value })}
-                        options={editCategories.map(cat => ({ value: cat.id, label: cat.name }))}
-                        placeholder="Select a category or leave empty"
-                    />
-                </form>
-            </Modal>
-
-            <Modal
-                isOpen={isDeleteConfirmOpen}
-                onClose={() => setIsDeleteConfirmOpen(false)}
-                title="Delete Skill"
-                footer={
-                    <>
-                        <Button variant="secondary" onClick={() => setIsDeleteConfirmOpen(false)} disabled={isDeleteLoading}>
-                            Cancel
-                        </Button>
-                        <Button variant="danger" onClick={handleDeleteSkill} disabled={isDeleteLoading}>
-                            {isDeleteLoading ? 'Deleting...' : 'Delete Skill'}
-                        </Button>
-                    </>
-                }
-            >
-                <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-red-100 dark:bg-red-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-2">
-                            Are you sure you want to delete this skill?
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-[#9399b2] mb-4">
-                            This action cannot be undone. All sessions and progress data associated with this skill will be permanently deleted.
-                        </p>
-                        <p className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">
-                            Skill: <span className="text-red-600 dark:text-red-400">{skill?.name}</span>
-                        </p>
                     </div>
                 </div>
-            </Modal>
 
-            <Modal
-                isOpen={isSessionEditModalOpen}
-                onClose={() => setIsSessionEditModalOpen(false)}
-                title="Edit Session"
-                size="lg"
-                footer={
-                    <div className="flex gap-3 justify-end">
-                        <Button
-                            variant="secondary"
-                            onClick={() => setIsSessionEditModalOpen(false)}
-                            disabled={sessionEditLoading}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="primary"
-                            onClick={handleSessionEditSubmit}
-                            disabled={sessionEditLoading}
-                        >
-                            {sessionEditLoading ? 'Saving...' : 'Save Changes'}
-                        </Button>
+                {/* Right Column: Stats */}
+                <div className="space-y-6">
+                    <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl p-6 shadow-sm border border-gray-200 dark:border-[#313244]">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4] mb-4 flex items-center gap-2">
+                            <Target className="w-5 h-5 text-purple-500" /> Averages
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="p-4 bg-gray-50 dark:bg-[#181825] rounded-2xl border border-gray-100 dark:border-[#313244]">
+                                <div className="text-sm font-semibold text-gray-500 dark:text-[#7f849c] mb-1">Avg Session Length</div>
+                                <div className="text-2xl font-black text-gray-900 dark:text-[#cdd6f4]">
+                                    {sessions.length ? Math.round((sessions.reduce((a, s) => a + s.durationMinutes, 0) / sessions.length)) : 0} <span className="text-sm font-semibold text-gray-500">min</span>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-purple-50/50 dark:bg-purple-500/5 rounded-2xl border border-purple-100/50 dark:border-purple-500/10">
+                                <div className="text-sm font-semibold text-purple-600/70 dark:text-purple-400/70 mb-1">Mastery Gain / Hr</div>
+                                <div className="text-2xl font-black text-purple-700 dark:text-purple-300">
+                                    {totalTimeHours > 0 ? (skill.progress / totalTimeHours).toFixed(1) : 0}% 
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                }
-            >
+                </div>
+            </div>
+
+            {/* Modals */}
+            <Modal isOpen={isSessionModalOpen} onClose={() => setIsSessionModalOpen(false)} title="Log Practice Session" footer={
+                <><Button variant="secondary" onClick={() => setIsSessionModalOpen(false)}>Cancel</Button><Button variant="primary" onClick={handleAddSession}>Add Session</Button></>
+            }>
                 <form className="space-y-4">
-                    <Input
-                        label="Duration (minutes)"
-                        type="number"
-                        name="durationMinutes"
-                        placeholder="e.g. 60"
-                        value={sessionEditForm.durationMinutes}
-                        onChange={handleSessionEditFormChange}
-                        required
-                        min="1"
-                    />
-                    <Input
-                        label="Date"
-                        type="date"
-                        name="sessionDate"
-                        value={sessionEditForm.sessionDate}
-                        onChange={handleSessionEditFormChange}
-                        required
-                    />
-                    <Textarea
-                        label="Notes"
-                        name="notes"
-                        placeholder="What did you work on?"
-                        value={sessionEditForm.notes}
-                        onChange={(e) => handleSessionEditFormChange(e)}
-                        rows={3}
-                    />
+                    <Input label="Duration (minutes)" type="number" placeholder="60" value={sessionForm.duration} onChange={(e) => setSessionForm({ ...sessionForm, duration: e.target.value })} required min="1" max="1440" />
+                    <Input label="Date" type="date" value={sessionForm.date} onChange={(e) => setSessionForm({ ...sessionForm, date: e.target.value })} required />
+                    <Textarea label="Notes" placeholder="What did you learn or practice?" value={sessionForm.notes} onChange={(e) => setSessionForm({ ...sessionForm, notes: e.target.value })} rows={4} />
                 </form>
             </Modal>
 
-            <Modal
-                isOpen={isSessionDeleteConfirmOpen}
-                onClose={() => setIsSessionDeleteConfirmOpen(false)}
-                title="Delete Session"
-                footer={
-                    <>
-                        <Button variant="secondary" onClick={() => setIsSessionDeleteConfirmOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button variant="danger" onClick={handleConfirmSessionDelete}>
-                            Delete Session
-                        </Button>
-                    </>
-                }
-            >
+            <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Skill" footer={
+                <><Button variant="secondary" onClick={() => setIsEditModalOpen(false)} disabled={isEditLoading}>Cancel</Button>
+                {skill?.categoryId && (
+                    <Button variant="danger" onClick={async () => {
+                        setIsEditLoading(true);
+                        try { await removeCategory(skillId); setSkill({ ...skill, categoryId: null, category: null }); setEditForm({ name: skill.name, categoryId: '' }); setIsEditModalOpen(false); showNotification('Category removed successfully!'); } catch (err) { alert('Failed to remove category.'); } finally { setIsEditLoading(false); }
+                    }} disabled={isEditLoading} size="sm">Remove Category</Button>
+                )}
+                <Button variant="primary" onClick={handleEditSkill} disabled={isEditLoading}>{isEditLoading ? 'Saving...' : 'Save Changes'}</Button></>
+            }>
+                <form className="space-y-4">
+                    <Input label="Skill Name" type="text" placeholder="Enter skill name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} required />
+                    <Select label="Category (Optional)" value={editForm.categoryId} onChange={(e) => setEditForm({ ...editForm, categoryId: e.target.value })} options={editCategories.map(cat => ({ value: cat.id, label: cat.name }))} placeholder="Select a category" />
+                </form>
+            </Modal>
+
+            <Modal isOpen={isDeleteConfirmOpen} onClose={() => setIsDeleteConfirmOpen(false)} title="Delete Skill" footer={<><Button variant="secondary" onClick={() => setIsDeleteConfirmOpen(false)} disabled={isDeleteLoading}>Cancel</Button><Button variant="danger" onClick={handleDeleteSkill} disabled={isDeleteLoading}>{isDeleteLoading ? 'Deleting...' : 'Delete Skill'}</Button></>}>
                 <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-red-100 dark:bg-red-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
-                    </div>
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-500/15 rounded-xl flex items-center justify-center flex-shrink-0"><AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" /></div>
                     <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-2">
-                            Are you sure you want to delete this session?
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-[#9399b2]">
-                            This action cannot be undone.
-                        </p>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4] mb-2">Delete this skill?</h3>
+                        <p className="text-sm text-gray-600 dark:text-[#9399b2] mb-4">This action cannot be undone. All sessions and progress data associated with this skill will be permanently deleted.</p>
                     </div>
                 </div>
             </Modal>
 
-            <Modal
-                isOpen={validationError}
-                onClose={() => setValidationError(false)}
-                title="Duration Exceeds Limit"
-                footer={
-                    <Button variant="primary" onClick={() => setValidationError(false)}>
-                        Got it
-                    </Button>
-                }
-            >
-                <div className="flex items-start space-x-4">
-                    <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-gray-700 dark:text-[#a6adc8]">
-                        Session duration cannot exceed 24 hours (1440 minutes). Please enter a shorter duration.
-                    </p>
+            <Modal isOpen={isSessionEditModalOpen} onClose={() => setIsSessionEditModalOpen(false)} title="Edit Session" size="lg" footer={<div className="flex gap-3 justify-end"><Button variant="secondary" onClick={() => setIsSessionEditModalOpen(false)} disabled={sessionEditLoading}>Cancel</Button><Button variant="primary" onClick={handleSessionEditSubmit} disabled={sessionEditLoading}>{sessionEditLoading ? 'Saving...' : 'Save Changes'}</Button></div>}>
+                <form className="space-y-4">
+                    <Input label="Duration (minutes)" type="number" name="durationMinutes" value={sessionEditForm.durationMinutes} onChange={(e) => setSessionEditForm(prev => ({...prev, durationMinutes: parseInt(e.target.value) || 0}))} required min="1" />
+                    <Input label="Date" type="date" name="sessionDate" value={sessionEditForm.sessionDate} onChange={(e) => setSessionEditForm(prev => ({...prev, sessionDate: e.target.value}))} required />
+                    <Textarea label="Notes" name="notes" value={sessionEditForm.notes} onChange={(e) => setSessionEditForm(prev => ({...prev, notes: e.target.value}))} rows={3} />
+                </form>
+            </Modal>
+
+            <Modal isOpen={isSessionDeleteConfirmOpen} onClose={() => setIsSessionDeleteConfirmOpen(false)} title="Delete Session" footer={<><Button variant="secondary" onClick={() => setIsSessionDeleteConfirmOpen(false)}>Cancel</Button><Button variant="danger" onClick={handleConfirmSessionDelete}>Delete Session</Button></>}>
+                <div className="flex items-start space-x-4"><div className="w-12 h-12 bg-red-100 dark:bg-red-500/15 rounded-xl flex items-center justify-center flex-shrink-0"><AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" /></div>
+                    <div className="flex-1"><h3 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4] mb-2">Delete this session?</h3><p className="text-sm text-gray-600 dark:text-[#9399b2]">This action cannot be undone.</p></div>
                 </div>
+            </Modal>
+            
+            <Modal isOpen={validationError} onClose={() => setValidationError(false)} title="Duration Exceeds Limit" footer={<Button variant="primary" onClick={() => setValidationError(false)}>Got it</Button>}>
+                <div className="flex items-start space-x-4"><AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" /><p className="text-sm text-gray-700 dark:text-[#a6adc8]">Session duration cannot exceed 24 hours (1440 minutes). Please enter a shorter duration.</p></div>
             </Modal>
         </div>
     );
