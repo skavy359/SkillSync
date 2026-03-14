@@ -1,51 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Lightbulb, Eye, EyeOff, ArrowRight, Quote } from 'lucide-react';
+import { Lightbulb, Eye, EyeOff, ArrowRight, Quote, Sparkles } from 'lucide-react';
 import { loginUser } from "../services/authService.js";
 import api from "../services/api.js";
 
 const testimonials = [
-    {
-        text: "SkillSync completely changed how I approach learning. I went from inconsistent to clocking 20+ hours a week without feeling burned out.",
-        name: "Malay Shikhar Soni.",
-        role: "Full-Stack Developer",
-        initials: "MS",
-        gradient: "from-yellow-400 to-orange-500"
-    },
-    {
-        text: "The streak tracking feature is incredibly motivating. I've maintained a 45-day learning streak and my coding skills have skyrocketed.",
-        name: "Ronit Thakur",
-        role: "Full-Stack Developer",
-        initials: "RT",
-        gradient: "from-cyan-400 to-blue-500"
-    },
-    {
-        text: "I love how SkillSync breaks down my learning into manageable sessions. The burnout risk feature saved me from overworking multiple times.",
-        name: "Saransh Sharma",
-        role: "UX Designer",
-        initials: "SS",
-        gradient: "from-pink-400 to-rose-500"
-    },
-    {
-        text: "As a self-taught developer, SkillSync gave me the structure I was missing. The analytics helped me understand my learning patterns.",
-        name: "Kartavya Shrivastava",
-        role: "Frontend Engineer",
-        initials: "KS",
-        gradient: "from-green-400 to-emerald-500"
-    },
-    {
-        text: "The recommendations engine is spot-on. It always knows exactly which skill I should focus on next to maximize my growth.",
-        name: "Aditya Shukla",
-        role: "Data Scientist",
-        initials: "AS",
-        gradient: "from-violet-400 to-purple-500"
-    },
-    {
-        text: "SkillSync's category analytics helped our team track learning across different domains. It's become essential for our growth plans.",
-        name: "Khushi Dhir",
-        role: "Product Manager",
-        initials: "KD",
-        gradient: "from-amber-400 to-red-500"
-    }
+    { text: "SkillSync completely changed how I approach learning. I went from inconsistent to clocking 20+ hours a week without feeling burned out.", name: "Malay Shikhar Soni", role: "Full-Stack Developer", initials: "MS", gradient: "from-amber-400 to-orange-500" },
+    { text: "The streak tracking feature is incredibly motivating. I've maintained a 45-day learning streak and my coding skills have skyrocketed.", name: "Ronit Thakur", role: "Software Engineer", initials: "RT", gradient: "from-cyan-400 to-blue-500" },
+    { text: "I love how SkillSync breaks down my learning into manageable sessions. The burnout risk feature saved me from overworking multiple times.", name: "Saransh Sharma", role: "UX Designer", initials: "SS", gradient: "from-pink-400 to-rose-500" },
+    { text: "As a self-taught developer, SkillSync gave me the structure I was missing. The analytics helped me understand my learning patterns.", name: "Kartavya Shrivastava", role: "Frontend Engineer", initials: "KS", gradient: "from-emerald-400 to-teal-500" },
+    { text: "The recommendations engine is spot-on. It always knows exactly which task I should focus on next to maximize my growth.", name: "Aditya Shukla", role: "Data Scientist", initials: "AS", gradient: "from-violet-400 to-purple-500" }
 ];
 
 const Login = ({ onNavigate, onLogin }) => {
@@ -58,21 +21,15 @@ const Login = ({ onNavigate, onLogin }) => {
     const [rememberMe, setRememberMe] = useState(false);
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const { data } = await api.get('/auth/platform-stats');
-                setPlatformStats(data.data);
-            } catch (err) {
-                console.error('Failed to fetch platform stats:', err);
-            }
-        };
-        fetchStats();
+        api.get('/auth/platform-stats')
+            .then(({ data }) => setPlatformStats(data.data))
+            .catch(err => console.error('Failed to fetch stats:', err));
     }, []);
 
     useEffect(() => {
         const interval = setInterval(() => {
             setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
-        }, 4000);
+        }, 5000);
         return () => clearInterval(interval);
     }, []);
 
@@ -87,128 +44,106 @@ const Login = ({ onNavigate, onLogin }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const validationErrors = validate();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            return;
-        }
+        if (Object.keys(validationErrors).length > 0) return setErrors(validationErrors);
 
         setErrors({});
         setLoading(true);
 
         try {
             const res = await loginUser(form.email, form.password, rememberMe);
-
             if (res.success) {
                 const { token, id, name, email, role } = res.data;
-
                 localStorage.setItem('token', token);
-
-                onLogin && onLogin({
-                    id,
-                    name,
-                    email,
-                    role
-                });
+                onLogin && onLogin({ id, name, email, role });
             } else {
                 setErrors({ password: 'Invalid credentials' });
             }
         } catch (err) {
-            const message = err.response?.data?.message || 'Login failed';
-            setErrors({ password: message });
+            setErrors({ password: err.response?.data?.message || 'Login failed' });
         } finally {
             setLoading(false);
         }
     };
 
-    const formatStat = (num) => {
-        if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K+`;
-        return `${num}+`;
-    };
-
+    const formatStat = (num) => num >= 1000 ? `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K+` : `${num}+`;
     const stats = platformStats
-        ? [
-            { value: formatStat(platformStats.totalUsers), label: 'Active Learners' },
-            { value: formatStat(platformStats.totalSessions), label: 'Sessions Logged' },
-            { value: formatStat(platformStats.totalSkills), label: 'Skills Tracked' },
-        ]
-        : [
-            { value: '—', label: 'Active Learners' },
-            { value: '—', label: 'Sessions Logged' },
-            { value: '—', label: 'Skills Tracked' },
-        ];
+        ? [ { value: formatStat(platformStats.totalUsers), label: 'Active Learners' }, { value: formatStat(platformStats.totalSessions), label: 'Sessions Logged' }, { value: formatStat(platformStats.totalSkills), label: 'Skills Tracked' } ]
+        : [ { value: '—', label: 'Active Learners' }, { value: '—', label: 'Sessions Logged' }, { value: '—', label: 'Skills Tracked' } ];
 
     return (
-        <div className="min-h-screen flex bg-[#0f0f1a] dark:bg-[#0f0f1a]">
+        <div className="min-h-screen flex bg-[#0a0a0f] text-white selection:bg-indigo-500/30">
 
-            <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 flex-col justify-between p-12 overflow-hidden">
-
+            {/* --- Left Hero Panel --- */}
+            <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 relative bg-[#050510] flex-col justify-between p-12 lg:p-16 overflow-hidden border-r border-white/5">
+                
+                {/* Advanced Animated Background */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-32 -right-32 w-96 h-96 bg-white opacity-5 rounded-full" />
-                    <div className="absolute top-1/2 -left-20 w-64 h-64 bg-white opacity-5 rounded-full" />
-                    <div className="absolute -bottom-20 right-20 w-72 h-72 bg-purple-400 opacity-10 rounded-full" />
-                    <div
-                        className="absolute inset-0 opacity-10"
-                        style={{
-                            backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)`,
-                            backgroundSize: '32px 32px',
-                        }}
-                    />
+                    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse-slow" />
+                    <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4 animate-pulse-slow" style={{ animationDelay: '2s' }} />
+                    <div className="absolute top-1/2 left-1/2 w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[80px] -translate-x-1/2 -translate-y-1/2" />
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik01OS4yNSAwSDBWMHogTTEuMjEgNjBIMFYwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiIHN0cm9rZS13aWR0aD0iMSIvPgo8L3N2Zz4=')] opacity-50" />
                 </div>
 
-                <div className="relative flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                {/* Logo Area */}
+                <div className="relative z-10 flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/10 shrink-0">
                         <Lightbulb className="w-6 h-6 text-white" />
                     </div>
-                    <span className="text-2xl font-bold text-white tracking-tight">SkillSync</span>
+                    <span className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight">
+                        SkillSync
+                    </span>
                 </div>
 
-                <div className="relative space-y-8">
+                {/* Main Copy */}
+                <div className="relative z-10 space-y-12 shrink-0 my-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-                            Track your learning.<br />
-                            <span className="text-indigo-200">Master your skills.</span>
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6 text-sm font-bold shadow-sm backdrop-blur-md text-indigo-300 uppercase tracking-widest">
+                            <Sparkles className="w-4 h-4" /> Welcome Back
+                        </div>
+                        <h1 className="text-5xl xl:text-6xl font-black text-white leading-[1.1] tracking-tight mb-6">
+                            Master your potential.<br />
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-fuchsia-400">Own your growth.</span>
                         </h1>
-                        <p className="text-indigo-200 text-lg leading-relaxed max-w-sm">
-                            Join thousands of learners who stay consistent, avoid burnout, and hit their goals faster with SkillSync.
+                        <p className="text-gray-400 text-lg xl:text-xl font-medium leading-relaxed max-w-lg">
+                            Join elite learners tracking their journey, avoiding burnout, and hitting their career milestones faster with SkillSync.
                         </p>
                     </div>
 
-                    <div className="flex items-center space-x-8">
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-3 gap-6 pt-4 border-t border-white/10">
                         {stats.map((stat, i) => (
-                            <div key={i}>
-                                <div className="text-2xl font-bold text-white">{stat.value}</div>
-                                <div className="text-indigo-300 text-sm">{stat.label}</div>
+                            <div key={i} className="space-y-1">
+                                <div className="text-3xl font-black text-white tracking-tight">{stat.value}</div>
+                                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">{stat.label}</div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="relative">
-                        <div className="bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-2xl p-6 min-h-[160px] transition-all duration-500">
-                            <Quote className="w-5 h-5 text-indigo-300 opacity-50 mb-2" />
-                            <p className="text-white text-sm leading-relaxed mb-4 transition-opacity duration-500" key={activeTestimonial}>
+                    {/* Testimonial Widget */}
+                    <div className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+                        <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 transition-all duration-300">
+                            <Quote className="w-6 h-6 text-indigo-400/40 mb-3" />
+                            <p className="text-gray-300 text-[15px] font-medium leading-relaxed min-h-[70px] mb-6">
                                 "{testimonials[activeTestimonial].text}"
                             </p>
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                    <div className={`w-9 h-9 bg-gradient-to-br ${testimonials[activeTestimonial].gradient} rounded-full flex items-center justify-center text-white text-sm font-bold`}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-black shadow-lg bg-gradient-to-br ${testimonials[activeTestimonial].gradient}`}>
                                         {testimonials[activeTestimonial].initials}
                                     </div>
                                     <div>
-                                        <div className="text-white text-sm font-semibold">{testimonials[activeTestimonial].name}</div>
-                                        <div className="text-indigo-300 text-xs">{testimonials[activeTestimonial].role}</div>
+                                        <div className="text-white text-sm font-bold">{testimonials[activeTestimonial].name}</div>
+                                        <div className="text-indigo-400 text-xs font-semibold">{testimonials[activeTestimonial].role}</div>
                                     </div>
                                 </div>
-                                <div className="flex items-center space-x-1.5">
+                                <div className="flex items-center gap-1.5">
                                     {testimonials.map((_, i) => (
                                         <button
                                             key={i}
                                             onClick={() => setActiveTestimonial(i)}
-                                            className={`rounded-full transition-all duration-300 ${i === activeTestimonial
-                                                ? 'w-6 h-2 bg-white'
-                                                : 'w-2 h-2 bg-white bg-opacity-30 hover:bg-opacity-50'
-                                                }`}
+                                            className={`rounded-full transition-all duration-300 ${i === activeTestimonial ? 'w-6 h-1.5 bg-indigo-500' : 'w-1.5 h-1.5 bg-white/20 hover:bg-white/40'}`}
                                         />
                                     ))}
                                 </div>
@@ -217,31 +152,38 @@ const Login = ({ onNavigate, onLogin }) => {
                     </div>
                 </div>
 
-                <div className="relative text-indigo-400 text-sm">
-                    © 2026 SkillSync. Built for learners, by learners.
+                {/* Footer */}
+                <div className="relative z-10 text-gray-500 text-sm font-medium">
+                    © {new Date().getFullYear()} SkillSync. Built for learners.
                 </div>
             </div>
 
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-                <div className="w-full max-w-md">
+            {/* --- Right Auth Panel --- */}
+            <div className="w-full lg:w-[55%] xl:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-16 relative">
+                
+                {/* Mobile Glow */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 lg:hidden pointer-events-none" />
 
-                    <div className="flex lg:hidden items-center space-x-3 mb-10">
-                        <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <div className="w-full max-w-[420px] relative z-10">
+                    
+                    {/* Mobile Logo */}
+                    <div className="flex items-center gap-3 mb-10 lg:hidden justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/10 shrink-0">
                             <Lightbulb className="w-5 h-5 text-white" />
                         </div>
-                        <span className="text-xl font-bold text-[#cdd6f4]">SkillSync</span>
+                        <span className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight">
+                            SkillSync
+                        </span>
                     </div>
 
-                    <div className="mb-8">
-                        <h2 className="text-3xl font-bold text-[#cdd6f4] mb-2">Welcome back</h2>
-                        <p className="text-[#9399b2]">Sign in to continue your learning journey</p>
+                    <div className="mb-10 text-center lg:text-left">
+                        <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-3">Welcome back.</h2>
+                        <p className="text-gray-400 font-medium text-lg">Sign in to continue your journey.</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-[#a6adc8] mb-2">
-                                Email address
-                            </label>
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-bold text-gray-300">Email Address</label>
                             <input
                                 type="email"
                                 value={form.email}
@@ -249,19 +191,18 @@ const Login = ({ onNavigate, onLogin }) => {
                                     setForm({ ...form, email: e.target.value });
                                     if (errors.email) setErrors({ ...errors, email: '' });
                                 }}
-                                placeholder="kavy123@example.com"
-                                className={`w-full px-4 py-3 bg-[#1e1e2e] border rounded-xl text-sm text-[#cdd6f4] placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.email ? 'border-red-500 bg-red-500/10' : 'border-[#313244]'
-                                    }`}
+                                placeholder="name@example.com"
+                                className={`w-full px-4 py-3.5 bg-white/5 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-4 focus:bg-white/10 transition-all font-medium ${
+                                    errors.email ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5' : 'border-white/10 focus:border-indigo-500 focus:ring-indigo-500/20'
+                                }`}
                             />
-                            {errors.email && (
-                                <p className="mt-1.5 text-xs text-red-400">{errors.email}</p>
-                            )}
+                            {errors.email && <p className="text-sm font-semibold text-red-400 pt-1">{errors.email}</p>}
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-[#a6adc8] mb-2">
-                                Password
-                            </label>
+                        <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                                <label className="block text-sm font-bold text-gray-300">Password</label>
+                                </div>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -271,70 +212,74 @@ const Login = ({ onNavigate, onLogin }) => {
                                         if (errors.password) setErrors({ ...errors, password: '' });
                                     }}
                                     placeholder="Enter your password"
-                                    className={`w-full px-4 py-3 pr-12 bg-[#1e1e2e] border rounded-xl text-sm text-[#cdd6f4] placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.password ? 'border-red-500 bg-red-500/10' : 'border-[#313244]'
-                                        }`}
+                                    className={`w-full px-4 py-3.5 pr-12 bg-white/5 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-4 focus:bg-white/10 transition-all font-medium ${
+                                        errors.password ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5' : 'border-white/10 focus:border-indigo-500 focus:ring-indigo-500/20'
+                                    }`}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6c7086] hover:text-[#a6adc8] transition-colors p-1 rounded"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
                                 >
-                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                             </div>
-                            {errors.password && (
-                                <p className="mt-1.5 text-xs text-red-400">{errors.password}</p>
-                            )}
+                            {errors.password && <p className="text-sm font-semibold text-red-400 pt-1">{errors.password}</p>}
                         </div>
 
-                        <div className="flex items-center space-x-2 pt-1">
+                        <div className="flex items-center gap-3 pt-2">
                             <input
                                 id="remember"
                                 type="checkbox"
                                 checked={rememberMe}
                                 onChange={(e) => setRememberMe(e.target.checked)}
-                                className="w-4 h-4 text-indigo-600 border-[#313244] rounded focus:ring-indigo-500 cursor-pointer bg-[#1e1e2e]"
+                                className="w-4 h-4 text-indigo-500 bg-white/5 border-white/20 rounded focus:ring-indigo-500/50 focus:ring-offset-[#0a0a0f] focus:ring-2 transition-all cursor-pointer"
                             />
-                            <label htmlFor="remember" className="text-sm text-[#9399b2] cursor-pointer select-none">
-                                Keep me signed in for 5 days
+                            <label htmlFor="remember" className="text-sm font-semibold text-gray-400 cursor-pointer select-none hover:text-gray-300 transition-colors">
+                                Keep me signed in
                             </label>
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-indigo-400 text-white text-sm font-semibold rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 mt-2"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none disabled:transform-none focus:outline-none focus:ring-4 focus:ring-purple-500/30 mt-4"
                         >
                             {loading ? (
                                 <>
-                                    <svg className="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                    </svg>
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     <span>Signing in...</span>
                                 </>
                             ) : (
                                 <>
-                                    <span>Sign in</span>
-                                    <ArrowRight className="w-4 h-4" />
+                                    <span>Sign In to SkillSync</span>
+                                    <ArrowRight className="w-5 h-5" />
                                 </>
                             )}
                         </button>
                     </form>
 
-                    <p className="mt-8 text-center text-sm text-[#9399b2]">
+                    <p className="mt-10 text-center font-semibold text-gray-500">
                         Don't have an account?{' '}
                         <button
                             onClick={() => onNavigate && onNavigate('register')}
-                            className="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                            className="text-indigo-400 hover:text-indigo-300 transition-colors ml-1"
                         >
-                            Create one free
+                            Create one for free
                         </button>
                     </p>
-
                 </div>
             </div>
-
+            
+            <style>{`
+                @keyframes pulse-slow {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.8; transform: scale(1.05); }
+                }
+                .animate-pulse-slow {
+                    animation: pulse-slow 6s ease-in-out infinite;
+                }
+            `}</style>
         </div>
     );
 };
