@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MessageSquare, Search, Plus, ThumbsUp, MessageCircle, Clock, X, Tag, ExternalLink, Check } from 'lucide-react';
+import { MessageSquare, Search, Plus, ThumbsUp, MessageCircle, Clock, X, Tag, ExternalLink, Check, ChevronRight } from 'lucide-react';
 import { getPosts, createPost, togglePostUpvote } from '../services/forumService';
+import Button from '../components/ui/Button';
 
 const TAGS = [
   { value: 'QUESTION', label: 'Question', color: '#6366f1', bg: 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' },
@@ -37,10 +38,7 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [successMsg, setSuccessMsg] = useState('');
 
-  const showSuccess = (msg) => {
-    setSuccessMsg(msg);
-    setTimeout(() => setSuccessMsg(''), 3000);
-  };
+  const showSuccess = (msg) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(''), 3000); };
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
@@ -51,38 +49,20 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
       const data = await getPosts(params);
       setPosts(data.content || []);
       setTotalPages(data.totalPages || 0);
-    } catch (err) {
-      console.error('Failed to fetch posts', err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error('Failed to fetch posts', err); } finally { setLoading(false); }
   }, [page, searchQuery, activeTag]);
 
-  useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
+  useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
   const handleCreatePost = async () => {
-    if (!newTitle.trim() || !newContent.trim()) return;
+    if (!newTitle.trim() || !newContent.trim()) return alert('Please fill in all fields');
     setCreating(true);
     try {
-      await createPost({
-        title: newTitle.trim(),
-        content: newContent.trim(),
-        tag: newTag,
-      });
-      setNewTitle('');
-      setNewContent('');
-      setNewTag('QUESTION');
-      setShowNewPost(false);
-      showSuccess('Post created successfully!');
-      setPage(0);
-      fetchPosts();
-    } catch (err) {
-      console.error('Failed to create post', err);
-    } finally {
-      setCreating(false);
-    }
+      await createPost({ title: newTitle.trim(), content: newContent.trim(), tag: newTag });
+      setNewTitle(''); setNewContent(''); setNewTag('QUESTION'); setShowNewPost(false);
+      showSuccess('Post created successfully! 🎉');
+      setPage(0); fetchPosts();
+    } catch (err) { console.error('Failed to create post', err); alert('Failed to create post'); } finally { setCreating(false); }
   };
 
   const handleUpvote = async (e, postId) => {
@@ -90,88 +70,78 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
     try {
       const updated = await togglePostUpvote(postId);
       setPosts(prev => prev.map(p => p.id === postId ? updated : p));
-    } catch (err) {
-      console.error('Failed to upvote', err);
-    }
+    } catch (err) { console.error('Failed to upvote', err); }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setPage(0);
-    fetchPosts();
-  };
+  const handleSearch = (e) => { e.preventDefault(); setPage(0); fetchPosts(); };
 
   const getTagInfo = (tag) => TAGS.find(t => t.value === tag) || TAGS[0];
 
-  const handleOpenPost = (postId) => {
-    onSelectPost(postId);
-    onNavigate('forum-post-detail');
-  };
+  const handleOpenPost = (postId) => { onSelectPost(postId); onNavigate('forum-post-detail'); };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-white" />
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
+      {/* --- Hero Header --- */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-700 p-8 md:p-12 shadow-2xl text-white">
+        <div className="absolute top-0 left-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -ml-20 -mt-20"></div>
+        <div className="absolute bottom-0 right-10 w-48 h-48 bg-purple-400/20 rounded-full blur-3xl -mb-10"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 mb-4 text-sm font-medium shadow-sm">
+              <MessageSquare className="w-4 h-4 text-fuchsia-200" />
+              <span>Community Discussions</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">
-              Discussions
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3 drop-shadow-md">Discussion Forum</h1>
+            <p className="text-purple-50 text-lg opacity-90 leading-relaxed">
+              Ask questions, share tips, and learn from the community. Your knowledge could be the breakthrough someone else needs.
+            </p>
           </div>
-          <p className="text-gray-600 dark:text-[#a6adc8] mt-1">
-            Ask questions, share tips, and learn from the community
-          </p>
+          <button
+            onClick={() => setShowNewPost(true)}
+            className="inline-flex items-center justify-center px-6 py-3 shrink-0 border border-transparent text-base font-bold rounded-xl text-purple-700 bg-white hover:bg-gray-50 hover:shadow-xl hover:-translate-y-0.5 transition-all whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            New Discussion
+          </button>
         </div>
-        <button
-          onClick={() => setShowNewPost(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
-        >
-          <Plus className="w-4 h-4" />
-          New Post
-        </button>
       </div>
 
       {successMsg && (
-        <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-center gap-3">
-          <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-          <p className="text-sm font-medium text-green-700 dark:text-green-400">{successMsg}</p>
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 shadow-sm">
+          <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+          <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{successMsg}</p>
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <form onSubmit={handleSearch} className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      {/* --- Search and Filters --- */}
+      <div className="flex flex-col lg:flex-row gap-4">
+        <form onSubmit={handleSearch} className="relative flex-1 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search discussions..."
+            placeholder="Search discussions by keyword..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 dark:border-[#313244] rounded-xl bg-white dark:bg-[#1e1e2e] text-gray-900 dark:text-[#cdd6f4] placeholder-gray-400 dark:placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500"
+            className="w-full pl-12 pr-4 py-4 text-sm bg-white dark:bg-[#1e1e2e] border-none rounded-2xl shadow-sm text-gray-900 dark:text-[#cdd6f4] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all font-medium"
           />
         </form>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center bg-white dark:bg-[#1e1e2e] p-2 rounded-2xl shadow-sm">
           <button
             onClick={() => { setActiveTag(null); setPage(0); }}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-              !activeTag
-                ? 'bg-gray-900 dark:bg-[#cdd6f4] text-white dark:text-[#1e1e2e]'
-                : 'bg-gray-100 dark:bg-[#313244] text-gray-600 dark:text-[#a6adc8] hover:bg-gray-200 dark:hover:bg-[#45475a]'
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all ${
+              !activeTag ? 'bg-gray-900 dark:bg-[#cdd6f4] text-white dark:text-[#1e1e2e] shadow-md' : 'text-gray-600 dark:text-[#a6adc8] hover:bg-gray-100 dark:hover:bg-[#313244]'
             }`}
           >
-            All
+            All Topics
           </button>
           {TAGS.map(tag => (
             <button
               key={tag.value}
               onClick={() => { setActiveTag(activeTag === tag.value ? null : tag.value); setPage(0); }}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                activeTag === tag.value
-                  ? tag.bg + ' ring-2 ring-offset-1 dark:ring-offset-[#1e1e2e]'
-                  : 'bg-gray-100 dark:bg-[#313244] text-gray-600 dark:text-[#a6adc8] hover:bg-gray-200 dark:hover:bg-[#45475a]'
+              className={`px-4 py-2 text-sm font-bold rounded-xl transition-all ${
+                activeTag === tag.value ? tag.bg + ' shadow-md scale-105 transform' : 'text-gray-600 dark:text-[#a6adc8] hover:bg-gray-100 dark:hover:bg-[#313244]'
               }`}
-              style={activeTag === tag.value ? { '--tw-ring-color': tag.color + '40' } : {}}
             >
               {tag.label}
             </button>
@@ -179,125 +149,135 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
         </div>
       </div>
 
+      {/* --- Posts Feed --- */}
       {loading ? (
-        <div className="text-center py-16">
-          <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-gray-500 dark:text-[#6c7086] mt-3 text-sm">Loading discussions...</p>
+        <div className="flex justify-center py-20">
+          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto shadow-lg" />
         </div>
       ) : posts.length === 0 ? (
-        <div className="text-center py-16">
-          <MessageSquare className="w-12 h-12 text-gray-300 dark:text-[#45475a] mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-[#6c7086]">
-            {searchQuery || activeTag ? 'No discussions found matching your filters.' : 'No discussions yet. Start one!'}
-          </p>
+        <div className="bg-white/50 dark:bg-[#1e1e2e]/50 backdrop-blur-md rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-[#313244] p-16 text-center">
+            <div className="w-24 h-24 bg-white dark:bg-[#272739] shadow-sm rounded-full flex items-center justify-center mx-auto mb-6">
+                <MessageSquare className="w-12 h-12 text-purple-500" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 dark:text-[#cdd6f4] mb-2">No discussions found</h3>
+            <p className="text-gray-500 dark:text-[#a6adc8] mb-8 max-w-sm mx-auto">
+                {searchQuery || activeTag ? 'Try adjusting your filters to find what you are looking for.' : 'Be the first to start a conversation in the community!'}
+            </p>
+            <Button variant="primary" onClick={() => setShowNewPost(true)} icon={Plus}>Start Discussion</Button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {posts.map(post => {
             const tagInfo = getTagInfo(post.tag);
             return (
-              <button
+              <div
                 key={post.id}
                 onClick={() => handleOpenPost(post.id)}
-                className="w-full text-left bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] p-5 hover:shadow-md hover:border-purple-200 dark:hover:border-purple-500/30 transition-all duration-200 group"
+                className="group relative bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-100 dark:border-[#313244] p-5 hover:shadow-xl hover:shadow-purple-500/5 hover:border-purple-200 dark:hover:border-purple-500/30 transition-all cursor-pointer overflow-hidden flex flex-col md:flex-row md:items-center gap-5"
               >
-                <div className="flex items-start gap-4">
-                  <div className="flex flex-col items-center shrink-0 min-w-[44px]">
-                    <div
-                      onClick={(e) => handleUpvote(e, post.id)}
-                      className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-                        post.upvotedByMe
-                          ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400'
-                          : 'bg-gray-100 dark:bg-[#313244] text-gray-400 dark:text-[#6c7086] hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:text-purple-500'
-                      }`}
-                    >
-                      <ThumbsUp className="w-4 h-4" />
-                    </div>
-                    <span className={`text-xs font-bold mt-1 ${
-                      post.upvotedByMe ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-[#6c7086]'
-                    }`}>
-                      {post.upvotes}
+                <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-48 h-48 bg-gradient-to-r from-purple-50 to-fuchsia-50 dark:from-purple-500/5 dark:to-fuchsia-500/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none -z-0" />
+                
+                <div className="flex flex-col items-center shrink-0 w-16 relative z-10">
+                  <div
+                    onClick={(e) => handleUpvote(e, post.id)}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                      post.upvotedByMe
+                        ? 'bg-gradient-to-br from-purple-500 to-fuchsia-600 text-white shadow-md'
+                        : 'bg-gray-50 dark:bg-[#181825] text-gray-400 dark:text-[#6c7086] hover:bg-purple-100 dark:hover:bg-purple-500/20 hover:text-purple-600 dark:hover:text-purple-400 border border-gray-100 dark:border-[#313244]'
+                    }`}
+                  >
+                    <ThumbsUp className={`w-6 h-6 ${post.upvotedByMe ? '' : 'transform group-hover:-translate-y-0.5 transition-transform'}`} />
+                  </div>
+                  <span className={`text-sm font-black mt-2 ${post.upvotedByMe ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-[#6c7086]'}`}>
+                    {post.upvotes}
+                  </span>
+                </div>
+
+                <div className="flex-1 min-w-0 relative z-10">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${tagInfo.bg}`}>
+                      {tagInfo.label}
+                    </span>
+                    {post.skillName && (
+                      <span className="text-xs px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-100 dark:border-indigo-500/20">
+                        {post.skillName}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-black text-gray-900 dark:text-[#cdd6f4] group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-1 mb-1.5">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm font-medium text-gray-500 dark:text-[#a6adc8] mb-4 line-clamp-2 leading-relaxed">
+                    {post.content}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold text-gray-400 dark:text-[#585b70]">
+                    <span className="flex items-center gap-1.5 text-gray-600 dark:text-[#cdd6f4] bg-gray-50 dark:bg-[#181825] px-2 py-1 rounded-md">
+                        <span className="w-4 h-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-[#313244] dark:to-[#45475a] inline-block" />
+                        {post.authorName}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" /> {timeAgo(post.createdAt)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle className="w-3.5 h-3.5" /> {post.replyCount} {post.replyCount === 1 ? 'reply' : 'replies'}
                     </span>
                   </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${tagInfo.bg}`}>
-                        {tagInfo.label}
-                      </span>
-                      {post.skillName && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium">
-                          {post.skillName}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-[#cdd6f4] group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-1">
-                      {post.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-[#6c7086] mt-1 line-clamp-2">
-                      {post.content}
-                    </p>
-                    <div className="flex items-center gap-4 mt-3 text-xs text-gray-400 dark:text-[#585b70]">
-                      <span>{post.authorName}</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {timeAgo(post.createdAt)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3" />
-                        {post.replyCount} {post.replyCount === 1 ? 'reply' : 'replies'}
-                      </span>
-                    </div>
-                  </div>
                 </div>
-              </button>
+
+                <div className="hidden md:flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-gray-50 dark:bg-[#181825] text-gray-400 group-hover:bg-purple-50 dark:group-hover:bg-purple-500/10 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors relative z-10">
+                    <ChevronRight className="w-5 h-5" />
+                </div>
+              </div>
             );
           })}
         </div>
       )}
 
+      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i)}
-              className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
-                page === i
-                  ? 'bg-purple-500 text-white'
-                  : 'bg-gray-100 dark:bg-[#313244] text-gray-600 dark:text-[#a6adc8] hover:bg-gray-200 dark:hover:bg-[#45475a]'
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
+        <div className="flex justify-center mt-8">
+            <div className="flex items-center gap-2 bg-white dark:bg-[#1e1e2e] p-2 rounded-2xl shadow-sm border border-gray-100 dark:border-[#313244]">
+                <Button variant={page === 0 ? 'secondary' : 'primary'} onClick={() => setPage(page - 1)} disabled={page === 0} className="px-4">
+                    <ChevronRight className="w-4 h-4 rotate-180" />
+                </Button>
+                <span className="px-3 text-sm font-bold text-gray-600 dark:text-[#a6adc8]">
+                    {page + 1} / {totalPages}
+                </span>
+                <Button variant={page === totalPages - 1 ? 'secondary' : 'primary'} onClick={() => setPage(page + 1)} disabled={page === totalPages - 1} className="px-4">
+                    <ChevronRight className="w-4 h-4" />
+                </Button>
+            </div>
         </div>
       )}
 
+      {/* --- New Post Modal --- */}
       {showNewPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#1e1e2e] rounded-2xl border border-gray-200 dark:border-[#313244] w-full max-w-xl shadow-2xl">
-            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-[#313244]">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4]">New Discussion</h2>
-              <button onClick={() => setShowNewPost(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-[#cdd6f4]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setShowNewPost(false)}>
+          <div className="bg-white dark:bg-[#1e1e2e] rounded-3xl border border-gray-200 dark:border-[#313244] w-full max-w-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-purple-50 to-fuchsia-50 dark:from-purple-500/10 dark:to-fuchsia-500/10 px-6 py-4 border-b border-gray-200 dark:border-[#313244] flex items-center justify-between">
+              <h2 className="text-xl font-black text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Start a Discussion
+              </h2>
+              <button onClick={() => setShowNewPost(false)} className="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-[#cdd6f4] hover:bg-white/50 dark:hover:bg-[#313244] transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-5 space-y-4">
+            
+            <div className="p-6 space-y-6">
               <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-[#6c7086] mb-2">Category</label>
-                <div className="flex gap-2 flex-wrap">
+                <label className="block text-sm font-bold text-gray-700 dark:text-[#cdd6f4] mb-3">Topic Category</label>
+                <div className="flex gap-3 flex-wrap">
                   {TAGS.map(tag => (
                     <button
                       key={tag.value}
                       onClick={() => setNewTag(tag.value)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                      className={`px-4 py-2 text-sm font-bold rounded-xl border-2 transition-all flex items-center gap-2 ${
                         newTag === tag.value
-                          ? tag.bg + ' ring-2 ring-offset-1 dark:ring-offset-[#1e1e2e]'
-                          : 'bg-gray-100 dark:bg-[#313244] text-gray-500 dark:text-[#6c7086]'
+                          ? `${tag.bg} border-transparent shadow-sm ring-2 ring-offset-2 ring-purple-500/30 dark:ring-offset-[#1e1e2e]`
+                          : 'bg-white dark:bg-[#181825] border-gray-200 dark:border-[#313244] text-gray-600 dark:text-[#a6adc8] hover:border-gray-300'
                       }`}
-                      style={newTag === tag.value ? { '--tw-ring-color': tag.color + '40' } : {}}
                     >
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color }} />
                       {tag.label}
                     </button>
                   ))}
@@ -305,42 +285,33 @@ const DiscussionForum = ({ onNavigate, onSelectPost }) => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-[#6c7086] mb-1.5">Title</label>
+                <label className="block text-sm font-bold text-gray-700 dark:text-[#cdd6f4] mb-2">Title <span className="text-rose-500">*</span></label>
                 <input
                   type="text"
-                  placeholder="What's your question or topic?"
+                  placeholder="Summarize your question or topic..."
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-[#313244] rounded-xl bg-white dark:bg-[#181825] text-gray-900 dark:text-[#cdd6f4] placeholder-gray-400 dark:placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500"
+                  className="w-full px-4 py-3 text-sm border-2 border-gray-200 dark:border-[#313244] rounded-xl bg-gray-50 dark:bg-[#181825] text-gray-900 dark:text-[#cdd6f4] focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-[#6c7086] mb-1.5">Content</label>
+                <label className="block text-sm font-bold text-gray-700 dark:text-[#cdd6f4] mb-2">Details <span className="text-rose-500">*</span></label>
                 <textarea
-                  placeholder="Share your thoughts, question, or tip..."
+                  placeholder="Provide context, share code snippets, or explain your problem..."
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
-                  rows={5}
-                  className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-[#313244] rounded-xl bg-white dark:bg-[#181825] text-gray-900 dark:text-[#cdd6f4] placeholder-gray-400 dark:placeholder-[#6c7086] focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 resize-none"
+                  rows={6}
+                  className="w-full px-4 py-3 text-sm border-2 border-gray-200 dark:border-[#313244] rounded-xl bg-gray-50 dark:bg-[#181825] text-gray-900 dark:text-[#cdd6f4] focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 resize-none transition-all font-medium"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 p-5 pt-0">
-              <button
-                onClick={() => setShowNewPost(false)}
-                className="px-4 py-2 text-sm font-medium rounded-xl border border-gray-200 dark:border-[#313244] text-gray-600 dark:text-[#a6adc8] hover:bg-gray-50 dark:hover:bg-[#313244] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreatePost}
-                disabled={!newTitle.trim() || !newContent.trim() || creating}
-                className="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {creating ? 'Posting...' : 'Post'}
-              </button>
+            <div className="bg-gray-50 dark:bg-[#181825] px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-[#313244]">
+              <Button variant="secondary" onClick={() => setShowNewPost(false)}>Cancel</Button>
+              <Button variant="primary" onClick={handleCreatePost} disabled={!newTitle.trim() || !newContent.trim() || creating} className="bg-gradient-to-r from-purple-500 to-fuchsia-600 border-transparent hover:shadow-purple-500/30">
+                {creating ? 'Publishing...' : 'Publish Discussion'}
+              </Button>
             </div>
           </div>
         </div>
