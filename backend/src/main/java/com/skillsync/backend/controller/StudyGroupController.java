@@ -109,6 +109,13 @@ public class StudyGroupController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Group updated successfully", group));
     }
 
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<ApiResponse<String>> deleteGroup(@PathVariable Long groupId) {
+        User currentUser = getCurrentUser();
+        groupService.deleteGroup(groupId, currentUser.getId());
+        return ResponseEntity.ok(new ApiResponse<>(true, "Group deleted", "Success"));
+    }
+
     @GetMapping("/{groupId}/members")
     public ResponseEntity<ApiResponse<List<GroupMemberDTO>>> getGroupMembers(@PathVariable Long groupId) {
         List<GroupMemberDTO> members = groupService.getGroupMembers(groupId);
