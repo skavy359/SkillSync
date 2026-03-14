@@ -84,3 +84,8 @@ export const updateGroup = async (groupId, updateData) => {
     const { data } = await api.put(`/study-groups/${groupId}`, updateData);
     return data.data;
 };
+
+export const deleteGroup = async (groupId) => {
+    const { data } = await api.delete(`/study-groups/${groupId}`);
+    return data.data;
+};
