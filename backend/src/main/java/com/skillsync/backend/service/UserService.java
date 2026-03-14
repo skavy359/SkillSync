@@ -15,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import com.skillsync.backend.dto.AddSkillRequest;
 import com.skillsync.backend.dto.AdminUserResponse;
 import com.skillsync.backend.dto.CategoryResponse;
@@ -97,6 +99,9 @@ public class UserService {
     private final AuditService auditService;
     private final AuditLogRepository auditLogRepository;
     private final NotificationRepository notificationRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public UserService(
             UserRepository userRepository,
@@ -552,22 +557,28 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(null));
 
-        long total = skillRepository.countByUser(user);
-        long completed = skillRepository.countByUserAndStatus(user, SkillStatus.COMPLETED);
-        long active = skillRepository.countByUserAndStatus(user, SkillStatus.ACTIVE);
+        List<SkillResponse> mappedSkills = skillRepository.findAllByUser(user).stream()
+                .map(this::mapSkill)
+                .toList();
+                
+        long total = mappedSkills.size();
+        long completed = mappedSkills.stream().filter(s -> "COMPLETED".equals(s.getStatus())).count();
+        long active = mappedSkills.stream().filter(s -> "ACTIVE".equals(s.getStatus())).count();
 
         double completionRate =
                 total == 0 ? 0 : (double) completed / total * 100;
 
         double avgProgress =
-                skillRepository.findAllByUser(user).stream()
-                        .mapToInt(Skill::getProgress)
+                mappedSkills.stream()
+                        .mapToInt(SkillResponse::getProgress)
                         .average()
                         .orElse(0);
 
         String topSkill =
-                skillRepository.findTopByUserOrderByProgressDesc(user)
-                        .map(Skill::getName)
+                mappedSkills.stream()
+                        .sorted((s1, s2) -> Integer.compare(s2.getProgress(), s1.getProgress()))
+                        .findFirst()
+                        .map(SkillResponse::getName)
                         .orElse(null);
 
         return new UserStatsResponse(
@@ -1314,7 +1325,7 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(null));
 
-        LocalDate start = LocalDate.now().minusDays(7);
+        java.time.LocalDate start = java.time.LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
 
         int minutes =
                 learningSessionRepository.sumMinutesFromDate(user, start);
@@ -1339,7 +1350,7 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(null));
 
-        LocalDate start = LocalDate.now().minusDays(30);
+        java.time.LocalDate start = java.time.LocalDate.now().with(java.time.temporal.TemporalAdjusters.firstDayOfMonth());
 
         int minutes =
                 learningSessionRepository.sumMinutesFromDate(user, start);
@@ -1383,8 +1394,8 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(null));
 
-        LocalDate weekStart = LocalDate.now().minusDays(7);
-        LocalDate monthStart = LocalDate.now().minusDays(30);
+        java.time.LocalDate weekStart = java.time.LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        java.time.LocalDate monthStart = java.time.LocalDate.now().with(java.time.temporal.TemporalAdjusters.firstDayOfMonth());
 
         int weeklyMinutes =
                 learningSessionRepository.sumMinutesFromDate(user, weekStart);
@@ -1682,8 +1693,79 @@ public class UserService {
         return mapToAdminUserResponse(user);
     }
 
+    @jakarta.transaction.Transactional
     public void adminDeleteUser(Long userId) {
-        userRepository.deleteById(userId);
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException(userId);
+        }
+
+        jakarta.persistence.EntityManager em = entityManager;
+
+        // Delete in correct FK dependency order using native SQL
+
+        // 1. Learning sessions & goals (depend on skills which depend on user)
+        em.createNativeQuery("DELETE FROM learning_session WHERE skill_id IN (SELECT id FROM skills WHERE user_id = :uid)")
+                .setParameter("uid", userId).executeUpdate();
+        em.createNativeQuery("DELETE FROM learning_goal WHERE skill_id IN (SELECT id FROM skills WHERE user_id = :uid)")
+                .setParameter("uid", userId).executeUpdate();
+
+        // 2. Quiz attempts
+        em.createNativeQuery("DELETE FROM quiz_attempts WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+
+        // 3. Study events
+        em.createNativeQuery("DELETE FROM study_events WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+
+        // 4. Forum: upvotes on user's replies, then upvotes on user's posts, then user's reply upvotes, user's post upvotes
+        em.createNativeQuery("DELETE FROM forum_reply_upvotes WHERE reply_id IN (SELECT id FROM forum_replies WHERE author_id = :uid)")
+                .setParameter("uid", userId).executeUpdate();
+        em.createNativeQuery("DELETE FROM forum_reply_upvotes WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+        em.createNativeQuery("DELETE FROM forum_replies WHERE author_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+        em.createNativeQuery("DELETE FROM forum_post_upvotes WHERE post_id IN (SELECT id FROM forum_posts WHERE author_id = :uid)")
+                .setParameter("uid", userId).executeUpdate();
+        em.createNativeQuery("DELETE FROM forum_post_upvotes WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+        // Delete replies on user's posts (by other users)
+        em.createNativeQuery("DELETE FROM forum_replies WHERE post_id IN (SELECT id FROM forum_posts WHERE author_id = :uid)")
+                .setParameter("uid", userId).executeUpdate();
+        em.createNativeQuery("DELETE FROM forum_posts WHERE author_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+
+        // 5. Group data
+        em.createNativeQuery("DELETE FROM group_memberships WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+        em.createNativeQuery("DELETE FROM group_activities WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+        em.createNativeQuery("DELETE FROM group_messages WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+        em.createNativeQuery("DELETE FROM group_invitations WHERE invited_user_id = :uid OR invited_by_user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+
+        // 6. Notifications
+        em.createNativeQuery("DELETE FROM notification WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+
+        // 7. Audit logs
+        em.createNativeQuery("DELETE FROM audit_log WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+
+        // 8. Recommendation history
+        em.createNativeQuery("DELETE FROM recommendation_history WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+
+        // 9. Skills (after sessions/goals/quizzes are gone)
+        em.createNativeQuery("DELETE FROM skills WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+
+        // 10. Skill categories
+        em.createNativeQuery("DELETE FROM skill_category WHERE user_id = :uid")
+                .setParameter("uid", userId).executeUpdate();
+        // 11. Finally delete the user
+        em.createNativeQuery("DELETE FROM users WHERE id = :uid")
+                .setParameter("uid", userId).executeUpdate();
     }
 
     public SkillResponse adminAddSkill(Long userId, AddSkillRequest req) {
