@@ -20,4 +20,6 @@ public interface GroupMessageRepository extends JpaRepository<GroupMessage, Long
     
     @Query("SELECT gm FROM GroupMessage gm WHERE gm.group.id = :groupId ORDER BY gm.createdAt DESC")
     List<GroupMessage> findLatestMessagesByGroup(@Param("groupId") Long groupId);
+    
+    void deleteByGroupId(Long groupId);
 }
