@@ -19,6 +19,10 @@ import com.skillsync.backend.model.User;
 import com.skillsync.backend.repository.GroupMembershipRepository;
 import com.skillsync.backend.repository.SkillRepository;
 import com.skillsync.backend.repository.StudyGroupRepository;
+import com.skillsync.backend.repository.GroupAnnouncementRepository;
+import com.skillsync.backend.repository.GroupActivityRepository;
+import com.skillsync.backend.repository.GroupMessageRepository;
+import com.skillsync.backend.repository.GroupInvitationRepository;
 import com.skillsync.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +36,10 @@ public class StudyGroupService {
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final GroupActivityService groupActivityService;
+    private final GroupAnnouncementRepository announcementRepository;
+    private final GroupActivityRepository activityRepository;
+    private final GroupMessageRepository messageRepository;
+    private final GroupInvitationRepository invitationRepository;
 
     @Transactional
     public StudyGroupDTO createGroup(CreateStudyGroupRequest request, Long userId) {
@@ -171,6 +179,28 @@ public class StudyGroupService {
         groupRepository.save(group);
         log.info("Group {} updated by user {}", groupId, userId);
         return mapToDTO(group, true, false);
+    }
+
+    @Transactional
+    public void deleteGroup(Long groupId, Long userId) {
+        StudyGroup group = groupRepository.findById(groupId)
+            .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        GroupMembership adminMembership = membershipRepository.findByGroupIdAndUserId(groupId, userId)
+            .orElseThrow(() -> new RuntimeException("User is not a member of this group"));
+
+        if (adminMembership.getRole() != GroupRole.ADMIN) {
+            throw new RuntimeException("Only admins can delete the group");
+        }
+
+        announcementRepository.deleteByGroupId(groupId);
+        activityRepository.deleteByGroupId(groupId);
+        messageRepository.deleteByGroupId(groupId);
+        invitationRepository.deleteByGroupId(groupId);
+        membershipRepository.deleteByGroupId(groupId);
+        
+        groupRepository.delete(group);
+        log.info("Group {} deleted by user {}", groupId, userId);
     }
 
     @Transactional
