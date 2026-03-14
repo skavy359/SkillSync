@@ -22,4 +22,6 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     
     @Query("SELECT COUNT(gm) > 0 FROM GroupMembership gm WHERE gm.group.id = :groupId AND gm.user.id = :userId")
     boolean isMember(@Param("groupId") Long groupId, @Param("userId") Long userId);
+    
+    void deleteByGroupId(Long groupId);
 }
