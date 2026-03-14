@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Users, BookOpen, ChevronRight, Loader2, Sparkles, TrendingUp } from 'lucide-react';
+import { Search, Users, BookOpen, ChevronRight, Loader2, Sparkles, TrendingUp, CheckCircle } from 'lucide-react';
 import { listPublicGroups, searchGroups, joinGroup } from '../services/studyGroupService';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -15,9 +15,7 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
     const [successMsg, setSuccessMsg] = useState('');
     const PAGE_SIZE = 10;
 
-    useEffect(() => {
-        fetchInitialData();
-    }, []);
+    useEffect(() => { fetchInitialData(); }, []);
 
     const fetchInitialData = async () => {
         try {
@@ -26,50 +24,30 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
             setGroups(groupsRes.content || groupsRes || []);
             setTotalPages(groupsRes.totalPages || 1);
             setCurrentPage(0);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        } finally {
-            setLoading(false);
-        }
+        } catch (error) { console.error('Error fetching data:', error); } finally { setLoading(false); }
     };
 
     const handleSearch = async (e) => {
         e.preventDefault();
-        if (!searchQuery.trim()) {
-            fetchInitialData();
-            return;
-        }
-
+        if (!searchQuery.trim()) { fetchInitialData(); return; }
         try {
             setSearching(true);
             const result = await searchGroups(searchQuery, 0, PAGE_SIZE);
             setGroups(result.content || result || []);
             setTotalPages(result.totalPages || 1);
             setCurrentPage(0);
-        } catch (error) {
-            console.error('Error searching groups:', error);
-        } finally {
-            setSearching(false);
-        }
+        } catch (error) { console.error('Error searching groups:', error); } finally { setSearching(false); }
     };
-
 
     const handlePagination = async (newPage) => {
         try {
             setLoading(true);
             let result;
-            if (searchQuery.trim()) {
-                result = await searchGroups(searchQuery, newPage, PAGE_SIZE);
-            } else {
-                result = await listPublicGroups(newPage, PAGE_SIZE);
-            }
+            if (searchQuery.trim()) { result = await searchGroups(searchQuery, newPage, PAGE_SIZE); } 
+            else { result = await listPublicGroups(newPage, PAGE_SIZE); }
             setGroups(result.content || result || []);
             setCurrentPage(newPage);
-        } catch (error) {
-            console.error('Error loading page:', error);
-        } finally {
-            setLoading(false);
-        }
+        } catch (error) { console.error('Error loading page:', error); } finally { setLoading(false); }
     };
 
     const handleNavigateToGroup = (groupId) => {
@@ -83,162 +61,164 @@ const BrowseStudyGroups = ({ onNavigate, onSelectGroup }) => {
             setJoiningGroupId(groupId);
             await joinGroup(groupId);
             setGroups(groups.map(g => g.id === groupId ? { ...g, isMember: true } : g));
-            setSuccessMsg('Successfully joined group!');
+            setSuccessMsg('Successfully joined group! 🎉');
             setTimeout(() => setSuccessMsg(''), 3000);
-        } catch (err) {
-            console.error('Error joining group:', err);
-            alert(err.response?.data?.message || 'Failed to join group');
-        } finally {
-            setJoiningGroupId(null);
-        }
+        } catch (err) { console.error('Error joining group:', err); alert(err.response?.data?.message || 'Failed to join group'); } finally { setJoiningGroupId(null); }
     };
 
     return (
-        <div className="flex-1 flex flex-col bg-gray-50 dark:bg-[#11111b]">
-            <div className="px-8 py-8">
-                <div className="max-w-6xl mx-auto bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-[#1e1e2e] dark:to-[#1e1e2e] border-2 border-gray-200 dark:border-[#313244] rounded-3xl px-8 py-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Sparkles className="w-8 h-8 text-white dark:text-indigo-400" />
-                        <h1 className="text-4xl font-bold text-white">
-                            Discover Study Groups
-                        </h1>
-                    </div>
-                    <p className="text-indigo-100 dark:text-[#a6adc8]">
-                        Join thriving communities of learners and accelerate your growth together
-                    </p>
-                </div>
-            </div>
-
-            <div className="flex-1 px-8 py-6 overflow-auto">
-                <div className="max-w-6xl mx-auto">
-                    {successMsg && (
-                        <div className="mb-4 p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg">
-                            <p className="text-sm font-medium text-green-700 dark:text-green-400">{successMsg}</p>
+        <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
+            {/* --- Hero Section --- */}
+            <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-700 p-8 md:p-12 shadow-2xl text-white">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                <div className="absolute bottom-0 left-10 w-48 h-48 bg-blue-400/20 rounded-full blur-3xl -mb-10"></div>
+                
+                <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+                    <div className="max-w-2xl">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 mb-4 text-sm font-medium shadow-sm">
+                            <Sparkles className="w-4 h-4 text-sky-200" />
+                            <span>Discover Communities</span>
                         </div>
-                    )}
-
-                    <div className="mb-8">
-                        <form onSubmit={handleSearch} className="flex gap-2">
-                            <div className="flex-1 relative">
-                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-indigo-400" />
-                                <Input
-                                    type="text"
-                                    placeholder="Search by group name or skill..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-12 py-3 text-base bg-white dark:bg-[#1e1e2e] border border-gray-300 dark:border-[#313244]"
-                                />
+                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3 drop-shadow-md">
+                            Find Your Tribe
+                        </h1>
+                        <p className="text-blue-50 text-lg opacity-90 leading-relaxed max-w-xl">
+                            Join thriving communities of learners. Find study groups matching your skills and accelerate your growth together.
+                        </p>
+                    </div>
+                    
+                    <div className="w-full md:w-96 shrink-0">
+                        <form onSubmit={handleSearch} className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Search className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                             </div>
-                            <Button type="submit" loading={searching} className="px-8">
-                                Search
-                            </Button>
+                            <input
+                                type="text"
+                                placeholder="Search by name or skill..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-24 py-4 bg-white dark:bg-[#1e1e2e] border-none rounded-2xl text-gray-900 dark:text-[#cdd6f4] placeholder-gray-400 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 transition-shadow"
+                            />
+                            <button
+                                type="submit"
+                                disabled={searching}
+                                className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors flex items-center gap-2"
+                            >
+                                {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
+                            </button>
                         </form>
                     </div>
-
-                    {loading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
-                        </div>
-                    ) : groups.length === 0 ? (
-                        <div className="bg-white dark:bg-[#1e1e2e] rounded-lg p-8 text-center">
-                            <Users className="w-12 h-12 text-gray-400 dark:text-[#6c7086] mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-[#cdd6f4] mb-2">
-                                No groups found
-                            </h3>
-                            <p className="text-gray-600 dark:text-[#a6adc8] mb-4">
-                                {searchQuery ? 'Try a different search term' : 'No public groups available yet'}
-                            </p>
-                            <Button onClick={() => onNavigate('study-groups')}>
-                                Create a Group
-                            </Button>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                                {groups.map(group => (
-                                    <div
-                                        key={group.id}
-                                        onClick={() => handleNavigateToGroup(group.id)}
-                                        className="group relative bg-white dark:bg-[#1e1e2e] rounded-3xl overflow-hidden border-2 border-gray-200 dark:border-[#313244] hover:border-transparent transition-all duration-300 hover:shadow-2xl dark:hover:shadow-2xl dark:hover:shadow-indigo-500/30 cursor-pointer transform hover:-translate-y-1"
-                                    >
-                                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/20 dark:to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                                        <div className="relative p-6 space-y-4">
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-bold text-lg text-gray-900 dark:text-[#cdd6f4] truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                        {group.name}
-                                                    </h3>
-                                                    <p className="text-xs text-gray-500 dark:text-[#6c7086] mt-1 flex items-center gap-1">
-                                                        <span>👤</span> {group.createdByName}
-                                                    </p>
-                                                </div>
-                                                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                    <BookOpen className="w-5 h-5 text-white" />
-                                                </div>
-                                            </div>
-
-                                            <p className="text-sm text-gray-600 dark:text-[#a6adc8] line-clamp-2 leading-relaxed">
-                                                {group.description || 'A collaborative learning space'}
-                                            </p>
-
-                                            {group.skillName && (
-                                                <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-500/20 dark:to-blue-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold gap-1">
-                                                    <span>🎯</span>
-                                                    {group.skillName}
-                                                </div>
-                                            )}
-
-                                            <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-[#313244]">
-                                                <div className="flex items-center gap-1">
-                                                    <Users className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-                                                    <span className="text-sm font-semibold text-gray-900 dark:text-[#cdd6f4]">{group.memberCount}</span>
-                                                    <span className="text-xs text-gray-500 dark:text-[#6c7086]">members</span>
-                                                </div>
-                                                {group.isMember ? (
-                                                    <span className="flex items-center gap-1 text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-3 py-1 rounded-full">
-                                                        <span>✓</span> Joined
-                                                    </span>
-                                                ) : (
-                                                    <button
-                                                        onClick={(e) => handleJoinGroup(group.id, e)}
-                                                        disabled={joiningGroupId === group.id}
-                                                        className="px-4 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:shadow-lg hover:shadow-indigo-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
-                                                    >
-                                                        {joiningGroupId === group.id ? '...' : 'Join'}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {totalPages > 1 && (
-                                <div className="flex items-center justify-center gap-2">
-                                    <Button
-                                        onClick={() => handlePagination(currentPage - 1)}
-                                        disabled={currentPage === 0}
-                                        className="px-4"
-                                    >
-                                        Previous
-                                    </Button>
-                                    <span className="text-gray-600 dark:text-[#a6adc8] text-sm">
-                                        Page {currentPage + 1} of {totalPages}
-                                    </span>
-                                    <Button
-                                        onClick={() => handlePagination(currentPage + 1)}
-                                        disabled={currentPage === totalPages - 1}
-                                        className="px-4"
-                                    >
-                                        Next
-                                    </Button>
-                                </div>
-                            )}
-                        </>
-                    )}
                 </div>
             </div>
+
+            {successMsg && (
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 shadow-sm">
+                    <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                    <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{successMsg}</p>
+                </div>
+            )}
+
+            {/* --- Results Section --- */}
+            <div className="mb-4">
+                <h2 className="text-2xl font-black text-gray-900 dark:text-[#cdd6f4] flex items-center gap-2">
+                     Explore Groups
+                </h2>
+            </div>
+
+            {loading ? (
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+                </div>
+            ) : groups.length === 0 ? (
+                <div className="bg-white/50 dark:bg-[#1e1e2e]/50 backdrop-blur-md rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-[#313244] p-16 text-center">
+                    <div className="w-24 h-24 bg-white dark:bg-[#272739] shadow-sm rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Users className="w-12 h-12 text-blue-500" />
+                    </div>
+                    <h3 className="text-2xl font-black text-gray-900 dark:text-[#cdd6f4] mb-2">No groups found</h3>
+                    <p className="text-gray-500 dark:text-[#a6adc8] mb-8 max-w-sm mx-auto">
+                        {searchQuery ? 'Try adjusting your search terms to find what you are looking for.' : 'There are no public study groups available at the moment.'}
+                    </p>
+                    <Button variant="primary" onClick={() => onNavigate('study-groups')}>
+                        Create the first group
+                    </Button>
+                </div>
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {groups.map(group => (
+                            <div
+                                key={group.id}
+                                onClick={() => handleNavigateToGroup(group.id)}
+                                className="group bg-white dark:bg-[#1e1e2e] rounded-[2rem] border border-gray-100 dark:border-[#313244] p-6 hover:shadow-xl hover:shadow-blue-500/5 hover:border-blue-200 dark:hover:border-blue-500/30 transition-all cursor-pointer relative overflow-hidden flex flex-col h-full"
+                            >
+                                <div className="absolute -right-6 -top-6 w-32 h-32 bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-500/5 dark:to-sky-500/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity -z-0" />
+                                
+                                <div className="relative z-10 flex-1">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-white shadow-inner shadow-black/10">
+                                            <BookOpen className="w-7 h-7" />
+                                        </div>
+                                        <div className="text-xs font-semibold text-gray-500 dark:text-[#6c7086] flex items-center gap-1 bg-gray-50 dark:bg-[#181825] px-2.5 py-1 rounded-lg">
+                                            <span>👤</span> {group.createdByName}
+                                        </div>
+                                    </div>
+                                    
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-[#cdd6f4] mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{group.name}</h3>
+                                    
+                                    {group.skillName && (
+                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold mb-3 border border-sky-100 dark:border-sky-500/20">
+                                            <TrendingUp className="w-3.5 h-3.5" /> {group.skillName}
+                                        </div>
+                                    )}
+                                    
+                                    <p className="text-sm font-medium text-gray-500 dark:text-[#a6adc8] line-clamp-2 mb-6 leading-relaxed">
+                                        {group.description || 'A collaborative learning space for sharing knowledge.'}
+                                    </p>
+                                </div>
+
+                                <div className="relative z-10 flex items-center justify-between pt-4 border-t border-gray-100 dark:border-[#313244] mt-auto">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-[#cdd6f4]">
+                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                            <Users className="w-4 h-4" />
+                                        </div>
+                                        <span>{group.memberCount} Members</span>
+                                    </div>
+                                    
+                                    {group.isMember ? (
+                                        <span className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                                            <CheckCircle className="w-4 h-4" /> Joined
+                                        </span>
+                                    ) : (
+                                        <button
+                                            onClick={(e) => handleJoinGroup(group.id, e)}
+                                            disabled={joiningGroupId === group.id}
+                                            className="px-4 py-2 text-sm font-bold rounded-xl bg-gradient-to-r from-blue-500 to-sky-500 text-white hover:shadow-lg hover:shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5"
+                                        >
+                                            {joiningGroupId === group.id ? 'Joining...' : 'Join Group'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {totalPages > 1 && (
+                        <div className="flex justify-center mt-10">
+                            <div className="flex items-center gap-2 bg-white dark:bg-[#1e1e2e] p-2 rounded-2xl border border-gray-200 dark:border-[#313244] shadow-sm">
+                                <Button variant={currentPage === 0 ? 'secondary' : 'primary'} onClick={() => handlePagination(currentPage - 1)} disabled={currentPage === 0} className="px-5">
+                                    <ChevronRight className="w-5 h-5 rotate-180" /> Prev
+                                </Button>
+                                <span className="px-4 text-sm font-bold text-gray-600 dark:text-[#a6adc8]">
+                                    {currentPage + 1} / {totalPages}
+                                </span>
+                                <Button variant={currentPage === totalPages - 1 ? 'secondary' : 'primary'} onClick={() => handlePagination(currentPage + 1)} disabled={currentPage === totalPages - 1} className="px-5">
+                                    Next <ChevronRight className="w-5 h-5" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
         </div>
     );
 };
