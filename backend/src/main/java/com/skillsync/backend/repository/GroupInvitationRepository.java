@@ -23,4 +23,6 @@ public interface GroupInvitationRepository extends JpaRepository<GroupInvitation
     List<GroupInvitation> findPendingInvitations(@Param("userId") Long userId);
     
     long countByGroupIdAndStatus(Long groupId, InvitationStatus status);
+    
+    void deleteByGroupId(Long groupId);
 }
