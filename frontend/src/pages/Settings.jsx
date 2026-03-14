@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, FileText, X, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Shield, FileText, X, ChevronRight, AlertTriangle, Bell, Info } from 'lucide-react';
 import notificationPreferenceService from '../services/notificationPreferenceService';
 import { deleteMyAccount } from '../services/profileService';
 
@@ -37,23 +37,18 @@ const Settings = () => {
                 });
             } catch (error) {
                 const stored = localStorage.getItem('notifPrefs');
-                if (stored) {
-                    setNotifPrefs(JSON.parse(stored));
-                }
+                if (stored) setNotifPrefs(JSON.parse(stored));
             } finally {
                 setLoading(false);
             }
         };
-
         loadPreferences();
     }, []);
 
     const toggleNotif = async (key) => {
         const updated = { ...notifPrefs, [key]: !notifPrefs[key] };
         setNotifPrefs(updated);
-
         localStorage.setItem('notifPrefs', JSON.stringify(updated));
-
         try {
             await notificationPreferenceService.updatePreferences(updated);
         } catch (error) {
@@ -62,11 +57,7 @@ const Settings = () => {
     };
 
     const handleDeleteAccount = async () => {
-        if (deleteInput !== 'DELETE') {
-            alert('Please type DELETE to confirm account deletion');
-            return;
-        }
-
+        if (deleteInput !== 'DELETE') return;
         setDeleting(true);
         try {
             await deleteMyAccount();
@@ -80,259 +71,230 @@ const Settings = () => {
         }
     };
 
-    const notifItems = [
-        { key: 'sessionReminders', label: 'Session reminders', desc: 'Get reminded to log your learning sessions' },
-        { key: 'goalAlerts', label: 'Goal alerts', desc: 'Notifications when goals are due or completed' },
-        { key: 'skillCompletions', label: 'Skill completions', desc: 'Celebrate when you complete a skill' },
-        { key: 'learningStreaks', label: 'Learning streaks', desc: 'Alert when your streak is at risk of breaking' },
-        { key: 'categoryMilestones', label: 'Category milestones', desc: 'Notifications for reaching milestones in a category' },
-        { key: 'burnoutWarnings', label: 'Burnout warnings', desc: 'Alert when overworking patterns are detected' },
-        { key: 'weeklySummary', label: 'Weekly summary', desc: 'Receive a weekly learning summary every Monday showing what you accomplished' },
-        { key: 'achievementNotifications', label: 'Achievement notifications', desc: 'Get notified when earning new achievements and badges' },
+    const notifGroups = [
+        {
+            title: "Learning & Progress",
+            items: [
+                { key: 'sessionReminders', label: 'Session Reminders', desc: 'Get reminded to log your learning sessions' },
+                { key: 'learningStreaks', label: 'Streak Alerts', desc: 'Alert when your learning streak is at risk of breaking' },
+                { key: 'burnoutWarnings', label: 'Burnout Warnings', desc: 'Smart alerts when overworking patterns are detected' },
+                { key: 'weeklySummary', label: 'Weekly Summary', desc: 'Receive a personalized learning summary every Monday' },
+            ]
+        },
+        {
+            title: "Achievements & Goals",
+            items: [
+                { key: 'goalAlerts', label: 'Goal Tracking', desc: 'Notifications when goals are due or successfully completed' },
+                { key: 'skillCompletions', label: 'Skill Mastery', desc: 'Celebrate when you 100% complete a tracked skill' },
+                { key: 'categoryMilestones', label: 'Category Milestones', desc: 'Updates for reaching significant milestones in a category' },
+                { key: 'achievementNotifications', label: 'Badges & Trophies', desc: 'Get notified immediately when earning new achievements' },
+            ]
+        }
     ];
 
     return (
-        <div className="space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8 pb-12">
+            
+            {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-[#cdd6f4]">Settings</h1>
-                <p className="text-gray-500 dark:text-[#7f849c] mt-1">Manage your preferences and account settings.</p>
+                <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Account Settings</h1>
+                <p className="text-gray-500 dark:text-gray-400 font-medium">Manage your notification preferences, privacy, and account data.</p>
             </div>
 
-            <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 dark:border-[#272739]">
-                    <h2 className="text-base font-semibold text-gray-900 dark:text-[#cdd6f4]">Notifications</h2>
-                    <p className="text-sm text-gray-500 dark:text-[#7f849c] mt-0.5">Manage how you receive notifications</p>
+            {/* Notifications Section */}
+            <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 shadow-sm overflow-hidden">
+                <div className="px-6 sm:px-8 py-6 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                        <Bell className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Notification Preferences</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Customize what alerts and summaries you receive.</p>
+                    </div>
                 </div>
-                <div className="divide-y divide-gray-100 dark:divide-[#272739]">
-                    {loading ? (
-                        <div className="px-6 py-8 text-center">
-                            <p className="text-sm text-gray-500 dark:text-[#7f849c]">Loading preferences...</p>
-                        </div>
-                    ) : (
-                        notifItems.map((item) => (
-                            <div key={item.key} className="flex items-center justify-between px-6 py-4">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">{item.label}</p>
-                                    <p className="text-xs text-gray-500 dark:text-[#7f849c] mt-0.5">{item.desc}</p>
+
+                {loading ? (
+                    <div className="px-8 py-16 flex flex-col items-center justify-center">
+                        <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400 font-medium">Loading preferences...</p>
+                    </div>
+                ) : (
+                    <div className="divide-y divide-gray-100 dark:divide-white/5">
+                        {notifGroups.map((group, gIdx) => (
+                            <div key={gIdx} className="p-6 sm:p-8">
+                                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider mb-6">{group.title}</h3>
+                                <div className="space-y-6">
+                                    {group.items.map((item) => (
+                                        <label key={item.key} className="flex items-start sm:items-center justify-between gap-4 cursor-pointer group">
+                                            <div className="flex-1">
+                                                <p className="text-base font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{item.label}</p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-0.5">{item.desc}</p>
+                                            </div>
+                                            <div className="relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full focus:outline-none focus:ring-4 focus:ring-indigo-500/20 mt-1 sm:mt-0">
+                                                <div className={`absolute inset-0 rounded-full transition-colors duration-300 ease-in-out ${notifPrefs[item.key] ? 'bg-indigo-500' : 'bg-gray-200 dark:bg-[#313244]'}`} />
+                                                <div className={`absolute left-1 h-5 w-5 rounded-full bg-white shadow-sm ring-1 ring-gray-900/5 transition-transform duration-300 ease-in-out ${notifPrefs[item.key] ? 'translate-x-7' : 'translate-x-0'}`} />
+                                                <input type="checkbox" className="sr-only" checked={notifPrefs[item.key]} onChange={() => toggleNotif(item.key)} />
+                                            </div>
+                                        </label>
+                                    ))}
                                 </div>
-                                <button
-                                    onClick={() => toggleNotif(item.key)}
-                                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${notifPrefs[item.key] ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-[#45475a]'
-                                        }`}
-                                >
-                                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${notifPrefs[item.key] ? 'translate-x-5' : 'translate-x-0'
-                                        }`} />
-                                </button>
                             </div>
-                        ))
-                    )}
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Legal & About */}
+                <div className="space-y-8">
+                    <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 shadow-sm overflow-hidden">
+                        <div className="px-6 py-5 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Legal & Policies</h2>
+                        </div>
+                        <div className="divide-y divide-gray-100 dark:divide-white/5">
+                            <button onClick={() => setModalOpen('terms')} className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-[#272739] transition-colors group">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 transition-colors">
+                                        <FileText className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Terms of Service</span>
+                                </div>
+                                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+                            </button>
+                            <button onClick={() => setModalOpen('privacy')} className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-[#272739] transition-colors group">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-amber-500 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/10 transition-colors">
+                                        <Shield className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Privacy Policy</span>
+                                </div>
+                                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-amber-500 transition-colors" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#181825] rounded-3xl border border-gray-200/50 dark:border-white/5 shadow-sm overflow-hidden">
+                        <div className="px-6 py-5 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Info className="w-5 h-5 text-gray-400" /> App Info
+                            </h2>
+                        </div>
+                        <div className="px-6 py-4 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Version</span>
+                                <span className="text-sm font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-white/5 px-2.5 py-1 rounded-md">2026.1.0</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">License</span>
+                                <span className="text-sm font-bold text-gray-900 dark:text-white">MIT License</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Danger Zone */}
+                <div>
+                    <div className="bg-white dark:bg-[#181825] rounded-3xl border border-red-200 dark:border-red-500/20 shadow-sm overflow-hidden group hover:border-red-400 dark:hover:border-red-500/40 transition-colors">
+                        <div className="px-6 py-6 border-b border-red-100 dark:border-red-500/10 bg-red-50 dark:bg-red-500/5 flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center text-red-600 dark:text-red-400 shrink-0">
+                                <AlertTriangle className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-red-900 dark:text-red-400 mb-1">Danger Zone</h2>
+                                <p className="text-sm text-red-700 dark:text-red-300/80 font-medium">Irreversible actions regarding your account data.</p>
+                            </div>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-6">
+                                Deleting your account will permanently remove all of your tracked skills, sessions, goals, achievements, and statistics from our servers. This action cannot be undone.
+                            </p>
+                            <button
+                                onClick={() => setDeleteModalOpen(true)}
+                                className="w-full sm:w-auto px-6 py-3 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-500/20 hover:border-transparent font-bold rounded-xl transition-all shadow-sm"
+                            >
+                                Delete My Account
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-red-200 dark:border-red-500/20 overflow-hidden">
-                <div className="px-6 py-4 border-b border-red-100 dark:border-red-500/10 bg-red-50 dark:bg-red-500/5">
-                    <h2 className="text-base font-semibold text-red-900 dark:text-red-400 flex items-center">
-                        <AlertTriangle className="w-5 h-5 mr-2" />
-                        Danger Zone
-                    </h2>
-                    <p className="text-sm text-red-700 dark:text-red-300/80 mt-0.5">Irreversible and permanent actions</p>
-                </div>
-                <div className="px-6 py-4">
-                    <button
-                        onClick={() => setDeleteModalOpen(true)}
-                        className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-all"
-                    >
-                        Delete Account
-                    </button>
-                    <p className="text-xs text-red-600 dark:text-red-400/80 mt-3">
-                        Once you delete your account, there is no going back. Please be certain.
-                    </p>
-                </div>
-            </div>
-
+            {/* Modals */}
             {deleteModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div
-                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                        onClick={() => {
-                            setDeleteModalOpen(false);
-                            setDeleteInput('');
-                        }}
-                    />
-                    <div className="relative bg-white dark:bg-[#1e1e2e] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-red-100 dark:border-red-500/10 bg-red-50 dark:bg-red-500/5">
-                            <h3 className="text-lg font-bold text-red-900 dark:text-red-400 flex items-center">
-                                <AlertTriangle className="w-5 h-5 mr-2" />
-                                Delete Account?
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setDeleteModalOpen(false); setDeleteInput(''); }} />
+                    <div className="relative bg-white dark:bg-[#181825] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-gray-200 dark:border-white/10">
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-red-100 dark:border-red-500/10 bg-red-50 dark:bg-red-500/5">
+                            <h3 className="text-lg font-black text-red-900 dark:text-red-400 flex items-center gap-2">
+                                <AlertTriangle className="w-5 h-5" /> Delete Account?
                             </h3>
-                            <button
-                                onClick={() => {
-                                    setDeleteModalOpen(false);
-                                    setDeleteInput('');
-                                }}
-                                className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-500/10 transition-all"
-                            >
+                            <button onClick={() => { setDeleteModalOpen(false); setDeleteInput(''); }} className="p-2 rounded-xl text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-all">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="px-6 py-5 space-y-4">
-                            <p className="text-sm text-gray-600 dark:text-[#9399b2]">
-                                This action cannot be undone. All your data including skills, sessions, goals, and achievements will be permanently deleted.
+                        <div className="p-6 sm:p-8 space-y-6">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                                You are about to <strong className="text-red-600 dark:text-red-400">permanently delete</strong> your account. All data including skills, sessions, and achievements will be erased immediately.
                             </p>
                             <div>
-                                <label className="text-sm font-medium text-gray-700 dark:text-[#a6adc8] mb-2 block">
-                                    Type <strong className="text-red-600 dark:text-red-400">DELETE</strong> to confirm
+                                <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">
+                                    Type <span className="text-red-600 dark:text-red-400 select-all font-mono bg-red-50 dark:bg-red-500/10 px-1.5 py-0.5 rounded">DELETE</span> to confirm
                                 </label>
                                 <input
                                     type="text"
                                     value={deleteInput}
                                     onChange={(e) => setDeleteInput(e.target.value)}
-                                    placeholder="Type DELETE"
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-[#313244] rounded-lg bg-white dark:bg-[#272739] text-gray-900 dark:text-[#cdd6f4] placeholder-gray-500 dark:placeholder-[#7f849c] focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    placeholder="DELETE"
+                                    className="w-full px-4 py-3 border border-gray-200 dark:border-white/10 rounded-xl bg-gray-50 dark:bg-[#1e1e2e] text-gray-900 dark:text-white font-mono focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                    autoComplete="off"
                                 />
                             </div>
                         </div>
-                        <div className="px-6 py-4 border-t border-gray-100 dark:border-[#272739] bg-gray-50 dark:bg-[#181825] flex gap-3">
-                            <button
-                                onClick={() => {
-                                    setDeleteModalOpen(false);
-                                    setDeleteInput('');
-                                }}
-                                className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-[#313244] hover:bg-gray-300 dark:hover:bg-[#45475a] text-gray-900 dark:text-[#cdd6f4] text-sm font-semibold rounded-xl transition-all"
-                            >
+                        <div className="px-6 py-5 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[#1e1e2e]/50 flex gap-3">
+                            <button onClick={() => { setDeleteModalOpen(false); setDeleteInput(''); }} className="flex-1 px-4 py-3 bg-white dark:bg-[#272739] hover:bg-gray-100 border border-gray-200 dark:border-white/5 dark:hover:bg-[#313244] text-gray-700 dark:text-gray-300 text-sm font-bold rounded-xl transition-all shadow-sm">
                                 Cancel
                             </button>
-                            <button
-                                onClick={handleDeleteAccount}
-                                disabled={deleting || deleteInput !== 'DELETE'}
-                                className={`flex-1 px-4 py-2.5 text-white text-sm font-semibold rounded-xl transition-all ${
-                                    deleteInput === 'DELETE' && !deleting
-                                        ? 'bg-red-600 hover:bg-red-700'
-                                        : 'bg-red-400 cursor-not-allowed opacity-50'
-                                }`}
-                            >
-                                {deleting ? 'Deleting...' : 'Delete Account'}
+                            <button onClick={handleDeleteAccount} disabled={deleting || deleteInput !== 'DELETE'} className={`flex-1 px-4 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-sm flex justify-center items-center gap-2 ${deleteInput === 'DELETE' && !deleting ? 'bg-red-600 hover:bg-red-700 shadow-red-500/20' : 'bg-red-400 dark:bg-red-500/50 cursor-not-allowed opacity-50'}`}>
+                                {deleting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Delete Account'}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 dark:border-[#272739]">
-                    <h2 className="text-base font-semibold text-gray-900 dark:text-[#cdd6f4]">Legal</h2>
-                    <p className="text-sm text-gray-500 dark:text-[#7f849c] mt-0.5">Review our policies</p>
-                </div>
-                <div className="divide-y divide-gray-100 dark:divide-[#272739]">
-                    <button
-                        onClick={() => setModalOpen('terms')}
-                        className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-[#272739] transition-colors"
-                    >
-                        <div className="flex items-center space-x-3">
-                            <FileText className="w-5 h-5 text-gray-400 dark:text-[#6c7086]" />
-                            <span className="text-sm font-medium text-gray-700 dark:text-[#a6adc8]">Terms of Service</span>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-[#6c7086]" />
-                    </button>
-                    <button
-                        onClick={() => setModalOpen('privacy')}
-                        className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-[#272739] transition-colors"
-                    >
-                        <div className="flex items-center space-x-3">
-                            <Shield className="w-5 h-5 text-gray-400 dark:text-[#6c7086]" />
-                            <span className="text-sm font-medium text-gray-700 dark:text-[#a6adc8]">Privacy Policy</span>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-[#6c7086]" />
-                    </button>
-                </div>
-            </div>
-
-            <div className="bg-white dark:bg-[#1e1e2e] rounded-xl border border-gray-200 dark:border-[#313244] overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 dark:border-[#272739]">
-                    <h2 className="text-base font-semibold text-gray-900 dark:text-[#cdd6f4]">About</h2>
-                </div>
-                <div className="px-6 py-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-[#9399b2]">Version</span>
-                        <span className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">1.0.0</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-[#9399b2]">License</span>
-                        <span className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">MIT License</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-[#9399b2]">Built with</span>
-                        <span className="text-sm font-medium text-gray-900 dark:text-[#cdd6f4]">React + Spring Boot</span>
-                    </div>
-                    <div className="pt-2 border-t border-gray-100 dark:border-[#272739]">
-                        <p className="text-xs text-gray-400 dark:text-[#6c7086] text-center">
-                            © 2026 SkillSync. Built for learners, by learners.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
             {modalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div
-                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                        onClick={() => setModalOpen(null)}
-                    />
-                    <div className="relative bg-white dark:bg-[#1e1e2e] rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#272739]">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-[#cdd6f4]">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(null)} />
+                    <div className="relative bg-white dark:bg-[#181825] rounded-3xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-gray-200 dark:border-white/10">
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+                            <h3 className="text-xl font-black text-gray-900 dark:text-white">
                                 {modalOpen === 'terms' ? 'Terms of Service' : 'Privacy Policy'}
                             </h3>
-                            <button
-                                onClick={() => setModalOpen(null)}
-                                className="p-1.5 rounded-lg text-gray-400 dark:text-[#6c7086] hover:text-gray-600 dark:hover:text-[#cdd6f4] hover:bg-gray-100 dark:hover:bg-[#313244] transition-all"
-                            >
+                            <button onClick={() => setModalOpen(null)} className="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="px-6 py-5 overflow-y-auto text-sm text-gray-600 dark:text-[#9399b2] leading-relaxed space-y-4">
-                            {modalOpen === 'terms' ? (
-                                <>
-                                    <p className="font-semibold text-gray-800 dark:text-[#bac2de]">Last updated: February 2026</p>
-                                    <p>Welcome to SkillSync. By creating an account and using our platform, you agree to the following terms:</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de] mt-3">1. Account Responsibility</h4>
-                                    <p>You are responsible for maintaining the security of your account credentials. You agree to provide accurate information during registration and to keep it up to date.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">2. Acceptable Use</h4>
-                                    <p>You agree to use SkillSync solely for personal learning and skill tracking purposes. You may not use the platform to distribute harmful content, violate any laws, or interfere with other users' experience.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">3. Intellectual Property</h4>
-                                    <p>All content, features, and functionality of SkillSync are owned by SkillSync and protected by copyright and trademark laws. Your learning data belongs to you.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">4. Service Availability</h4>
-                                    <p>We strive for 99.9% uptime but do not guarantee uninterrupted service. We may perform maintenance or updates that temporarily affect availability.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">5. Termination</h4>
-                                    <p>We reserve the right to suspend or terminate accounts that violate these terms. You may delete your account at any time from your profile settings.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">6. Limitation of Liability</h4>
-                                    <p>SkillSync is provided "as is" without warranties of any kind. We shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform.</p>
-                                </>
-                            ) : (
-                                <>
-                                    <p className="font-semibold text-gray-800 dark:text-[#bac2de]">Last updated: February 2026</p>
-                                    <p>At SkillSync, your privacy is important to us. This policy explains how we collect, use, and protect your personal information.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de] mt-3">1. Information We Collect</h4>
-                                    <p>We collect your name, email address, and password when you create an account. We also store your learning sessions, skills, and usage analytics to provide our services.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">2. How We Use Your Data</h4>
-                                    <p>Your data is used to personalize your learning experience, generate analytics and insights, detect burnout patterns, and improve the platform.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">3. Data Storage & Security</h4>
-                                    <p>All data is stored securely with industry-standard encryption. Passwords are hashed using bcrypt and are never stored in plain text. We use JWT tokens for authentication.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">4. Data Sharing</h4>
-                                    <p>We do not sell, trade, or share your personal data with third parties. Your learning data is yours and will never be used for advertising purposes.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">5. Your Rights</h4>
-                                    <p>You have the right to access, update, or delete your personal information at any time. You may export your data or request complete account deletion.</p>
-                                    <h4 className="font-semibold text-gray-800 dark:text-[#bac2de]">6. Cookies</h4>
-                                    <p>We use local storage to maintain your authentication session. We do not use third-party tracking cookies or analytics services.</p>
-                                </>
-                            )}
+                        <div className="px-6 sm:px-8 py-6 overflow-y-auto custom-scrollbar text-sm text-gray-600 dark:text-gray-400 font-medium leading-relaxed space-y-6">
+                            <p className="font-bold text-indigo-600 dark:text-indigo-400">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                            <div className="space-y-6">
+                                {modalOpen === 'terms' ? (
+                                    <>
+                                        <div><h4 className="font-bold text-gray-900 dark:text-white text-base mb-1">1. Acceptable Use</h4><p>You agree to use SkillSync solely for personal learning. Distributed harmful content is strictly prohibited.</p></div>
+                                        <div><h4 className="font-bold text-gray-900 dark:text-white text-base mb-1">2. Data Ownership</h4><p>Your learning data belongs to you. You may export or delete it at any point in time.</p></div>
+                                        <div><h4 className="font-bold text-gray-900 dark:text-white text-base mb-1">3. Uptime Guarantees</h4><p>We do our best to maintain 99.9% uptime, but we are not liable for incidental downtime or data loss.</p></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div><h4 className="font-bold text-gray-900 dark:text-white text-base mb-1">1. Data Collection</h4><p>We store your email, encrypted passwords, and anonymized metrics related to your tracked skills.</p></div>
+                                        <div><h4 className="font-bold text-gray-900 dark:text-white text-base mb-1">2. No Third-Party Sales</h4><p>We will never sell or rent your personal user data to third-party data brokers or advertisers.</p></div>
+                                        <div><h4 className="font-bold text-gray-900 dark:text-white text-base mb-1">3. Account Deletion</h4><p>When you trigger account deletion via the Danger Zone, your record is purged immediately.</p></div>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                        <div className="px-6 py-4 border-t border-gray-100 dark:border-[#272739] bg-gray-50 dark:bg-[#181825]">
-                            <button
-                                onClick={() => setModalOpen(null)}
-                                className="w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all"
-                            >
-                                I understand
+                        <div className="px-6 py-5 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[#1e1e2e]/50">
+                            <button onClick={() => setModalOpen(null)} className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-sm">
+                                I Understand
                             </button>
                         </div>
                     </div>
