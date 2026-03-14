@@ -124,6 +124,13 @@ public class ForumService {
             throw new RuntimeException("You can only delete your own posts");
         }
 
+        List<ForumReply> replies = replyRepository.findByPostOrderByCreatedAtAsc(post);
+        for (ForumReply reply : replies) {
+            replyUpvoteRepository.deleteByReply(reply);
+            replyRepository.delete(reply);
+        }
+        
+        postUpvoteRepository.deleteByPost(post);
         postRepository.delete(post);
     }
 
@@ -155,6 +162,7 @@ public class ForumService {
             throw new RuntimeException("You can only delete your own replies");
         }
 
+        replyUpvoteRepository.deleteByReply(reply);
         replyRepository.delete(reply);
     }
 
