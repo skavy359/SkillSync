@@ -15,4 +15,5 @@ public interface GroupActivityRepository extends JpaRepository<GroupActivity, Lo
     List<GroupActivity> findByGroupIdAndActivityTypeOrderByCreatedAtDesc(Long groupId, ActivityType activityType);
     
     long countByGroupId(Long groupId);
+    void deleteByGroupId(Long groupId);
 }
