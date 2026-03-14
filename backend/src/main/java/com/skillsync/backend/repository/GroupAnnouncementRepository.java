@@ -14,4 +14,5 @@ public interface GroupAnnouncementRepository extends JpaRepository<GroupAnnounce
     List<GroupAnnouncement> findByGroupIdAndIsPinnedTrueOrderByPinnedAtDesc(Long groupId);
     
     long countByGroupId(Long groupId);
+    void deleteByGroupId(Long groupId);
 }
