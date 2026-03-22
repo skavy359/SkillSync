@@ -40,7 +40,7 @@ public class GroupAnnouncementController {
 
     @PostMapping("/groups/{groupId}")
     public ResponseEntity<ApiResponse<GroupAnnouncementDTO>> createAnnouncement(
-            @PathVariable Long groupId,
+            @PathVariable("groupId") Long groupId,
             @RequestBody CreateAnnouncementRequest request) {
         User currentUser = getCurrentUser();
         GroupAnnouncementDTO announcement = announcementService.createAnnouncement(groupId, request, currentUser.getId());
@@ -49,9 +49,9 @@ public class GroupAnnouncementController {
 
     @GetMapping("/groups/{groupId}")
     public ResponseEntity<ApiResponse<Page<GroupAnnouncementDTO>>> getAnnouncements(
-            @PathVariable Long groupId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @PathVariable("groupId") Long groupId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<GroupAnnouncementDTO> announcements = announcementService.getAnnouncements(groupId, pageable);
         return ResponseEntity.ok(new ApiResponse<>(true, "Announcements retrieved", announcements));
@@ -59,20 +59,20 @@ public class GroupAnnouncementController {
 
     @GetMapping("/groups/{groupId}/pinned")
     public ResponseEntity<ApiResponse<List<GroupAnnouncementDTO>>> getPinnedAnnouncements(
-            @PathVariable Long groupId) {
+            @PathVariable("groupId") Long groupId) {
         List<GroupAnnouncementDTO> announcements = announcementService.getPinnedAnnouncements(groupId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Pinned announcements", announcements));
     }
 
     @PutMapping("/{announcementId}/toggle-pin")
-    public ResponseEntity<ApiResponse<GroupAnnouncementDTO>> togglePin(@PathVariable Long announcementId) {
+    public ResponseEntity<ApiResponse<GroupAnnouncementDTO>> togglePin(@PathVariable("announcementId") Long announcementId) {
         User currentUser = getCurrentUser();
         GroupAnnouncementDTO announcement = announcementService.togglePin(announcementId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Pin status toggled", announcement));
     }
 
     @DeleteMapping("/{announcementId}")
-    public ResponseEntity<ApiResponse<String>> deleteAnnouncement(@PathVariable Long announcementId) {
+    public ResponseEntity<ApiResponse<String>> deleteAnnouncement(@PathVariable("announcementId") Long announcementId) {
         User currentUser = getCurrentUser();
         announcementService.deleteAnnouncement(announcementId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Announcement deleted", "Success"));

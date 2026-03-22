@@ -56,11 +56,11 @@ public class SkillController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<SkillResponse>>> getMySkills(
-            @RequestParam(required = false) SkillStatus status,
-            @RequestParam(required = false) SkillLevel level,
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(name = "status", required = false) SkillStatus status,
+            @RequestParam(name = "level", required = false) SkillLevel level,
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         Page<SkillResponse> result =
                 userService.getMySkills(status, level, search, page, size);
@@ -76,7 +76,7 @@ public class SkillController {
 
     @PatchMapping("/{skillId}/progress")
     public ResponseEntity<ApiResponse<SkillResponse>> updateSkillProgress(
-            @PathVariable Long skillId,
+            @PathVariable("skillId") Long skillId,
             @Valid @RequestBody UpdateSkillProgressRequest request) {
 
         SkillResponse updatedSkill =
@@ -93,7 +93,7 @@ public class SkillController {
 
     @DeleteMapping("/{skillId}")
     public ResponseEntity<ApiResponse<String>> deleteSkill(
-            @PathVariable Long skillId) {
+            @PathVariable("skillId") Long skillId) {
 
         userService.deleteSkill(skillId);
 
@@ -108,7 +108,7 @@ public class SkillController {
 
     @PutMapping("/{skillId}")
     public ResponseEntity<ApiResponse<SkillResponse>> updateSkill(
-            @PathVariable Long skillId,
+            @PathVariable("skillId") Long skillId,
             @Valid @RequestBody UpdateSkillRequest request) {
 
         SkillResponse updatedSkill = userService.updateSkill(skillId, request);
@@ -124,7 +124,7 @@ public class SkillController {
 
     @PostMapping("/{skillId}/sessions")
     public ResponseEntity<ApiResponse<SessionResponse>> addSession(
-            @PathVariable Long skillId,
+            @PathVariable("skillId") Long skillId,
             @RequestBody AddSessionRequest request
     ) {
         SessionResponse result =
@@ -141,7 +141,7 @@ public class SkillController {
 
     @GetMapping("/{skillId}/sessions")
     public ResponseEntity<ApiResponse<List<SessionResponse>>> getSessions(
-            @PathVariable Long skillId
+            @PathVariable("skillId") Long skillId
     ) {
         List<SessionResponse> result =
                 userService.getSessions(skillId);
@@ -157,8 +157,8 @@ public class SkillController {
 
     @PatchMapping("/{skillId}/sessions/{sessionId}")
     public ResponseEntity<ApiResponse<SessionResponse>> updateSession(
-            @PathVariable Long skillId,
-            @PathVariable Long sessionId,
+            @PathVariable("skillId") Long skillId,
+            @PathVariable("sessionId") Long sessionId,
             @RequestBody AddSessionRequest request
     ) {
         SessionResponse result =
@@ -175,8 +175,8 @@ public class SkillController {
 
     @DeleteMapping("/{skillId}/sessions/{sessionId}")
     public ResponseEntity<ApiResponse<String>> deleteSession(
-            @PathVariable Long skillId,
-            @PathVariable Long sessionId
+            @PathVariable("skillId") Long skillId,
+            @PathVariable("sessionId") Long sessionId
     ) {
         userService.deleteSession(skillId, sessionId);
 
@@ -191,7 +191,7 @@ public class SkillController {
 
     @GetMapping("/{skillId}/session-stats")
     public ResponseEntity<ApiResponse<SessionStatsResponse>> getSessionStats(
-            @PathVariable Long skillId
+            @PathVariable("skillId") Long skillId
     ) {
         SessionStatsResponse result =
                 userService.getSessionStats(skillId);
@@ -207,7 +207,7 @@ public class SkillController {
 
     @GetMapping("/{skillId}/velocity")
     public ResponseEntity<ApiResponse<SkillVelocityResponse>>
-    getSkillVelocity(@PathVariable Long skillId) {
+    getSkillVelocity(@PathVariable("skillId") Long skillId) {
 
         SkillVelocityResponse result =
                 userService.getSkillVelocity(skillId);
@@ -223,7 +223,7 @@ public class SkillController {
 
     @GetMapping("/{skillId}/eta")
     public ResponseEntity<ApiResponse<SkillEtaResponse>>
-    getSkillEta(@PathVariable Long skillId) {
+    getSkillEta(@PathVariable("skillId") Long skillId) {
 
         SkillEtaResponse result =
                 userService.getSkillEta(skillId);
@@ -239,7 +239,7 @@ public class SkillController {
 
     @GetMapping("/{skillId}/difficulty")
     public ResponseEntity<ApiResponse<SkillDifficultyResponse>>
-    getSkillDifficulty(@PathVariable Long skillId) {
+    getSkillDifficulty(@PathVariable("skillId") Long skillId) {
 
         SkillDifficultyResponse result =
                 userService.getSkillDifficulty(skillId);
@@ -255,7 +255,7 @@ public class SkillController {
 
     @GetMapping("/{skillId}/completion-probability")
     public ResponseEntity<ApiResponse<CompletionProbabilityResponse>>
-    getCompletionProbability(@PathVariable Long skillId) {
+    getCompletionProbability(@PathVariable("skillId") Long skillId) {
 
         CompletionProbabilityResponse result =
                 userService.getCompletionProbability(skillId);
@@ -271,8 +271,8 @@ public class SkillController {
 
     @PutMapping("/{skillId}/category/{categoryId}")
     public ApiResponse<SkillResponse> assignCategory(
-            @PathVariable Long skillId,
-            @PathVariable Long categoryId) {
+            @PathVariable("skillId") Long skillId,
+            @PathVariable("categoryId") Long categoryId) {
 
         SkillResponse response = userService.assignCategoryToSkill(skillId, categoryId);
 
@@ -285,7 +285,7 @@ public class SkillController {
 
     @DeleteMapping("/{skillId}/category")
     public ApiResponse<SkillResponse> removeCategory(
-            @PathVariable Long skillId) {
+            @PathVariable("skillId") Long skillId) {
 
         SkillResponse response = userService.removeCategoryFromSkill(skillId);
 

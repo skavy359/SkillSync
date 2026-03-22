@@ -48,7 +48,7 @@ public class StudyGroupController {
     }
 
     @GetMapping("/{groupId}")
-    public ResponseEntity<ApiResponse<StudyGroupDTO>> getGroup(@PathVariable Long groupId) {
+    public ResponseEntity<ApiResponse<StudyGroupDTO>> getGroup(@PathVariable("groupId") Long groupId) {
         User currentUser = getCurrentUser();
         StudyGroupDTO group = groupService.getGroup(groupId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Group fetched", group));
@@ -66,9 +66,9 @@ public class StudyGroupController {
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Page<StudyGroupDTO>>> searchGroups(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam("query") String query,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
         User currentUser = getCurrentUser();
         Pageable pageable = PageRequest.of(page, size);
         Page<StudyGroupDTO> groups = groupService.searchGroups(query, pageable, currentUser.getId());
@@ -77,9 +77,9 @@ public class StudyGroupController {
 
     @GetMapping("/skill/{skillId}")
     public ResponseEntity<ApiResponse<Page<StudyGroupDTO>>> listGroupsBySkill(
-            @PathVariable Long skillId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @PathVariable("skillId") Long skillId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
         User currentUser = getCurrentUser();
         Pageable pageable = PageRequest.of(page, size);
         Page<StudyGroupDTO> groups = groupService.listGroupsBySkill(skillId, pageable, currentUser.getId());
@@ -94,7 +94,7 @@ public class StudyGroupController {
     }
 
     @PostMapping("/{groupId}/join")
-    public ResponseEntity<ApiResponse<StudyGroupDTO>> joinGroup(@PathVariable Long groupId) {
+    public ResponseEntity<ApiResponse<StudyGroupDTO>> joinGroup(@PathVariable("groupId") Long groupId) {
         User currentUser = getCurrentUser();
         StudyGroupDTO group = groupService.joinGroup(groupId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Joined group successfully", group));
@@ -102,7 +102,7 @@ public class StudyGroupController {
 
     @PutMapping("/{groupId}")
     public ResponseEntity<ApiResponse<StudyGroupDTO>> updateGroup(
-            @PathVariable Long groupId,
+            @PathVariable("groupId") Long groupId,
             @RequestBody UpdateStudyGroupRequest request) {
         User currentUser = getCurrentUser();
         StudyGroupDTO group = groupService.updateGroup(groupId, request, currentUser.getId());
@@ -110,22 +110,22 @@ public class StudyGroupController {
     }
 
     @DeleteMapping("/{groupId}")
-    public ResponseEntity<ApiResponse<String>> deleteGroup(@PathVariable Long groupId) {
+    public ResponseEntity<ApiResponse<String>> deleteGroup(@PathVariable("groupId") Long groupId) {
         User currentUser = getCurrentUser();
         groupService.deleteGroup(groupId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Group deleted", "Success"));
     }
 
     @GetMapping("/{groupId}/members")
-    public ResponseEntity<ApiResponse<List<GroupMemberDTO>>> getGroupMembers(@PathVariable Long groupId) {
+    public ResponseEntity<ApiResponse<List<GroupMemberDTO>>> getGroupMembers(@PathVariable("groupId") Long groupId) {
         List<GroupMemberDTO> members = groupService.getGroupMembers(groupId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Group members", members));
     }
 
     @PostMapping("/{groupId}/members/{memberId}")
     public ResponseEntity<ApiResponse<GroupMemberDTO>> addMember(
-            @PathVariable Long groupId,
-            @PathVariable Long memberId) {
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("memberId") Long memberId) {
         User currentUser = getCurrentUser();
         GroupMemberDTO member = groupService.addMember(groupId, memberId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Member added", member));
@@ -133,8 +133,8 @@ public class StudyGroupController {
 
     @DeleteMapping("/{groupId}/members/{memberId}")
     public ResponseEntity<ApiResponse<String>> removeMember(
-            @PathVariable Long groupId,
-            @PathVariable Long memberId) {
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("memberId") Long memberId) {
         User currentUser = getCurrentUser();
         groupService.removeMember(groupId, memberId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Member removed", "Success"));

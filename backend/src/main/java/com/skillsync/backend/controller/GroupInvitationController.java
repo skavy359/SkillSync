@@ -34,7 +34,7 @@ public class GroupInvitationController {
 
     @PostMapping("/groups/{groupId}")
     public ResponseEntity<ApiResponse<GroupInvitationDTO>> inviteUser(
-            @PathVariable Long groupId,
+            @PathVariable("groupId") Long groupId,
             @RequestBody InviteUserRequest request) {
         User currentUser = getCurrentUser();
         GroupInvitationDTO invitation = invitationService.inviteUser(groupId, request.getUserId(), currentUser.getId());
@@ -43,7 +43,7 @@ public class GroupInvitationController {
 
     @PostMapping("/groups/{groupId}/invite-by-email")
     public ResponseEntity<ApiResponse<GroupInvitationDTO>> inviteUserByEmail(
-            @PathVariable Long groupId,
+            @PathVariable("groupId") Long groupId,
             @RequestBody InviteUserRequest request) {
         User currentUser = getCurrentUser();
         GroupInvitationDTO invitation = invitationService.inviteUserByEmail(groupId, request.getEmail(), currentUser.getId());
@@ -51,14 +51,14 @@ public class GroupInvitationController {
     }
 
     @PostMapping("/{invitationId}/accept")
-    public ResponseEntity<ApiResponse<GroupInvitationDTO>> acceptInvitation(@PathVariable Long invitationId) {
+    public ResponseEntity<ApiResponse<GroupInvitationDTO>> acceptInvitation(@PathVariable("invitationId") Long invitationId) {
         User currentUser = getCurrentUser();
         GroupInvitationDTO invitation = invitationService.acceptInvitation(invitationId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Invitation accepted", invitation));
     }
 
     @PostMapping("/{invitationId}/reject")
-    public ResponseEntity<ApiResponse<GroupInvitationDTO>> rejectInvitation(@PathVariable Long invitationId) {
+    public ResponseEntity<ApiResponse<GroupInvitationDTO>> rejectInvitation(@PathVariable("invitationId") Long invitationId) {
         User currentUser = getCurrentUser();
         GroupInvitationDTO invitation = invitationService.rejectInvitation(invitationId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Invitation rejected", invitation));
@@ -72,7 +72,7 @@ public class GroupInvitationController {
     }
 
     @GetMapping("/groups/{groupId}")
-    public ResponseEntity<ApiResponse<List<GroupInvitationDTO>>> getGroupInvitations(@PathVariable Long groupId) {
+    public ResponseEntity<ApiResponse<List<GroupInvitationDTO>>> getGroupInvitations(@PathVariable("groupId") Long groupId) {
         List<GroupInvitationDTO> invitations = invitationService.getGroupInvitations(groupId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Group invitations", invitations));
     }

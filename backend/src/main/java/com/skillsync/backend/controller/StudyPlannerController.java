@@ -25,8 +25,8 @@ public class StudyPlannerController {
     @GetMapping("/events")
     public ResponseEntity<List<StudyEventResponse>> getEvents(
             Authentication auth,
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year) {
+            @RequestParam(name = "month", required = false) Integer month,
+            @RequestParam(name = "year", required = false) Integer year) {
         if (month != null && year != null) {
             return ResponseEntity.ok(studyPlannerService.getEventsByMonth(auth.getName(), year, month));
         }
@@ -34,17 +34,17 @@ public class StudyPlannerController {
     }
 
     @PutMapping("/events/{id}")
-    public ResponseEntity<StudyEventResponse> updateEvent(Authentication auth, @PathVariable Long id, @RequestBody CreateStudyEventRequest request) {
+    public ResponseEntity<StudyEventResponse> updateEvent(Authentication auth, @PathVariable("id") Long id, @RequestBody CreateStudyEventRequest request) {
         return ResponseEntity.ok(studyPlannerService.updateEvent(auth.getName(), id, request));
     }
 
     @PutMapping("/events/{id}/status")
-    public ResponseEntity<StudyEventResponse> updateStatus(Authentication auth, @PathVariable Long id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<StudyEventResponse> updateStatus(Authentication auth, @PathVariable("id") Long id, @RequestBody Map<String, String> body) {
         return ResponseEntity.ok(studyPlannerService.updateStatus(auth.getName(), id, body.get("status")));
     }
 
     @DeleteMapping("/events/{id}")
-    public ResponseEntity<Void> deleteEvent(Authentication auth, @PathVariable Long id) {
+    public ResponseEntity<Void> deleteEvent(Authentication auth, @PathVariable("id") Long id) {
         studyPlannerService.deleteEvent(auth.getName(), id);
         return ResponseEntity.ok().build();
     }

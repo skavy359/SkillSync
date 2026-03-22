@@ -39,7 +39,7 @@ public class GroupMessageController {
 
     @PostMapping("/groups/{groupId}")
     public ResponseEntity<ApiResponse<GroupMessageDTO>> sendMessage(
-            @PathVariable Long groupId,
+            @PathVariable("groupId") Long groupId,
             @RequestBody CreateMessageRequest request) {
         User currentUser = getCurrentUser();
         GroupMessageDTO message = messageService.sendMessage(groupId, request, currentUser.getId());
@@ -48,9 +48,9 @@ public class GroupMessageController {
 
     @GetMapping("/groups/{groupId}")
     public ResponseEntity<ApiResponse<Page<GroupMessageDTO>>> getGroupMessages(
-            @PathVariable Long groupId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
+            @PathVariable("groupId") Long groupId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "50") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<GroupMessageDTO> messages = messageService.getGroupMessages(groupId, pageable);
         return ResponseEntity.ok(new ApiResponse<>(true, "Messages retrieved", messages));
@@ -58,7 +58,7 @@ public class GroupMessageController {
 
     @PutMapping("/{messageId}")
     public ResponseEntity<ApiResponse<GroupMessageDTO>> updateMessage(
-            @PathVariable Long messageId,
+            @PathVariable("messageId") Long messageId,
             @RequestBody CreateMessageRequest request) {
         User currentUser = getCurrentUser();
         GroupMessageDTO message = messageService.updateMessage(messageId, request.getContent(), currentUser.getId());
@@ -66,7 +66,7 @@ public class GroupMessageController {
     }
 
     @DeleteMapping("/{messageId}")
-    public ResponseEntity<ApiResponse<String>> deleteMessage(@PathVariable Long messageId) {
+    public ResponseEntity<ApiResponse<String>> deleteMessage(@PathVariable("messageId") Long messageId) {
         User currentUser = getCurrentUser();
         messageService.deleteMessage(messageId, currentUser.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Message deleted", "Success"));

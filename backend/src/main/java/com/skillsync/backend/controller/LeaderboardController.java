@@ -36,7 +36,7 @@ public class LeaderboardController {
 
     @GetMapping("/profile/{userId}")
     public ResponseEntity<ApiResponse<SharingProfileResponse>> getUserProfile(
-            @PathVariable Long userId) {
+            @PathVariable("userId") Long userId) {
         SharingProfileResponse profile = leaderboardService.getUserProfile(userId);
         return ResponseEntity.ok(
             new ApiResponse<>(true, "User profile fetched", profile)

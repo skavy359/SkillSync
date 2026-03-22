@@ -195,7 +195,7 @@ public class UserProfileController {
 
     @PutMapping("/categories/{categoryId}")
     public ResponseEntity<ApiResponse<CategoryResponse>>
-    updateCategory(@PathVariable Long categoryId, @RequestBody CreateCategoryRequest request) {
+    updateCategory(@PathVariable("categoryId") Long categoryId, @RequestBody CreateCategoryRequest request) {
 
         CategoryResponse result =
                 userService.updateCategory(categoryId, request);
@@ -211,7 +211,7 @@ public class UserProfileController {
 
     @DeleteMapping("/categories/{categoryId}")
     public ResponseEntity<ApiResponse<Void>>
-    deleteCategory(@PathVariable Long categoryId) {
+    deleteCategory(@PathVariable("categoryId") Long categoryId) {
 
         userService.deleteCategory(categoryId);
 
@@ -226,7 +226,7 @@ public class UserProfileController {
 
     @GetMapping("/categories/{categoryId}/skills")
     public ResponseEntity<ApiResponse<List<SkillResponse>>> getSkillsByCategory(
-            @PathVariable Long categoryId) {
+            @PathVariable("categoryId") Long categoryId) {
 
         List<SkillResponse> result =
                 userService.getSkillsByCategory(categoryId);
@@ -290,7 +290,7 @@ public class UserProfileController {
 
     @PutMapping("/goals/{goalId}")
     public ResponseEntity<ApiResponse<GoalResponse>> updateGoal(
-            @PathVariable Long goalId,
+            @PathVariable("goalId") Long goalId,
             @RequestBody UpdateGoalRequest request) {
 
         GoalResponse goal =
@@ -307,7 +307,7 @@ public class UserProfileController {
 
     @DeleteMapping("/goals/{goalId}")
     public ResponseEntity<ApiResponse<String>> deleteGoal(
-            @PathVariable Long goalId) {
+            @PathVariable("goalId") Long goalId) {
 
         userService.deleteGoal(goalId);
 
@@ -404,7 +404,7 @@ public class UserProfileController {
 
     @PatchMapping("/me/notifications/{id}/read")
     public ResponseEntity<ApiResponse<String>>
-    markNotificationAsRead(@PathVariable Long id) {
+    markNotificationAsRead(@PathVariable("id") Long id) {
 
         notificationService.markAsRead(id);
 

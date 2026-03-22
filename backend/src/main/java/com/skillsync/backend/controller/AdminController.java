@@ -44,10 +44,10 @@ public class AdminController {
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<AdminUserResponse>>> getUsers(
-            @RequestParam(required = false) Role role,
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(name = "role", required = false) Role role,
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         Page<AdminUserResponse> result =
                 userService.getAllUsersForAdmin(role, search, page, size);
@@ -76,7 +76,7 @@ public class AdminController {
     @GetMapping("/users/{userId}/skills")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<SkillResponse>>> getUserSkills(
-            @PathVariable Long userId) {
+            @PathVariable("userId") Long userId) {
 
         List<SkillResponse> skills =
                 userService.getSkillsOfUserForAdmin(userId);
@@ -107,7 +107,7 @@ public class AdminController {
     @DeleteMapping("/users/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteUser(
-            @PathVariable Long userId) {
+            @PathVariable("userId") Long userId) {
 
         userService.adminDeleteUser(userId);
 
@@ -119,7 +119,7 @@ public class AdminController {
     @PostMapping("/users/{userId}/skills")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<SkillResponse>> addSkillToUser(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody AddSkillRequest request) {
 
         return ResponseEntity.ok(
@@ -134,7 +134,7 @@ public class AdminController {
     @DeleteMapping("/skills/{skillId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteSkill(
-            @PathVariable Long skillId) {
+            @PathVariable("skillId") Long skillId) {
 
         userService.adminDeleteSkill(skillId);
 
@@ -160,7 +160,7 @@ public class AdminController {
     @DeleteMapping("/categories/{categoryId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteCategory(
-            @PathVariable Long categoryId) {
+            @PathVariable("categoryId") Long categoryId) {
 
         userService.adminDeleteCategory(categoryId);
 
@@ -172,7 +172,7 @@ public class AdminController {
     @PutMapping("/users/{userId}/role")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> updateUserRole(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody Map<String, String> request) {
 
         String roleStr = request.get("role");
@@ -188,7 +188,7 @@ public class AdminController {
     @PutMapping("/users/{userId}/account-status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> toggleAccountStatus(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody AccountStatusRequest request) {
 
         userService.toggleAccountStatus(userId, request.getIsActive());
@@ -205,7 +205,7 @@ public class AdminController {
     @PutMapping("/users/{userId}/password-reset")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> resetUserPassword(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody PasswordResetRequest request) {
 
         userService.resetUserPassword(request.getUserId(), request.getNewPassword());
@@ -218,7 +218,7 @@ public class AdminController {
     @GetMapping("/users/inactive")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getInactiveUsers(
-            @RequestParam(defaultValue = "30") int days) {
+            @RequestParam(name = "days", defaultValue = "30") int days) {
 
         List<UserResponse> inactiveUsers = userService.getInactiveUsers(days);
 
@@ -230,8 +230,8 @@ public class AdminController {
     @GetMapping("/audit-logs")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getAuditLogs(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
 
         Page<AuditLogResponse> logs = auditService.getAllAuditLogs(page, size);
 
@@ -243,7 +243,7 @@ public class AdminController {
     @GetMapping("/audit-logs/action/{action}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<AuditLogResponse>>> getAuditLogsByAction(
-            @PathVariable String action) {
+            @PathVariable("action") String action) {
 
         List<AuditLogResponse> logs = auditService.getAuditLogsByAction(action);
 
@@ -255,7 +255,7 @@ public class AdminController {
     @GetMapping("/audit-logs/entity/{entityType}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<AuditLogResponse>>> getAuditLogsByEntityType(
-            @PathVariable String entityType) {
+            @PathVariable("entityType") String entityType) {
 
         List<AuditLogResponse> logs = auditService.getAuditLogsByEntityType(entityType);
 
@@ -303,7 +303,7 @@ public class AdminController {
     @GetMapping("/users/{userId}/activity-report")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getUserActivityReport(
-            @PathVariable Long userId) {
+            @PathVariable("userId") Long userId) {
 
         Map<String, Object> report = userService.getUserActivityReport(userId);
 
@@ -336,7 +336,7 @@ public class AdminController {
     @GetMapping("/users/search/email")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<AdminUserResponse>>> searchUsersByEmail(
-            @RequestParam String email) {
+            @RequestParam("email") String email) {
 
         List<AdminUserResponse> users = userService.searchUsersByEmail(email);
 

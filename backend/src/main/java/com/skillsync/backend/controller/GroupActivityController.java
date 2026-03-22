@@ -22,9 +22,9 @@ public class GroupActivityController {
 
     @GetMapping("/groups/{groupId}")
     public ResponseEntity<ApiResponse<Page<GroupActivityDTO>>> getGroupActivity(
-            @PathVariable Long groupId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @PathVariable("groupId") Long groupId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<GroupActivityDTO> activities = activityService.getGroupActivity(groupId, pageable);
         return ResponseEntity.ok(new ApiResponse<>(true, "Activity retrieved", activities));
