@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_BASE_URL = "https://skillsync-2fc5.onrender.com";
+
 const api = axios.create({
-    baseURL: 'http://localhost:8080/api',
+    baseURL: `${API_BASE_URL}/api`,
     timeout: 60000,
     headers: {
         'Content-Type': 'application/json',
