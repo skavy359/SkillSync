@@ -1,16 +1,18 @@
 package com.skillsync.backend.config;
 
-import com.skillsync.backend.security.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
+import com.skillsync.backend.security.JwtAuthenticationFilter;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -47,7 +49,7 @@ public class SecurityConfig {
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOrigins(java.util.List.of("http://localhost:5173","http://localhost:3000"));
+        configuration.setAllowedOrigins(java.util.List.of("http://localhost:5173","http://localhost:3000","https://skill-sync-luthor.vercel.app"));
         configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
