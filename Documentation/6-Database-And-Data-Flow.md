@@ -50,4 +50,4 @@ The architecture heavily relies on relational foreign keys mapping out specific 
 ## Storage logic
 - **Timestamps:** Entities utilize JPA Auditing features (`@CreatedDate`, `@LastModifiedDate`) to automatically manage `created_at` and `updated_at` columns on all major tables.
 - **Soft Deletes vs. Hard Deletes:** Most deletions are hard deletes. However, depending on business logic requirements (e.g., retaining audit trails), some entities might implement soft deletes via a boolean flag (`is_active = false`), filtering them out in repository queries.
-- **Indexing:** Foreign key columns (`user_id`, `skill_id`) are inherently indexed to ensure `JOIN` operations and filter queries (like loading a user's dashboard) are highly performant.
+- **Indexing:** Foreign key columns (`user_id`, `skill_id`) are inherently indexed to ensure `JOIN` operations and filter queries (like loading a user's dashboard) are highly performant
